@@ -14,6 +14,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const state = generateRandomString(16);
 
+  console.log('HERE', req.headers.host);
+  // console.log(window.location.host);
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE');
   res.redirect(
@@ -22,7 +24,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         response_type: "code",
         client_id: process.env.SPOTIFY_CLIENT_ID,
         scope: "user-read-private user-read-email user-library-read streaming",
-        redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+        redirect_uri: `${req.headers.host}${process.env.SPOTIFY_REDIRECT_URI}`,
         state: state,
       })
   );
