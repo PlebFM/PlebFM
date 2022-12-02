@@ -7,7 +7,7 @@ export class SpotifyStore {
   refreshToken: string | undefined;
 
 
-  constructor(clientId: string, clientSecret: string) { 
+  constructor() { 
     this.initialized = false;
   };
 
@@ -15,9 +15,9 @@ export class SpotifyStore {
   // try to initialize from storage... if it fails, redirect to spotify account service
   async initialize() {
     this.refreshToken = await this.getStorage('spotify_refresh_token');
-    const accessToken = await this.getAccessToken();
-    sessionStorage.setItem('spotify_access_token', accessToken);
-    console.log(accessToken);
+    // const accessToken = await this.getAccessToken();
+    // sessionStorage.setItem('spotify_access_token', accessToken);
+    // console.log(accessToken);
 
     this.initialized = true;
   };
@@ -39,34 +39,34 @@ export class SpotifyStore {
     sessionStorage.setItem('spotify_token_expiry', expiry.getTime().toString());
   }
 
-  // Gets Access Token
-  async getAccessToken() {
-    const refreshToken = sessionStorage.getItem('spotify_refresh_token');
-    if (refreshToken === null) throw Error('Spotify refresh token is missing.')
-    const basic = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
-    const TOKEN_ENDPOINT = `https://accounts.spotify.com/api/token`;
+  // // Gets Access Token
+  // async getAccessToken() {
+  //   const refreshToken = sessionStorage.getItem('spotify_refresh_token');
+  //   if (refreshToken === null) throw Error('Spotify refresh token is missing.')
+  //   const basic = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
+  //   const TOKEN_ENDPOINT = `https://accounts.spotify.com/api/token`;
 
-    const response = await fetch(TOKEN_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${basic}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({ grant_type: 'client_credentials', refreshToken })
-    });
+  //   const response = await fetch(TOKEN_ENDPOINT, {
+  //     method: 'POST',
+  //     headers: {
+  //       Authorization: `Basic ${basic}`,
+  //       'Content-Type': 'application/x-www-form-urlencoded'
+  //     },
+  //     body: new URLSearchParams({ grant_type: 'client_credentials', refreshToken })
+  //   });
 
-    if (!response.ok) throw Error('Failed to get spotify access token.')
+  //   if (!response.ok) throw Error('Failed to get spotify access token.')
 
-    return response.json();
-  };
+  //   return response.json();
+  // };
 
   async refreshStatus() {
     // Check for outdated token
     const tokenExpiry = sessionStorage.getItem('spotify_token_expiry');
     if (!tokenExpiry || parseInt(tokenExpiry) > new Date().getTime() ) {
-      const accessToken = await this.getAccessToken();
-      console.log('accessToken', accessToken);
-      sessionStorage.setItem('spotify_access_token', accessToken.access_token);
+      // const accessToken = await this.getAccessToken();
+      // console.log('accessToken', accessToken);
+      // sessionStorage.setItem('spotify_access_token', accessToken.access_token);
     }
     throw Error('tokenExpiry is missing');
     // TODO: Double check this

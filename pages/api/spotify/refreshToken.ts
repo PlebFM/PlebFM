@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           Authorization: `Basic ${basic}`,
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams({ grant_type: 'client_credentials', refreshToken })
+        body: new URLSearchParams({ grant_type: 'client_credentials', refreshToken: req.body.refreshToken })
       });
 
       if (!response.ok) res.status(500).json({error: 'failed to get access token'});
