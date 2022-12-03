@@ -23,8 +23,8 @@ const getCustomers = async (): Promise<Customer[]> => {
   const customers = await res.json();
   return customers.customers;
 }
-const getCustomer = async (customerName: string): Promise<Customer> => {
-  const res = await fetch(`http://0.0.0.0:3000/api/customer/${customerName}`, {
+const getCustomer = async (slug: string): Promise<Customer> => {
+  const res = await fetch(`http://0.0.0.0:3000/api/customers/${slug}`, {
     method: 'GET',
     mode: 'no-cors',
     headers: {
@@ -36,15 +36,14 @@ const getCustomer = async (customerName: string): Promise<Customer> => {
   return customer.customer;
 }
 
-export default async function Bidding({ params }: {params: {customerName: string}}) {
-  const { customerName } = params;
-  const customer = await getCustomer(customerName);
-
+export default async function Bidding({ params }: {params: {slug: string}}) {
+  const { slug } = params;
+  const customer = await getCustomer(slug);
   return (
-    <>
-      <h1>Hello World! Bidding landing page</h1>
+    <div>
+      <h1>Hello World! Bidding landing page for {customer.customerName} jukebox</h1>
       <SearchBox />
-    </>
+    </div>
   );
 }
 
@@ -54,7 +53,7 @@ export async function generateStaticParams() {
   // return customers;
 
   return customers.map((customer: Customer) => {
-    return { customerName: customer.customerName };
+    return { slug: customer.shortName };
   });
 }
 
