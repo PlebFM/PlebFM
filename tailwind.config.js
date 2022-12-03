@@ -6,6 +6,9 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    fontFamily: {
+      'sans': ['var(--font-manrope)', 'sans-serif']
+    },
     extend: {},
   },
   plugins: [],
