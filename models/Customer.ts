@@ -1,11 +1,15 @@
 import { Schema, models, model } from 'mongoose';
 
-export type CustomerRef = {
-  publicName: string, // slug
+export type Customer = {
+  customerName: string, // slug
 }
-const CustomerSchema = new Schema<CustomerRef>({
-  publicName: String, // slug
+const CustomerSchema = new Schema<Customer>({
+  customerName: String, // slug
 })
 
-const Customer = models.Customer || model('Customer', CustomerSchema);
-export default Customer;
+// console.error(models.Customers.find({}));
+console.error(models);
+console.error(models.Customers);
+
+const Customers = models.Customers || model('Customers', CustomerSchema);
+export default Customers;

@@ -1,13 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import querystring from "querystring";
-import connectDB from "../../middleware/mongodb";
-import Customers, { Customer } from '../../models/Customer'
+import connectDB from "../../../middleware/mongodb";
+import Customers, { Customer } from '../../../models/Customer'
 
 const handler = async(req: NextApiRequest, res: NextApiResponse) => {
+  const { customerName } = req.query;
   // Gets list of customers
   if (req.method === 'GET') {
-    const customers = await Customers.find();
-    res.status(200).json({success: true, customers: customers});
+    const customer = await Customers.findOne({customerName: customerName});
+    if (!customer)
+      res.status(400).json({success: false, error: 'Customer not found.'});
+
+    res.status(200).json({success: true, customer: customer});
 
   // Adds new customer
   } else if (req.method === 'POST') {

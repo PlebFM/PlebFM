@@ -2,7 +2,7 @@ import { ServerApiVersion } from 'mongodb';
 import mongoose, { ConnectOptions } from 'mongoose';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-const connectDB = handler => async (req: NextApiRequest, res: NextApiResponse) => {
+const connectDB = (handler) => async (req: NextApiRequest, res: NextApiResponse) => {
   if (mongoose.connections[0].readyState) {
     // Use current db connection
     return handler(req, res);
