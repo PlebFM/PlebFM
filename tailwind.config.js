@@ -9,7 +9,11 @@ module.exports = {
     fontFamily: {
       'sans': ['var(--font-manrope)', 'sans-serif']
     },
-    extend: {},
+    extend: {
+      colors: {
+        'pfm-purple-100': 'hsla(268, 22%, 10%, 1.0)'
+      }
+    },
   },
   plugins: [],
 }
