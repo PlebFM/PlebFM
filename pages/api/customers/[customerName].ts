@@ -9,15 +9,15 @@ const handler = async(req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'GET') {
     const customer = await Customers.findOne({customerName: customerName});
     if (!customer)
-      res.status(400).json({success: false, error: 'Customer not found.'});
+      return res.status(400).json({success: false, error: 'Customer not found.'});
 
-    res.status(200).json({success: true, customer: customer});
+    return res.status(200).json({success: true, customer: customer});
 
   // Adds new customer
   } else if (req.method === 'POST') {
     const { customerName } = req.body;
     if (!customerName) res.status(400).json({error: `customerName must be present`});
-    const customer: Customer= {
+    const customer: Customer = {
       customerName: customerName,
     }
     const result = await Customers.create(customer);
