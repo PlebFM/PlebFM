@@ -21,7 +21,7 @@ export default function Bidding({searchParams}: params) {
   if(newUser) {
     return(
       <>
-        <div className="fixed w-full h-full bg-black top-0 left-0">
+        <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
           <Image src={bokeh1} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-75" />
         </div>
         <div className="px-12 py-24 text-white relative z-50">
