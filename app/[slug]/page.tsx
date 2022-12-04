@@ -8,8 +8,9 @@ import { notFound } from "next/navigation";
 import SearchBox from "./SearchBox";
 import bokeh1 from "public/pfm-bokeh-1.jpg"
 import Image from "next/image"
-import {BitcoinIcon} from "@bitcoin-design/bitcoin-icons-react/filled"
+import {BitcoinIcon, ArrowRightIcon, ArrowLeftIcon} from "@bitcoin-design/bitcoin-icons-react/filled"
 import "../../app/globals.css"
+import Button from "../../components/Button"
 
 type Props = { params: {
     slug: string
@@ -43,18 +44,6 @@ const getCustomer = async (slug: string): Promise<Customer> => {
   return customer.customer;
 }
 
-// export default async function Bidding({ params }: {params: {slug: string}}) {
-//   const { slug } = params;
-//   const customer = await getCustomer(slug);
-//   return (
-//     <div>
-//       <h1>Hello World! Bidding landing page for {customer.customerName} jukebox</h1>
-//       <SearchBox />
-//     </div>
-//   );
-// }
-
-
 export default function Bidding({params, searchParams}: Props) {
   const newUser = true
 
@@ -64,7 +53,7 @@ export default function Bidding({params, searchParams}: Props) {
         <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
           <Image src={bokeh1} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-75" />
         </div>
-        <div className="px-6 py-12 text-white relative z-50 justify-between flex flex-col items-center min-h-screen font-thin">
+        <div className="px-6 py-12 text-white relative z-50 justify-between flex flex-col space-y-6 items-center min-h-screen font-thin">
           <div>
             <svg width="277" height="274" viewBox="0 0 277 274" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="138.499" cy="137" r="112" fill="#4B3C5D" fillOpacity="0.5"/>
@@ -111,7 +100,17 @@ export default function Bidding({params, searchParams}: Props) {
             Welcome to <strong>PlebFM</strong>,<br />the lightning jukebox.<br />Here’s how it&nbsp;works.
           </p>
 
-          <p className="text-4xl">Continue</p>
+          <Button size="large" icon={<ArrowRightIcon />}>Continue</Button>
+
+          <Button icon={<ArrowLeftIcon />} iconPosition="left">Continue</Button>
+
+          <Button size="small">Continue</Button>
+
+          <Button color="orange">Continue</Button>
+
+          <Button style="free" color="orange">Continue</Button>
+
+          <Button disabled>Continue</Button>
         </div>
       
         {/* export default function Bidding({ params }: {params: {clientName: string}}) { */}
