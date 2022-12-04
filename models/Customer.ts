@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 export type Customer = {
   id: string,
   customerName: string,
-  shortName: string, // slug
+  shortName: string,
   spotifyRefreshToken: string
 }
 

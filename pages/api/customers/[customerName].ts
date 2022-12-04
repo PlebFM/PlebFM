@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "../../../middleware/mongodb";
-import Customers, { Customer } from '../../../models/Customer'
+import Customers from '../../../models/Customer'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { customerName } = req.query;
