@@ -25,7 +25,8 @@ const CustomerSchema = new Schema<Customer>({
   },
   spotifyRefreshToken: {
     type: String,
-    required: true
+    unique: true,
+    required: false
   }
 })
 

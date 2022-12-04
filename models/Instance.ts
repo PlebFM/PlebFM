@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { Bid } from './Bid'
+import { Bid } from './Bid';
 
 /**
  * @type Instance
@@ -9,21 +9,20 @@ import { Bid } from './Bid'
  * @field queueTimestamp
  * @field playedTimestamp
  * @field Bids
- * 
  */
 export type Instance = {
-  songId: string,
   customerId: string,
+  songId: string,
   status: string,
   queueTimestamp: string
   playedTimestamp: string
-  Bids: ArrayLike<Bid>
+  Bids: object
 }
 
 const InstanceSchema = new Schema<Instance>({
   songId: {
     type: String,
-    unique: false,
+    unique: true,
     required: true,
   },
   customerId: {
@@ -41,7 +40,9 @@ const InstanceSchema = new Schema<Instance>({
     required: true,
   },
   playedTimestamp: {
-
+    type: String,
+    unique: false,
+    required: true
   },
   Bids: {
     type: Array<Bid>,
