@@ -8,6 +8,7 @@ import Users, {
     User,
 } from '../../models/User';
 import cuid from 'cuid';
+import connectDB from '../../middleware/mongodb';
 
 const getColorFromAdjective = (firstNym: any) => {
     const indexOfFirstNym = Object.keys(Adjectives).indexOf(firstNym);
@@ -54,4 +55,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 };
 
-export default handler;
+export default connectDB(handler);
