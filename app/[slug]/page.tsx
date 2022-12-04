@@ -1,3 +1,4 @@
+"use client"
 // pleb.fm/shiners
 // Bidding landing page
 
@@ -44,9 +45,9 @@ const getCustomer = async (slug: string): Promise<Customer> => {
   return customer.customer;
 }
 
-export default async function Bidding({params, searchParams}: Props) {
-  const customerName = params.slug;
-  const customer = await getCustomer(customerName);
+export default function Bidding() {
+  // const customerName = params.slug;
+  // const customer = await getCustomer(customerName);
 
   const [newUser, setNewUser] = React.useState(true)
   const [currentSlide, setCurrentSlide] = React.useState(0)
