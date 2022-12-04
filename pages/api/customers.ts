@@ -6,10 +6,9 @@ import Customers, { Customer } from '../../models/Customer';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // Gets list of customers
   const queries = req.query;
-  const customers: Customer[] = await Customers.find(queries || {});
+  const customers: Customer[] = await Customers.find({filter: queries});
   if (req.method === 'GET') {
     // return res.status(200).json({success: true, customers: customers});
-    if (customers[0])
     return res.status(200).send({success: true, customers: customers});
   // Adds new customer
   } else if (req.method === 'POST') {
