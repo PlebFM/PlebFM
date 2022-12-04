@@ -9,20 +9,32 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@bitcoin-design/bitcoin-icons-react": "^0.1.9",
+    "@next/font": "^13.0.6",
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.9",
-    "autoprefixer": "^10.4.13",
     "eslint": "8.28.0",
-    "eslint-config-next": "13.0.5",
+    "eslint-config-next": "^13.0.6",
     "mongodb": "^4.12.1",
-    "next": "13.0.5",
+    "mongoose": "^6.7.5",
+    "next": "^13.0.6",
     "next-auth": "^4.17.0",
+<<<<<<< HEAD
     "node-fetch": "^3.3.0",
     "postcss": "^8.4.19",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwindcss": "^3.2.4",
+=======
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+>>>>>>> b8f8a9834c04a98855d2688c28df006d8c81f0ce
     "typescript": "4.9.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.19",
+    "tailwindcss": "^3.2.4"
   }
 }
