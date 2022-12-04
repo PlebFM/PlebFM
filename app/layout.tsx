@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-head-element */
 import "./globals.css"
-// import { Manrope } from '@next/font/google'
+import { Manrope } from '@next/font/google'
 
-// const manrope = Manrope({
-//   weight: 'variable',
-//   subsets: ['latin'],
-//   variable: "--font-manrope"
-// })
+const manrope = Manrope({
+  weight: 'variable',
+  subsets: ['latin'],
+  variable: "--font-manrope"
+})
 
 export default function RootLayout({
   children,
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={manrope.variable}>
       <head></head>
       <body>
         {children}
