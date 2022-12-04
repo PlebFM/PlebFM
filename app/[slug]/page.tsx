@@ -2,7 +2,6 @@
 // pleb.fm/shiners
 // Bidding landing page
 
-
 import { Customer } from "../../models/Customer";
 import { notFound } from "next/navigation";
 import SearchBox from "./SearchBox";

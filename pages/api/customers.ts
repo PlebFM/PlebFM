@@ -3,7 +3,7 @@ import querystring from "querystring";
 import connectDB from "../../middleware/mongodb";
 import Customers, { Customer } from '../../models/Customer'
 
-const handler = async(req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // Gets list of customers
   if (req.method === 'GET') {
     const customers = await Customers.find();

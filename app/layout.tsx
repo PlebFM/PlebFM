@@ -1,6 +1,9 @@
+"use client"
+
 /* eslint-disable @next/next/no-head-element */
 import "./globals.css"
 import { Manrope } from '@next/font/google'
+import { SessionProvider } from "next-auth/react";
 
 const manrope = Manrope({
   weight: 'variable',
@@ -17,7 +20,9 @@ export default function RootLayout({
     <html lang="en" className={manrope.variable}>
       <head></head>
       <body>
-        {children}
+        <SessionProvider refetchOnWindowFocus={false}>
+          <>{children}</>
+        </SessionProvider>
       </body>
     </html>
   );
