@@ -57,11 +57,17 @@ export default function Bidding({params, searchParams}: Props) {
     }
   }, [currentSlide])
 
-  const generateUser = ()=>{
+  const generateUser = async ()=>{
+    // let userData = getNewUser()
+    const result = await fetch('/api/user', {
+      method: 'POST',
+    })
+    const userData = await result.json()
+    userData.user.color = userData.user.avatar
     let timer = setTimeout(()=>{
-      setUserProfile(testUser)
-      localStorage.setItem('userProfile', JSON.stringify(testUser))
-    }, 3000)
+      setUserProfile(userData.user)
+      localStorage.setItem('userProfile', JSON.stringify(userData.user))
+    }, 1500)
   }
 
   const setUser = ()=>{
