@@ -48,25 +48,24 @@ const getCustomer = async (slug: string): Promise<Customer> => {
 
 export default function Bidding({params, searchParams}: Props) {
   const newUser = true
+  const [currentSlide, setCurrentSlide] = React.useState(0)
 
   if(newUser) {
-    const [currentSlide, setCurrentSlide] = React.useState(0)
-
     const slides = [
       {
-        text: `Welcome to <strong>PlebFM</strong>,<br />the lightning jukebox.<br />Here’s how it&nbsp;works.`
+        text: 'Welcome to PlebFM, the lightning jukebox. Here’s how it works.',
       },
       {
-        text: `Search for your favorite song in the whole world.`
+        text: 'Search for your favorite song in the whole world.'
       },
       {
-        text: `Pay for it with your favorite lightning wallet.`
+        text: 'Pay for it with your favorite lightning wallet.'
       },
       {
-        text: `Outbid others to push your song to the top of the queue.`
+        text: 'Outbid others to push your song to the top of the queue.'
       },
       {
-        text: `One moment. Generating your secret identity&hellip;`
+        text: 'One moment. Generating your secret identity...'
       }
     ]
 
@@ -76,6 +75,18 @@ export default function Bidding({params, searchParams}: Props) {
 
     const prevSlide = ()=>{
       if(currentSlide > 0) setCurrentSlide(currentSlide - 1)
+    }
+
+    const gotoSlide = (slide:number) =>{
+      setCurrentSlide(slide)
+    }
+
+    const slideText = ()=>{
+      return(
+          <>
+            Test
+          </>
+      )
     }
 
     return(
@@ -127,7 +138,7 @@ export default function Bidding({params, searchParams}: Props) {
           </div>
 
           <p className="text-3xl leading-relaxed text-center">
-            Welcome to <strong>PlebFM</strong>,<br />the lightning jukebox.<br />Here’s how it&nbsp;works.
+            {slides[currentSlide].text}
           </p>
 
           <Button size="large" icon={<ArrowRightIcon />} onClick={nextSlide}>Continue</Button>
@@ -135,7 +146,7 @@ export default function Bidding({params, searchParams}: Props) {
           <div className="flex flex-row space-x-4">
             {currentSlide > 0 ? <Button icon={<ArrowLeftIcon />} iconPosition="left" size="small" style="free" onClick={prevSlide}>Back</Button> : ``}
 
-            <Button icon={<CrossIcon />} iconPosition="left" size="small" style="free">Skip</Button>
+            {currentSlide < slides.length -1 ? <Button icon={<CrossIcon />} iconPosition="left" size="small" style="free" onClick={()=>{gotoSlide(slides.length - 1)}}>Skip</Button> : ``}
           </div>
 
           <div className="flex space-x-6">
