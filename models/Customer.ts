@@ -29,6 +29,5 @@ const CustomerSchema = new Schema<Customer>({
   }
 })
 
-console.error(mongoose.models);
 const Customers = mongoose.models.Customers || mongoose.model('Customers', CustomerSchema);
 export default Customers;

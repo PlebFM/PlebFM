@@ -1,8 +1,7 @@
 "use client"
-
 import SpotifyAuthButton from "./SpotifyAuthButton";
 
-export default function Host() {
+export default function Login() {
   return (
     <div>
       <h1>Host Login</h1>

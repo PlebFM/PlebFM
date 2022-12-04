@@ -12,7 +12,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 rejectUnauthorized: false,
             }),
         };
-        // const agent = { agent: new Agent({ rejectUnauthorized: false }) };
         if (req.method === 'POST') {
             const { value, memo } = req.query;
             if (!value) throw new Error('value is required');
@@ -53,9 +52,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             console.log('data: ', data);
             res.status(200).json(data);
         }
-    } catch (e: any) {
-        console.error(e.message);
-        res.status(500).json(e.message);
+    } catch (error: any) {
+        console.error(error.message);
+        res.status(500).json(error.message);
     }
 };
 
