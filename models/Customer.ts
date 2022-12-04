@@ -3,6 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 export type Customer = {
   customerName: string, 
   shortName: string, // slug
+  spotifyRefreshToken: string
 }
 const CustomerSchema = new Schema<Customer>({
   customerName: {
@@ -14,6 +15,10 @@ const CustomerSchema = new Schema<Customer>({
     type: String, // slug
     unique: true,
     required: true,
+  },
+  spotifyRefreshToken: {
+    type: String,
+    required: true
   }
 })
 

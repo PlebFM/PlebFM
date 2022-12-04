@@ -6,7 +6,25 @@ const nextConfig = {
   headers: () => [{
     source: '/:path*',
     headers: [ { key: 'Cache-Control', value: 'no-store' } ]
-  }]
+  }],
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [ { key: 'Cache-Control', value: 'no-store' } ]
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'origins', value: '*' },
+          { key: 'Bypass-Tunnel-Reminder', value: '*' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Request-Methods', value: 'POST, GET, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Authorization, Content-Type' },
+        ],
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

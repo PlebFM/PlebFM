@@ -2,7 +2,6 @@
 // pleb.fm/shiners
 // Bidding landing page
 
-
 import { Customer } from "../../models/Customer";
 import { notFound } from "next/navigation";
 import SearchBox from "./SearchBox";
@@ -42,18 +41,6 @@ const getCustomer = async (slug: string): Promise<Customer> => {
   const customer = await res.json();
   return customer.customer;
 }
-
-// export default async function Bidding({ params }: {params: {slug: string}}) {
-//   const { slug } = params;
-//   const customer = await getCustomer(slug);
-//   return (
-//     <div>
-//       <h1>Hello World! Bidding landing page for {customer.customerName} jukebox</h1>
-//       <SearchBox />
-//     </div>
-//   );
-// }
-
 
 export default function Bidding({params, searchParams}: Props) {
   const newUser = true

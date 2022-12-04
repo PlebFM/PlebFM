@@ -14,8 +14,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const state = generateRandomString(16);
 
-  console.log('HERE', req.headers.host);
-  // console.log(window.location.host);
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE');
   res.redirect(
