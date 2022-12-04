@@ -1,19 +1,13 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import querystring from "querystring";
+import { getUsersPlaylists } from '../../../lib/spotify';
+import { getSession } from 'next-auth/react';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    const urlencoded = new URLSearchParams();
-    urlencoded.append('q', req.query.query as string || '');
-    const result = fetch(`https://api.spotify.com/v1/search?q=${req.query.query}&type=track&limit=10`).then(x => {
-      x.text()
-    }).then(x => {
-      // console.log(result);
-      res.status(200).json(result);
-    }).catch(e => {
-      console.error('error', e);
-      res.status(500).json(e);
-    });
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const { token: { accessToken }, } = await getSession({req});
+  const response = await getUsersPlaylists(accessToken);
+  const {items} = await response.json();
 
-  }
-}
+  return res.status(200).json({ items });
+};
+
+export default handler;
