@@ -60,6 +60,7 @@ export default function Bidding({params, searchParams}: Props) {
   const generateUser = ()=>{
     let timer = setTimeout(()=>{
       setUserProfile(testUser)
+      localStorage.setItem('userProfile', JSON.stringify(testUser))
     }, 3000)
   }
 
@@ -96,6 +97,18 @@ export default function Bidding({params, searchParams}: Props) {
       contBtnActive: false
     }
   ]
+
+  const getUserProfileFromLocal = ()=>{
+    let userProfileJSON = localStorage.getItem('userProfile')
+    if(userProfileJSON) {
+      setUserProfile(JSON.parse(userProfileJSON))
+      setUser()
+    }
+  }
+
+  React.useEffect(()=>{
+    getUserProfileFromLocal()
+  }, [])
 
   if(newUser && !userProfile.firstNym) {
     const nextSlide = ()=>{
