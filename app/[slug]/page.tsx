@@ -8,9 +8,11 @@ import { notFound } from "next/navigation";
 import SearchBox from "./SearchBox";
 import bokeh1 from "public/pfm-bokeh-1.jpg"
 import Image from "next/image"
-import {BitcoinIcon, ArrowRightIcon, ArrowLeftIcon} from "@bitcoin-design/bitcoin-icons-react/filled"
+import {ArrowLeftIcon, ArrowRightIcon, CrossIcon} from "@bitcoin-design/bitcoin-icons-react/outline"
 import "../../app/globals.css"
 import Button from "../../components/Button"
+import Boop from "../../components/Boop"
+import React from "react";
 
 type Props = { params: {
     slug: string
@@ -48,6 +50,34 @@ export default function Bidding({params, searchParams}: Props) {
   const newUser = true
 
   if(newUser) {
+    const [currentSlide, setCurrentSlide] = React.useState(0)
+
+    const slides = [
+      {
+        text: `Welcome to <strong>PlebFM</strong>,<br />the lightning jukebox.<br />Here’s how it&nbsp;works.`
+      },
+      {
+        text: `Search for your favorite song in the whole world.`
+      },
+      {
+        text: `Pay for it with your favorite lightning wallet.`
+      },
+      {
+        text: `Outbid others to push your song to the top of the queue.`
+      },
+      {
+        text: `One moment. Generating your secret identity&hellip;`
+      }
+    ]
+
+    const nextSlide = ()=>{
+      if(currentSlide < slides.length - 1) setCurrentSlide(currentSlide + 1)
+    }
+
+    const prevSlide = ()=>{
+      if(currentSlide > 0) setCurrentSlide(currentSlide - 1)
+    }
+
     return(
       <>
         <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
@@ -100,17 +130,19 @@ export default function Bidding({params, searchParams}: Props) {
             Welcome to <strong>PlebFM</strong>,<br />the lightning jukebox.<br />Here’s how it&nbsp;works.
           </p>
 
-          <Button size="large" icon={<ArrowRightIcon />}>Continue</Button>
+          <Button size="large" icon={<ArrowRightIcon />} onClick={nextSlide}>Continue</Button>
 
-          <Button icon={<ArrowLeftIcon />} iconPosition="left">Continue</Button>
+          <div className="flex flex-row space-x-4">
+            {currentSlide > 0 ? <Button icon={<ArrowLeftIcon />} iconPosition="left" size="small" style="free" onClick={prevSlide}>Back</Button> : ``}
 
-          <Button size="small">Continue</Button>
+            <Button icon={<CrossIcon />} iconPosition="left" size="small" style="free">Skip</Button>
+          </div>
 
-          <Button color="orange">Continue</Button>
-
-          <Button style="free" color="orange">Continue</Button>
-
-          <Button disabled>Continue</Button>
+          <div className="flex space-x-6">
+            {slides.map((slide, key)=>(
+                <Boop active={currentSlide === key} key={key} />
+            ))}
+          </div>
         </div>
       
         {/* export default function Bidding({ params }: {params: {clientName: string}}) { */}

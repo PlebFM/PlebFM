@@ -1,4 +1,6 @@
 import {ReactNode} from "react";
+import {webpack} from "next/dist/compiled/webpack/webpack";
+import javascript = webpack.javascript;
 
 interface ButtonProps {
     href?: string,
@@ -10,7 +12,8 @@ interface ButtonProps {
     style?: string,
     disabled?: boolean,
     vertical?: boolean,
-    icon?: ReactNode
+    icon?: ReactNode,
+    onClick?: javascript
 }
 
 export default function Button(props:ButtonProps) {
@@ -54,7 +57,7 @@ export default function Button(props:ButtonProps) {
     }
     else {
         return(
-            <button className={className} disabled={props.disabled}>
+            <button className={className} disabled={props.disabled} onClick={props.onClick}>
                 <span>{props.children}</span>
                 <Icon />
             </button>
