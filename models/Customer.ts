@@ -1,18 +1,25 @@
 import mongoose, { Schema } from 'mongoose';
 
 export type Customer = {
-  customerName: string, 
+  id: string,
+  customerName: string,
   shortName: string, // slug
   spotifyRefreshToken: string
 }
+
 const CustomerSchema = new Schema<Customer>({
+  id: {
+    type: String,
+    unique: true,
+    required: true
+  },
   customerName: {
-    type: String, // slug
+    type: String,
     unique: false,
     required: true,
   },
   shortName: {
-    type: String, // slug
+    type: String,
     unique: true,
     required: true,
   },
