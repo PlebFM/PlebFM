@@ -1,4 +1,3 @@
-"use client"
 // pleb.fm/shiners
 // Bidding landing page
 
@@ -19,7 +18,6 @@ type Props = { params: {
   },
   searchParams: {}
 }
-
 
 const getCustomers = async (): Promise<Customer[]> => {
   const res = await fetch("http://0.0.0.0:3000/api/customers", {
@@ -46,7 +44,10 @@ const getCustomer = async (slug: string): Promise<Customer> => {
   return customer.customer;
 }
 
-export default function Bidding({params, searchParams}: Props) {
+export default async function Bidding({params, searchParams}: Props) {
+  const customerName = params.slug;
+  const customer = await getCustomer(customerName);
+
   const [newUser, setNewUser] = React.useState(true)
   const [currentSlide, setCurrentSlide] = React.useState(0)
   const [userProfile, setUserProfile] = React.useState({firstNym: '', lastNym: '', color: ''})

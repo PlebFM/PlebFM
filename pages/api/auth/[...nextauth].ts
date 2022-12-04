@@ -1,12 +1,30 @@
 import NextAuth, { Session, User } from "next-auth"
+import { JWT } from "next-auth/jwt";
 import SpotifyProvider from "next-auth/providers/spotify"
 
+type GenericObject<T = unknown> = T & {
+  [key: string]: any 
+}
+interface AuthToken {
+  user: User
+  accessToken: string
+  accessTokenExpires?: number
+  expires_at?: number
+  refreshToken: string
+  error?: string
+}
+
+interface JwtInterface {
+  token: AuthToken
+  user: User
+  account: GenericObject
+}
 /**
  * Takes a token, and returns a new token with updated
  * `accessToken` and `accessTokenExpires`. If an error occurs,
  * returns the old token and an error property
  */
-async function refreshAccessToken(token) {
+async function refreshAccessToken(token: AuthToken): Promise<AuthToken> {
   try {
       const clientId = process.env.SPOTIFY_CLIENT_ID;
       const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -28,20 +46,30 @@ async function refreshAccessToken(token) {
       throw refreshedTokens
     }
 
+    // Give a 10 sec buffer
+    const now = new Date()
+    const accessTokenExpires = now.setSeconds(
+      now.getSeconds() + parseInt(refreshedTokens.expires_in) - 10,
+    )
+
     return {
       ...token,
       accessToken: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_at * 1000,
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
-    }
+      accessTokenExpires,
+      refreshToken: token.refreshToken
+    };
   } catch (error) {
-    console.log(error)
+    console.log('Refresh AccessToken err', error)
 
     return {
       ...token,
       error: "RefreshAccessTokenError",
     }
   }
+}
+
+const saveNewCustomer = async () => {
+
 }
 
 export default NextAuth({
@@ -53,26 +81,32 @@ export default NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({token, user, account}) {
+    //@ts-ignore
+    async jwt({token, user, account}: JwtInterface): Promise<AuthToken> {
+      let res: AuthToken;
+      const now = Date.now();
+
       if (account && user) {
-        return {
+        res = {
           accessToken: account.access_token,
           accessTokenExpires: Date.now() + (account?.expires_at || 0) * 1000,
           refreshToken: account.refresh_token,
           user,
         }
+      } else if (token.expires_at == null || now < token.expires_at) {
+        res = token
+      } else {
+        res = await refreshAccessToken(token);
       }
-       // Return previous token if the access token has not expired yet
-       if (Date.now() < token.accessTokenExpires) {
-        return token
-      }
-
-      // Access token has expired, try to update it
-      return refreshAccessToken(token)
+      return res;
     },
-    async session({session, user}) {
-      session.user = user;
-      return session;
+    // @ts-ignore
+    async session({ 
+      token 
+    }: {
+      token: GenericObject
+    }): Promise<GenericObject> {
+      return Promise.resolve(token);
     },
   },
 })

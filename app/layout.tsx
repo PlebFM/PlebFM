@@ -13,6 +13,7 @@ const manrope = Manrope({
 
 export default function RootLayout({
   children,
+  ...props
 }: {
   children: React.ReactNode;
 }) {
@@ -20,7 +21,8 @@ export default function RootLayout({
     <html lang="en" className={manrope.variable}>
       <head></head>
       <body>
-        <SessionProvider refetchOnWindowFocus={false}>
+        {/* <SessionProvider refetchOnWindowFocus={false}> */}
+        <SessionProvider>
           <>{children}</>
         </SessionProvider>
       </body>
