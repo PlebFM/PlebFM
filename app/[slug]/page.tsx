@@ -9,6 +9,7 @@ import "../../app/globals.css"
 import React from "react";
 import Onboarding from "./Onboarding";
 import OnboardingIdentity from "./OnboardingIdentity";
+import Search from "./Search";
 
 type Props = { params: {
     slug: string
@@ -80,12 +81,7 @@ export default function Bidding() {
     return(<OnboardingIdentity userProfile={userProfile} setNewUserFunc={setUser} />)
   }
   else {
-    return (
-      <>
-        <h1>Hello World! Bidding landing page</h1>
-        <SearchBox />
-      </>
-    );
+    return(<Search />)
   }
 }
 
