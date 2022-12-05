@@ -1,4 +1,5 @@
 "use client"
+import { WebPlayback } from "../../components/SpotifyPlayback";
 import SpotifyAuthButton from "./SpotifyAuthButton";
 
 export default function Login() {
@@ -6,7 +7,7 @@ export default function Login() {
     <div>
       <h1>Host Login</h1>
       <SpotifyAuthButton />
-            
+      <WebPlayback />
     </div>
   );
 }
