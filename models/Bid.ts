@@ -9,7 +9,7 @@ import mongoose, { Schema } from 'mongoose';
  */
 export type Bid = {
   userId: string;
-  bidAmount: string;
+  bidAmount: number;
   timestamp: string;
   rHash: string;
 }
@@ -21,7 +21,7 @@ const BidSchema = new Schema<Bid>({
     required: true,
   },
   bidAmount: {
-    type: String,
+    type: Number,
     unique: false,
     required: true,
   },

@@ -17,12 +17,13 @@ export type Instance = {
   queueTimestamp: string;
   playedTimestamp: string | undefined;
   Bids: Array<Bid>;
+  runningTotal: number;
 }
 
 const InstanceSchema = new Schema<Instance>({
   customerId: {
     type: String,
-    unique: true,
+    unique: false,
     required: true,
   },
   songId: {
@@ -48,6 +49,11 @@ const InstanceSchema = new Schema<Instance>({
     type: new Array<Bid>,
     unique: false,
     required: true,
+  },
+  runningTotal: {
+    type: Number,
+    unique: false,
+    required: true
   }
 })
 
