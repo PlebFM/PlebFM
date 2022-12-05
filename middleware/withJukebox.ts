@@ -7,11 +7,10 @@ const withJukebox = (handler: any) => async (req: NextApiRequest, res: NextApiRe
   let shortName;
   if (req.method === "GET") {
     shortName = req.query?.shortName ?? "";
-    console.log(shortName);
   } else if (req.method === "POST") {
     shortName = req.body?.shortName ?? "";
   }
-  if (!shortName) return res.status(400).send('withJukebox - Bad request: requires shortName in body or query')
+  if (!shortName) return res.status(400).json('withJukebox - Bad request: requires shortName in body or query')
 
   const customer: Customer | null = await Customers.findOne({filter: {shortName: shortName}});
   if (!customer) return res.status(400).send(`withJukebox - Bad request: Jukebox with name "${shortName}" not found`)

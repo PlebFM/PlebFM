@@ -3,8 +3,7 @@
 // Bidding landing page
 
 import { Customer } from "../../models/Customer";
-import { notFound } from "next/navigation";
-import SearchBox from "./SearchBox";
+import { notFound, usePathname } from "next/navigation";
 import "../../app/globals.css"
 import React from "react";
 import Onboarding from "./Onboarding";
@@ -29,20 +28,9 @@ const getCustomers = async (): Promise<Customer[]> => {
   const customers = await res.json();
   return customers.customers;
 }
-const getCustomer = async (slug: string): Promise<Customer> => {
-  const res = await fetch(`http://0.0.0.0:3000/api/customers/${slug}`, {
-    method: 'GET',
-    mode: 'no-cors',
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
-  });
-  if (!res.ok) notFound();
-  const customer = await res.json();
-  return customer.customer;
-}
 
 export default function Bidding() {
+  const pathName = usePathname();
   const [newUser, setNewUser] = React.useState(true)
   const [userProfile, setUserProfile] = React.useState({firstNym: '', lastNym: '', color: ''})
 
@@ -58,12 +46,12 @@ export default function Bidding() {
     }, 1500)
   }
 
-  const setUser = ()=>{
+  const setUser = ()=> {
     setNewUser(false)
   }
 
-  const getUserProfileFromLocal = ()=>{
-    let userProfileJSON = localStorage.getItem('userProfile')
+  const getUserProfileFromLocal = ()=> {
+    const userProfileJSON = localStorage.getItem('userProfile')
     if(userProfileJSON) {
       setUserProfile(JSON.parse(userProfileJSON))
       setUser()
@@ -71,8 +59,9 @@ export default function Bidding() {
   }
 
   React.useEffect(()=>{
-    getUserProfileFromLocal()
-  }, [])
+    getUserProfileFromLocal();
+
+  }, []);
 
   if(newUser && !userProfile.firstNym) {
     return(<Onboarding generateUserFunc={generateUser} />)

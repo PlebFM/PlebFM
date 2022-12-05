@@ -31,21 +31,10 @@ const findOrCreateNewHost = async (shortName: string, customerName: string, refr
   return await res.json();
 };
 
-async function searchSong(query: string, shortName: string) {
-  if (query === "") return ""; 
-  const res = await fetch (
-    `/api/spotify/search?${new URLSearchParams({ query: query, shortName: shortName})}`,
-    {method: 'GET'}
-  );
-  if (!res.ok) return ['failed'];
-  const result = await res.json();
-  return result.items;
-}
 const SpotifyAuthButton = () => {
   const { data: session } = useSession();
   const [ customer, setCustomer ] = useState<Customer | null>(null);
-  const [ query, setQuery ] = useState('');
-  const [ searchRes, setSearchRes ] = useState([]);
+
   useEffect(() => {
     const getCustomer = async () => {
       if (!session) return;
@@ -62,32 +51,12 @@ const SpotifyAuthButton = () => {
     getCustomer();
   }, [session]);
 
-  useEffect(() => {
-    const updateSearch = async () => {
-      const results = await searchSong(query, 'atl');
-      setSearchRes(results);
-    };
-    updateSearch();
-
-  }, [query])
-
-
   if (session) {
     return (
       <>
         <p>Signed in as {session?.user?.email ?? 'Spotify User'}</p> <br />
         <button onClick={() => signOut()}>Sign out</button>
         <p>Customer Obj: {customer ? JSON.stringify(customer) : '...' }</p> <br />
-        <input
-          type="text"
-          onChange={(e) => setQuery(e.target.value)}
-          value={query}
-        />
-          <ol>
-            {searchRes ? searchRes.map((x, i) =>
-              <li key={i}>{x.name}</li>
-            ) : <li>Loading</li>}
-          </ol>
       </>
     );
   }
