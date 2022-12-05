@@ -29,6 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const result = await Customers.create(customer).catch(e => {
       console.error('Failed to create customer', e);
+      return null;
     });
     return res.status(200).json({success: true, customer: result});
   }

@@ -41,3 +41,19 @@ export const searchTrack = async (queryText: string, accessToken: string, limit?
   const result = await res.json();
   return result.tracks;
 };
+
+export const getTrack = async (trackId: string, accessToken: string) => {
+  const searchUrl = `https://api.spotify.com/v1/tracks/${trackId}`;
+  const res = await fetch(searchUrl, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept': '*/*'
+    },
+  });
+  const result = await res.json();
+  console.error(result);
+  return result;
+
+}

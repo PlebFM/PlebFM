@@ -1,8 +1,5 @@
-import { Customer } from "../../models/Customer";
-import notFound from "./not-found";
+import { notFound } from 'next/navigation';
 import { getCustomer, getCustomers } from '../../lib/customers';
-import SearchBox from "./SearchBox";
-
 export interface LandingLayoutProps {
   children: React.ReactNode;
   params: { slug: string }
@@ -18,12 +15,10 @@ export async function generateStaticParams() {
 
 export default async function LandingLayout({ children, params }: LandingLayoutProps) {
   const customer = await getCustomer(params.slug);
+  if (!customer) return notFound();
 
   return (
     <section>
-      <h1>hi</h1>
-      <>{customer.customerName}</>
-      <SearchBox />
       {children}
     </section>
   );

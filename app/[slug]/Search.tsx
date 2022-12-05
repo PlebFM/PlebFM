@@ -29,11 +29,10 @@ export default function Search(){
     const search = setTimeout(async () => {
       setLoading(true);
       const results = await fetchSong(searchTerm.trim(), name) ?? [];
-      console.log(results[0]);
+      console.log(JSON.stringify(results[0]));
       setSearchResult(results);
       setLoading(false);
-      return results;
-    }, 1);
+    }, 300);
 
     return () => clearTimeout(search);
   }, [searchTerm, name])
@@ -51,6 +50,7 @@ export default function Search(){
           <div className="text-left space-y-2">
             <label className="uppercase font-bold text-left tracking-widest text-xs">Search for a Song</label>
             <input
+              autoFocus
               type="text"
               placeholder="Bitcoin killed the fiat star..."
               className="w-full p-4 text-lg bg-white/10 placeholder:text-pfm-neutral-800 text-pfm-orange-800 outline outline-2 outline-white focus:outline-pfm-orange-800"

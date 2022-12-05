@@ -14,7 +14,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (response?.status >= 400) return res.status(400).send(`searchTrack failed: ${await response.text()}`)
 
   return res.status(200).json(response);
-
 };
 
 export default withJukebox(handler);

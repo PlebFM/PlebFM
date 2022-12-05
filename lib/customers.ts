@@ -22,7 +22,10 @@ export const getCustomer = async (slug: string): Promise<Customer> => {
       'Access-Control-Allow-Origin': '*'
     }
   });
-  if (!res.ok) throw new Error('unable to fetch data');
+  if (!res.ok) {
+    if (res.status === 400) return null;
+    throw new Error('unable to fetch data');
+  }
   const customer = await res.json();
   return customer.customer;
 }

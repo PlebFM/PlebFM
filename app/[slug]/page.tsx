@@ -9,6 +9,7 @@ import React from "react";
 import Onboarding from "./Onboarding";
 import OnboardingIdentity from "./OnboardingIdentity";
 import Search from "./Search";
+import { getCustomer } from "../../lib/customers";
 
 type Props = { params: {
     slug: string
@@ -16,21 +17,8 @@ type Props = { params: {
   searchParams: {}
 }
 
-const getCustomers = async (): Promise<Customer[]> => {
-  const res = await fetch("http://0.0.0.0:3000/api/customers", {
-    method: 'GET',
-    mode: 'no-cors',
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
-  });
-  if (!res.ok) throw new Error('unable to fetch data');
-  const customers = await res.json();
-  return customers.customers;
-}
-
 export default function Bidding() {
-  const pathName = usePathname();
+  const pathName = usePathname()?.replaceAll('/', '');
   const [newUser, setNewUser] = React.useState(true)
   const [userProfile, setUserProfile] = React.useState({firstNym: '', lastNym: '', color: ''})
 
@@ -60,7 +48,6 @@ export default function Bidding() {
 
   React.useEffect(()=>{
     getUserProfileFromLocal();
-
   }, []);
 
   if(newUser && !userProfile.firstNym) {
