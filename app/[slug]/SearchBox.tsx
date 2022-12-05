@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 async function searchSong(query: string) {
   if (query === "") {
   }
-
   const res = await fetch(`/api/spotify/search?${new URLSearchParams({ query: query })}`);
   if (!res.ok) throw new Error('Failed to search song');
 }

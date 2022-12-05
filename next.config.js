@@ -11,7 +11,10 @@ const nextConfig = {
     return [
       {
         source: '/:path*',
-        headers: [ { key: 'Cache-Control', value: 'no-store' } ]
+        headers: [ 
+          { key: 'Cache-Control', value: 'no-store' },
+          { key: 'Accept', value: '*/*' },
+        ]
       },
       {
         source: '/api/:path*',
