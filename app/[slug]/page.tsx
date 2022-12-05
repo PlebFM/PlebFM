@@ -73,13 +73,3 @@ export default function Bidding() {
     return(<Search />)
   }
 }
-
-export async function generateStaticParams() {
-  const customers: Customer[] = await getCustomers();
-  console.error(customers);
-  // return customers;
-
-  return customers.map((customer: Customer) => {
-    return { slug: customer.shortName };
-  });
-}

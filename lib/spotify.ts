@@ -22,10 +22,11 @@ export const getAccessToken = async (refreshToken: string) => {
   return await response.json();
 };
 
-export const searchTrack = async (queryText: string, accessToken: string) => {
+export const searchTrack = async (queryText: string, accessToken: string, limit?: string) => {
   const queries = querystring.stringify({
     q: queryText,
     type: 'track',
+    limit: limit
   });
   const searchUrl = `https://api.spotify.com/v1/search?${queries}`;
   // const basic = Buffer.from(`${client_id}:${client_secret}`).toString('base64');

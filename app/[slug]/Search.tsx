@@ -1,58 +1,42 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import NavBar from "../../components/NavBar"
 import plebFMLogo from "../../public/plebfm-logo.svg"
 import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
+
+const fetchSong = async (query: string, shortName: string): Promise<{name: string, artists:{name: string}[]}[]> => {
+  if (query === "") return [];
+  const queryString = new URLSearchParams({ query: query, shortName: shortName, limit: "10" });
+  const res = await fetch(`/api/spotify/search?${queryString}`, {
+    headers: { 'Access-Control-Allow-Origin': '*' }
+  });
+  if (!res.ok) throw new Error('Failed to search song');
+  return (await res.json()).items;
+}
 
 export default function Search(){
   const [searchTerm, setSearchTerm] = React.useState('')
+  const [searchResult, setSearchResult] = useState<{name: string, artists:{name: string}[]}[]>([]);
+  const [loading, setLoading] = useState(true);
+  const name = usePathname()?.replaceAll('/', "") || "";
 
-  const search = (e: { target: { value: React.SetStateAction<string> } })=>{
-    setSearchTerm(e.target.value)
-  }
-
-  const dummySearchData = [
-    {
-      trackTitle: 'Obnoxiously long song title that takes up multiple lines',
-      artistName: 'Obnoxiously long artist name also (they need a hug)'
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Miner timestamp'
-    },
-    {
-      trackTitle: 'UTXO whitepaper blocksize stacking sats',
-      artistName: 'Satoshi Nakamoto'
-    },
-    {
-      trackTitle: 'Block height mempool blockchain',
-      artistName: 'SHA-256'
-    },
-    {
-      trackTitle: 'Merkle Tree!',
-      artistName: 'Genesis block'
-    },
-    {
-      trackTitle: 'Inputs halvening peer-to-peer',
-      artistName: 'Consensus'
-    },
-    {
-      trackTitle: 'Bitcoin Improvement Proposal',
-      artistName: 'Key pair address'
-    },
-    {
-      trackTitle: 'Stacking sats digital signature',
-      artistName: 'Peer-to-peer '
-    },
-    {
-      trackTitle: 'Key pair genesis block digital signature',
-      artistName: 'Decentralized'
-    },
-    {
-      trackTitle: 'Private key timestamp server',
-      artistName: 'Bitcoin Improvement Proposal'
+  useEffect(() => {
+    if (!searchTerm || !name) {
+      setSearchResult([]);
+      return;
     }
-  ]
+    const search = setTimeout(async () => {
+      setLoading(true);
+      const results = await fetchSong(searchTerm.trim(), name) ?? [];
+      console.log(results[0]);
+      setSearchResult(results);
+      setLoading(false);
+      return results;
+    }, 1);
+
+    return () => clearTimeout(search);
+  }, [searchTerm, name])
 
   return(
     <>
@@ -70,7 +54,7 @@ export default function Search(){
               type="text"
               placeholder="Bitcoin killed the fiat star..."
               className="w-full p-4 text-lg bg-white/10 placeholder:text-pfm-neutral-800 text-pfm-orange-800 outline outline-2 outline-white focus:outline-pfm-orange-800"
-              onChange={search}
+              onChange={(e) => setSearchTerm(e.target.value)}
               value={searchTerm}
             />
           </div>
@@ -85,13 +69,13 @@ export default function Search(){
           : ``}
         </div>
 
-        {searchTerm.length > 0?
+        {searchResult.length > 0?
           <div className="absolute top-0 left-0 h-full pt-56 pb-32 overflow-hidden z-[98]">
             <div className="h-full overflow-y-scroll">
-              {dummySearchData.map((track, key)=>(
+              {searchResult.map((track, key)=>(
                 <div className="px-7 py-4 border-b border-b-1 border-white/20" key={key}>
-                  <p className="">{track.trackTitle}</p>
-                  <p className="font-bold text-[12px]">{track.artistName}</p>
+                  <p className="">{track.name}</p>
+                  <p className="font-bold text-[12px]">{track.artists[0].name}</p>
                 </div>
               ))}
             </div>
