@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import querystring from 'querystring';
 import connectDB from '../../middleware/mongodb';
 import Customers, { Customer } from '../../models/Customer';
 
@@ -12,11 +11,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(200).send({success: true, customers: customers});
   // Adds new customer
   } else if (req.method === 'POST') {
-    const { customerName, shortName, refreshToken } = JSON.parse(req.body);
+    const { customerId, customerName, shortName, refreshToken } = JSON.parse(req.body);
     if (!customerName) return res.status(400).json({error: `customerName must be present`});
     if (!shortName) return res.status(400).json({error: `shortName must be present`});
     if (!refreshToken) return res.status(400).json({error: `refreshToken must be present`});
     const customer: Customer = {
+      id: customerId,
       customerName: customerName,
       shortName: shortName,
       spotifyRefreshToken: refreshToken
@@ -30,7 +30,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const result = await Customers.create(customer).catch(e => {
       console.error('Failed to create customer', e);
     });
-    await res.status(200).json({success: true, customer: result});
+    return res.status(200).json({success: true, customer: result});
   }
 }
 
