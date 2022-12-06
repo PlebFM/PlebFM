@@ -3,8 +3,14 @@ import NavBar from "../../components/NavBar"
 import plebFMLogo from "../../public/plebfm-logo.svg"
 import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import Image from "next/image"
+import {webpack} from "next/dist/compiled/webpack/webpack";
+import javascript = webpack.javascript;
 
-export default function Search(){
+interface SearchProps {
+  parentCallback: javascript
+}
+
+export default function Search(props: SearchProps){
   const [searchTerm, setSearchTerm] = React.useState('')
 
   const search = (e: { target: { value: React.SetStateAction<string> } })=>{
@@ -54,6 +60,10 @@ export default function Search(){
     }
   ]
 
+  const selectSong = (e: React.ChangeEvent<any>)=>{
+    props.parentCallback(e.target.dataset.songId)
+  }
+
   return(
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
@@ -89,9 +99,9 @@ export default function Search(){
           <div className="absolute top-0 left-0 h-full pt-56 pb-32 overflow-hidden z-[98]">
             <div className="h-full overflow-y-scroll">
               {dummySearchData.map((track, key)=>(
-                <div className="px-7 py-4 border-b border-b-1 border-white/20" key={key}>
-                  <p className="">{track.trackTitle}</p>
-                  <p className="font-bold text-[12px]">{track.artistName}</p>
+                <div className="px-7 py-4 border-b border-b-1 border-white/20" key={key} onClick={selectSong} data-song-id="aaaa-bbbb-cccc-ddd">
+                  <p className="pointer-events-none">{track.trackTitle}</p>
+                  <p className="font-bold text-[12px] pointer-events-none">{track.artistName}</p>
                 </div>
               ))}
             </div>
