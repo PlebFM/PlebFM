@@ -1,3 +1,4 @@
+'use client'
 import Button from "./Button"
 import {ContactsIcon, SearchIcon} from "@bitcoin-design/bitcoin-icons-react/outline"
 import {QueueListIcon} from "@heroicons/react/24/outline"

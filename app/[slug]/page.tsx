@@ -5,7 +5,7 @@
 import { Customer } from "../../models/Customer";
 import { notFound, usePathname } from "next/navigation";
 import "../../app/globals.css"
-import React from "react";
+import React, { useEffect } from "react";
 import Onboarding from "./Onboarding";
 import OnboardingIdentity from "./OnboardingIdentity";
 import Search from "./Search";
@@ -23,6 +23,12 @@ export default function Bidding() {
   const [newUser, setNewUser] = React.useState(true)
   const [userProfile, setUserProfile] = React.useState({firstNym: '', lastNym: '', color: ''})
   const [songChoice, setSongChoice] = React.useState('')
+
+  useEffect(() => {
+    if (!songChoice) return;
+    console.log('SONG', JSON.parse(songChoice))
+
+  }, [songChoice]);
 
   const generateUser = async ()=>{
     const result = await fetch('/api/user', {
@@ -64,7 +70,7 @@ export default function Bidding() {
     return(<OnboardingIdentity userProfile={userProfile} setNewUserFunc={setUser} />)
   }
   else {
-    if(songChoice.length > 0) return(<Checkout songId={songChoice} parentCallback={setSongChoice} />)
-    else return(<Search parentCallback={handleSongChoice} />)
+    if(songChoice.length > 0) return(<Checkout song={JSON.parse(songChoice)} parentCallback={setSongChoice} slug={pathName || ""} />)
+    else return(<Search setSong={setSongChoice} />)
   }
 }

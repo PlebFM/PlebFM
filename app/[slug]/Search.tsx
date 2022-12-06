@@ -18,7 +18,7 @@ const fetchSong = async (query: string, shortName: string): Promise<{name: strin
 }
 
 interface SearchProps {
-  parentCallback: javascript
+  setSong: javascript
 }
 
 export default function Search(props: SearchProps){
@@ -44,7 +44,7 @@ export default function Search(props: SearchProps){
   }, [searchTerm, name])
 
   const selectSong = (e: React.ChangeEvent<any>)=>{
-    props.parentCallback(e.target.dataset.songId)
+    props.setSong(e.target.dataset.song)
   }
 
   return(
@@ -83,7 +83,7 @@ export default function Search(props: SearchProps){
           <div className="absolute top-0 left-0 w-full h-full pt-56 pb-32 overflow-hidden z-[98]">
             <div className="h-full overflow-y-scroll w-full">
               {searchResult.map((track, key)=>(
-                <div className="px-7 py-4 border-b border-b-1 border-white/20" key={key} onClick={selectSong} data-song-id="aaaa-bbbb-cccc-ddd">
+                <div className="px-7 py-4 border-b border-b-1 border-white/20" key={key} onClick={selectSong} data-song={JSON.stringify(track)} data-song-id="aaaa-bbbb-cccc-ddd">
                   <p className="pointer-events-none">{track.name}</p>
                   <p className="font-bold text-[12px] pointer-events-none">{track.artists[0].name}</p>
                 </div>
