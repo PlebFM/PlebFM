@@ -1,6 +1,7 @@
 import querystring from 'querystring';
 
 export const getAccessToken = async (refreshToken: string) => {
+
   const client_id = process.env.SPOTIFY_CLIENT_ID;
   const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
   const basic = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
@@ -42,6 +43,35 @@ export const searchTrack = async (queryText: string, accessToken: string, limit?
   return result.tracks;
 };
 
+export const getPlaybackState = async (accessToken: string) => {
+  try {
+    const searchUrl = `https://api.spotify.com/v1/me/player`;
+    const res = await fetch(searchUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'Accept': '*/*'
+      },
+    });
+    if (!res.ok) return null;
+    const result = await res.json();
+    const response = {
+      deviceName: result.device.name,
+      deviceId: result.device.id,
+      repeatState: result.repeat_state,
+      shuffleState: result.shuffle_state,
+      trackUri: result.item.id,
+      progressMs: result.progress_ms,
+      durationMs: result.item.duration_ms,
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
 export const getTrack = async (trackId: string, accessToken: string) => {
   const searchUrl = `https://api.spotify.com/v1/tracks/${trackId}`;
   const res = await fetch(searchUrl, {
@@ -53,7 +83,41 @@ export const getTrack = async (trackId: string, accessToken: string) => {
     },
   });
   const result = await res.json();
-  console.error(result);
+  console.log(result);
   return result;
+}
 
+export const transferDevice = async (deviceId: string, accessToken: string) => {
+  const searchUrl = `https://api.spotify.com/v1/me/player`;
+  const body = JSON.stringify({ device_ids: [deviceId], play: true });
+  console.log('body', body);
+  const res = await fetch(searchUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept': '*/*'
+    },
+    body: body,
+  });
+  const result = await res.json();
+  return result;
+}
+
+export const addTrackToQueue = async (trackUri: string, deviceId: string, accessToken: string) => {
+  const queries = querystring.stringify({
+    uri: trackUri,
+    device_id: deviceId
+  });
+  const searchUrl = `https://api.spotify.com/v1/me/player/queue?${queries}`;
+  const res = await fetch(searchUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept': '*/*'
+    },
+  });
+  const result = await res.json();
+  return result;
 }

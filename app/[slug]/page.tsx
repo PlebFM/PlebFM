@@ -10,6 +10,7 @@ import Onboarding from "./Onboarding";
 import OnboardingIdentity from "./OnboardingIdentity";
 import Search from "./Search";
 import { getCustomer } from "../../lib/customers";
+import Checkout from "./Checkout";
 
 type Props = { params: {
     slug: string
@@ -21,6 +22,7 @@ export default function Bidding() {
   const pathName = usePathname()?.replaceAll('/', '');
   const [newUser, setNewUser] = React.useState(true)
   const [userProfile, setUserProfile] = React.useState({firstNym: '', lastNym: '', color: ''})
+  const [songChoice, setSongChoice] = React.useState('')
 
   const generateUser = async ()=>{
     const result = await fetch('/api/user', {
@@ -50,6 +52,11 @@ export default function Bidding() {
     getUserProfileFromLocal();
   }, []);
 
+  const handleSongChoice = (songChoice: string)=>{
+    setSongChoice(songChoice)
+  }
+
+
   if(newUser && !userProfile.firstNym) {
     return(<Onboarding generateUserFunc={generateUser} />)
   }
@@ -57,6 +64,7 @@ export default function Bidding() {
     return(<OnboardingIdentity userProfile={userProfile} setNewUserFunc={setUser} />)
   }
   else {
-    return(<Search />)
+    if(songChoice.length > 0) return(<Checkout songId={songChoice} parentCallback={setSongChoice} />)
+    else return(<Search parentCallback={handleSongChoice} />)
   }
 }
