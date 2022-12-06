@@ -4,9 +4,11 @@ import albumPlaceholder from "../../public/album-placeholder.jpg"
 import React from "react"
 import NavBar from "../../components/NavBar"
 import Button from "../../components/Button"
-import {ArrowLeftIcon, ArrowRightIcon, CrossIcon} from "@bitcoin-design/bitcoin-icons-react/outline"
+import {ArrowLeftIcon, ArrowRightIcon, CrossIcon, CopyIcon, CartIcon} from "@bitcoin-design/bitcoin-icons-react/outline"
+import {MusicalNoteIcon, QueueListIcon} from "@heroicons/react/24/outline"
 import {webpack} from "next/dist/compiled/webpack/webpack"
 import javascript = webpack.javascript
+import {ready} from "next/dist/build/output/log";
 
 interface CheckoutProps {
   songId: string,
@@ -29,6 +31,7 @@ export default function Checkout(props:CheckoutProps) {
   const [feeTotal, setFeeTotal] = React.useState(0)
   const [feeBracket, setFeeBracket] = React.useState(0)
   const [readyToCheckout, setReadyToCheckout] = React.useState(false)
+  const [invoicePaid, setInvoicePaid] = React.useState(false)
 
   const maxSats = 100
 
@@ -122,14 +125,63 @@ export default function Checkout(props:CheckoutProps) {
       </>
     )
   }
-  else if(readyToCheckout) {
+  else if(readyToCheckout || invoicePaid) {
     return(
       <>
         <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
           <Image src={albumPlaceholder} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" />
         </div>
 
-        Ready to checkout
+        <div className=" px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
+          <div className="w-full">
+            <p className="text-xl">{song.trackTitle}</p>
+            <p className="text-lg font-bold">{song.artistName}</p>
+            <p className="text-base">{song.albumName}</p>
+          </div>
+
+          <div
+            className="bg-white/10 w-[348px] h-[348px] p-[32px] rounded-full flex flex-col space-y-4 justify-center text-center p-8 touch-none relative"
+            id="slider"
+          >
+            {readyToCheckout && !invoicePaid ?
+              <>
+                <CartIcon className="w-24 h-24 mx-auto" />
+                <p className="text-xl text-center">
+                  You’re ready to bid! Copy the invoice and pay from your favorite bitcoin wallet.
+                </p>
+              </>
+            : readyToCheckout && invoicePaid ?
+              <>
+                <MusicalNoteIcon className="w-24 h-24 mx-auto" />
+                <p className="text-xl text-center">
+                  All paid! Let’s jam.
+                </p>
+              </>
+            : `` }
+          </div>
+
+          {readyToCheckout && !invoicePaid ?
+            <Button
+              className="w-full"
+              icon={<CopyIcon />}
+              onClick={()=>{alert('Invoice copied to clipboard!'); setInvoicePaid(true);}}
+              size="small"
+            >
+              Copy Invoice
+            </Button>
+          : readyToCheckout && invoicePaid ?
+            <Button
+              className="w-full"
+              icon={<QueueListIcon />}
+              onClick={()=>{console.log('make this visit queue')}}
+              size="small"
+            >
+              Song Queue
+            </Button>
+          : `` }
+        </div>
+
+        <NavBar />
       </>
     )
   }
