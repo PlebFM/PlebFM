@@ -13,7 +13,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             }),
         };
         if (req.method === 'POST') {
-            const { value, memo } = req.query;
+            const body = JSON.parse(req.body);
+            const { value, memo } = body;
             if (!value) throw new Error('value is required');
             const url = `${process.env.LND_ENDPOINT}/v1/invoices`;
             const requestBody = {
@@ -29,17 +30,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 }),
             });
             if (!response.ok) throw new Error('failed to create invoice');
-            const data = await response.json();
-            console.log('data: ', data);
-            res.status(200).json(data);
+            const data: any = await response.json();
+            const invoice = {
+                hash: Buffer.from(data.r_hash.toString(), 'base64').toString(
+                    'hex'
+                ),
+                paymentRequest: data.payment_request,
+            };
+            res.status(200).json(invoice);
         } else if (req.method === 'GET') {
             const { hash } = req.query;
             if (!hash) throw new Error('hash is required');
-            const hashHex = Buffer.from(hash.toString(), 'base64').toString(
-                'hex'
-            );
-            const url = `${process.env.LND_ENDPOINT}/v1/invoice/${hashHex}`;
-            console.log('url: ', url);
+            const url = `${process.env.LND_ENDPOINT}/v1/invoice/${hash}`;
             const response = await fetch(url, {
                 method: 'GET',
                 headers,
@@ -49,7 +51,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             });
             if (!response.ok) throw new Error('failed to get invoice status');
             const data = await response.json();
-            console.log('data: ', data);
             res.status(200).json(data);
         }
     } catch (error: any) {

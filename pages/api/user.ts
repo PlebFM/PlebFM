@@ -17,8 +17,6 @@ const getColorFromAdjective = (firstNym: any) => {
     return color;
 };
 
-// getColorFromAdjective(randomEnumValue(Adjectives));
-
 const generateUser = () => {
     const userId = cuid();
     const firstNym = randomEnumValue(Adjectives);
@@ -39,14 +37,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             // POST /api/user
             const user: User = { ...generateUser() };
             const result = await Users.create(user);
-            console.log('result: ', result);
             res.status(200).json({ success: true, user: result });
         } else if (req.method === 'GET') {
             // GET /api/user?userId=...
             const { userId } = req.query;
             if (!userId) throw new Error('userId is required');
             const result = await Users.find({ userId: userId });
-            console.log('result: ', result);
             res.status(200).json({ success: true, user: result });
         }
     } catch (error: any) {
