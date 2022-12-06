@@ -121,3 +121,17 @@ export const addTrackToQueue = async (trackUri: string, deviceId: string, access
   const result = await res.json();
   return result;
 }
+
+export const getQueue = async (accessToken: string) => {
+  const searchUrl = `https://api.spotify.com/v1/me/player/queue`;
+  const res = await fetch(searchUrl, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept': '*/*'
+    },
+  });
+  const result = await res.json();
+  return result;
+}
