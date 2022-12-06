@@ -3,6 +3,7 @@ import { ArrowRightIcon, CartIcon, CopyIcon, CrossIcon } from "@bitcoin-design/b
 import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import Button from "../../components/Button";
 import { useState } from "react";
+import NavBar from "../../components/NavBar";
 
 export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, setTotalBid, setBid}) {
   const maxSats = 100;
@@ -159,6 +160,7 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, 
 
         }
       </div>
+      <NavBar />
 
     </>
   )

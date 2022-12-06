@@ -5,6 +5,7 @@ import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import { MusicalNoteIcon, QueueListIcon } from "@heroicons/react/24/outline";
 import Button from "../../components/Button";
 import { useEffect, useState } from "react";
+import NavBar from '../../components/NavBar';
 
 function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePaid, totalBid, bid}) {
   const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '', });
@@ -59,8 +60,8 @@ function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePai
       const data = await response.json();
       if (data.settled === true) {
         console.log('PAID');
-        const bidres = await submitBid();
-        console.log('BID RESULT', bidres);
+        // const bidres = await submitBid();
+        // console.log('BID RESULT', bidres);
         props.setInvoicePaid(true);
         setStartPolling(false);
       }
@@ -142,6 +143,7 @@ function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePai
           </Button>
         : `` }
       </div>
+      <NavBar />
 
     </>
   )
