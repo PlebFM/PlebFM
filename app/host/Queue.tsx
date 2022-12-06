@@ -288,7 +288,7 @@ export default function Queue(){
             </div>
             <div className="w-3/5 flex flex-col space-y-2 pr-4 pt-4">
               {feed.map((update, key)=>(
-                <div key={key} className="flex space-x-4 justify-start items-center overflow-hidden bg-pfm-purple-400/50 h-12 rounded p-4">
+                <div key={key} className={"flex space-x-4 justify-start items-center overflow-hidden bg-pfm-purple-400/50 h-12 rounded p-4 animate-fade-out"}>
                   <div className="w-12">
                     <Avatar
                       firstNym={update.user.firstNym}
