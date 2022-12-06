@@ -9,13 +9,6 @@ const buildQueue = async (customerId: string | string[] | undefined) => {
   const queue = instances.sort((b: any, c: any) => (b.queueTimestamp < c.queueTimestamp) ? 1 : -1).sort((b: any, c: any) => (b.runningTotal < c.runningTotal) ? 1 : -1)
   return { success: true, queue: queue }
 }
-/**
- * 
- * @param req
- * @param res
- * @returns new Queue: sorted(sum(Instance.Bids.bidAmount))
- * query db for Instances by customerId
- */
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
