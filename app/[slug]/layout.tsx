@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import NavBar from '../../components/NavBar';
 import { getCustomer, getCustomers } from '../../lib/customers';
 export interface LandingLayoutProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ export default async function LandingLayout({ children, params }: LandingLayoutP
   return (
     <section>
       {children}
+      <NavBar />
     </section>
   );
 }
