@@ -31,13 +31,15 @@ async function refreshAccessToken(token: AuthToken): Promise<AuthToken> {
       const basic = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
       const TOKEN_ENDPOINT = `https://accounts.spotify.com/api/token`;
 
+      //@ts-ignore
       const response = await fetch(TOKEN_ENDPOINT, {
         method: 'POST',
         headers: {
           Authorization: `Basic ${basic}`,
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams({ grant_type: 'client_credentials', refreshToken: req.body.refreshToken })
+        //@ts-ignore
+        body: new URLSearchParams({ grant_type: 'client_credentials', refreshToken: response.body.refreshToken })
       });
 
     const refreshedTokens = await response.json()
@@ -68,16 +70,13 @@ async function refreshAccessToken(token: AuthToken): Promise<AuthToken> {
   }
 }
 
-const saveNewCustomer = async () => {
-
-}
 
 export default NextAuth({
   providers: [
     SpotifyProvider({
       clientId: process.env.SPOTIFY_CLIENT_ID || "",
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET || "",
-      authorization: 'https://accounts.spotify.com/authorize?scope=user-read-playback-state,user-modify-playback-state,user-read-playback-position,streaming',
+      authorization: 'https://accounts.spotify.com/authorize?scope=user-read-playback-state,user-modify-playback-state,user-read-playback-position,streaming,user-read-email,user-read-private',
     }),
   ],
   callbacks: {
@@ -93,6 +92,7 @@ export default NextAuth({
           refreshToken: account.refresh_token,
           user,
         }
+
       } else if (token.expires_at == null || now < token.expires_at) {
         res = token
       } else {

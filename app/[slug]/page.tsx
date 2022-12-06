@@ -5,11 +5,13 @@
 import { Customer } from "../../models/Customer";
 import { notFound, usePathname } from "next/navigation";
 import "../../app/globals.css"
-import React from "react";
+import React, { useEffect } from "react";
 import Onboarding from "./Onboarding";
 import OnboardingIdentity from "./OnboardingIdentity";
 import Search from "./Search";
 import { getCustomer } from "../../lib/customers";
+import Checkout from "./Checkout";
+import LoadingFun from "./LoadingFun"
 
 type Props = { params: {
     slug: string
@@ -19,8 +21,15 @@ type Props = { params: {
 
 export default function Bidding() {
   const pathName = usePathname()?.replaceAll('/', '');
-  const [newUser, setNewUser] = React.useState(true)
+  const [newUser, setNewUser] = React.useState(false)
   const [userProfile, setUserProfile] = React.useState({firstNym: '', lastNym: '', color: ''})
+  const [songChoice, setSongChoice] = React.useState('')
+
+  useEffect(() => {
+    if (!songChoice) return;
+    console.log('SONG', JSON.parse(songChoice))
+
+  }, [songChoice]);
 
   const generateUser = async ()=>{
     const result = await fetch('/api/user', {
@@ -44,19 +53,28 @@ export default function Bidding() {
       setUserProfile(JSON.parse(userProfileJSON))
       setUser()
     }
+    else setNewUser(true)
   }
 
   React.useEffect(()=>{
     getUserProfileFromLocal();
   }, []);
 
-  if(newUser && !userProfile.firstNym) {
+  const handleSongChoice = (songChoice: string)=>{
+    setSongChoice(songChoice)
+  }
+
+  if(!newUser && !userProfile.firstNym) {
+    return(<LoadingFun />)
+  }
+  else if(newUser && !userProfile.firstNym) {
     return(<Onboarding generateUserFunc={generateUser} />)
   }
   else if(newUser && userProfile.firstNym) {
     return(<OnboardingIdentity userProfile={userProfile} setNewUserFunc={setUser} />)
   }
   else {
-    return(<Search />)
+    if(songChoice.length > 0) return(<Checkout song={JSON.parse(songChoice)} parentCallback={setSongChoice} slug={pathName || ""} />)
+    else return(<Search setSong={setSongChoice} />)
   }
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { Session } from 'next-auth';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Customers, { Customer } from '../../models/Customer';
