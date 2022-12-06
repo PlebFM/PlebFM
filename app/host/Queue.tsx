@@ -3,6 +3,7 @@ import Image from "next/image";
 import bokeh4 from "../../public/pfm-bokeh-4.jpg";
 import Tag from "../../components/Tag";
 import Avatar from "../../components/Avatar";
+import qr from "../../public/qr.png"
 
 export default function Queue(){
   const dummyData = [
@@ -211,7 +212,16 @@ export default function Queue(){
       </div>
 
       <div className="flex flex-row w-full h-screen justify-between relative z-[99] overflow-hidden">
-        <div className="w-1/2 h-full text-white flex flex-col justify-end">
+        <div className="w-1/2 h-full text-white flex flex-col justify-between">
+          <div className="bg-[#e4f1fb] m-16 p-4 w-[200px] h-[200px] inline mix-blend-multiply rounded-2xl">
+            <Image
+              src={qr}
+              alt="https://pleb.fm/atl"
+              width="200"
+              height="200"
+              className="w-full"
+            />
+          </div>
           <div className="text-3xl p-16 flex flex-col space-y-6">
             <p>Song Title</p>
             <p className="font-bold">Artist name</p>
