@@ -3,10 +3,10 @@ import { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import { getSession, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { WebPlayback } from "../../components/SpotifyPlayback";
+import React, { useEffect, useState } from "react";
 import { addTrackToQueue, getAccessToken, getPlaybackState, searchTrack } from "../../lib/spotify";
-import SpotifyAuthButton from "./SpotifyAuthButton";
+import Queue from "./Queue"
+import Login from "./Login"
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {
 //   if (context.req.cookies["spotify-token"]) {
@@ -22,7 +22,7 @@ import SpotifyAuthButton from "./SpotifyAuthButton";
 // };
 
 
-export default function Login() {
+export default function Leaderboard() {
   const {data: session} = useSession();
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -45,18 +45,9 @@ export default function Login() {
     } 
     foo();
   }, [session]);
-  
-  return (
-    <div>
-      <h1>Host Login</h1>
-      <SpotifyAuthButton />
-      {/* <Link href="/api/auth/login">
-        Login Button
-      </Link> */}
 
-      {
-       accessToken && <WebPlayback token={accessToken} />
-      }
-    </div>
-  );
+  const dummySpotifyAuth = true
+
+  if(dummySpotifyAuth) return (<Queue />)
+  else return (<Login />)
 }

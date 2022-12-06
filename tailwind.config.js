@@ -51,6 +51,9 @@ module.exports = {
       dropShadow: {
         'glow-white': '0 0 10px hsla(0, 0%, 100%, 0.75)',
         'glow-orange': '0 0 10px hsla(35, 100%, 80%, 0.75)'
+      },
+      animation: {
+        'spin-slow': 'spin 4s linear infinite',
       }
     },
   },
