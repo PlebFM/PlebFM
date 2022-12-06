@@ -3,7 +3,8 @@ import Image from "next/image";
 interface AvatarProps {
   firstNym?: string,
   lastNym?: string,
-  color?: string
+  color?: string,
+  size?: string
 }
 
 export default function Avatar(props:AvatarProps){
@@ -25,16 +26,29 @@ export default function Avatar(props:AvatarProps){
   if(props.color) color = colorMap[props.color as keyof typeof colorMap]
 
   if(props.lastNym) imageSrc = props.lastNym
+  let size = {
+    padding: "p-4",
+    width: "w-full",
+    imageWidth: 180
+  }
+
+  if(props.size){
+    switch(props.size) {
+      case "xs":
+        size.padding = "p-1"
+        size.width = "w-10"
+    }
+  }
 
   return(
     <>
-      <div className="rounded-full bg-white/20 p-4 w-full">
+      <div className={"rounded-full bg-white/20 " + size.padding + " " + size.width}>
         <div className={"rounded-full overflow-hidden w-full h-auto " + color}>
           <Image
             src={"/Avatar/" + imageSrc + ".png"}
             alt={props.firstNym + " " + props.lastNym}
-            width="180"
-            height="180"
+            width={size.imageWidth}
+            height={size.imageWidth}
             quality="100"
             blurDataURL={"/Avatar/" + imageSrc + "-blur.png"}
             placeholder="blur"
