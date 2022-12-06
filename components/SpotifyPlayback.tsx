@@ -1,5 +1,8 @@
+"use client"
+import { getSession, signOut } from 'next-auth/react';
 import Script from 'next/script'
 import { useState, useEffect } from "react";
+import { addTrackToQueue, transferDevice } from '../lib/spotify';
 
 type Props = {
   token: string;
@@ -10,19 +13,25 @@ export const WebPlayback = ({ token }: Props) => {
   const [is_active, setActive] = useState<boolean>(false);
   const [player, setPlayer] = useState<Spotify.Player | null>(null);
   const [current_track, setTrack] = useState<Spotify.Track | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
 
   useEffect(() => {
+    // if (token?.error === 'invalid_client' ?? false) {
+    //   console.log('signingout')
+    //   // signOut();
+    // }
     const script = document.createElement("script");
     script.src = "https://sdk.scdn.co/spotify-player.js";
     script.async = true;
-
     document.body.appendChild(script);
 
     //@ts-ignore
     window.onSpotifyWebPlaybackSDKReady = () => {
+      console.log('ready');
       const player = new window.Spotify.Player({
-        name: "Web Playback SDK",
+        name: "Pleb.FM",
         getOAuthToken: (cb) => {
+          // console.log(token);
           cb(token);
         },
         volume: 0.5,
@@ -31,6 +40,7 @@ export const WebPlayback = ({ token }: Props) => {
       setPlayer(player);
 
       player.addListener("ready", ({ device_id }) => {
+        setDeviceId(device_id);
         console.log("Ready with Device ID", device_id);
       });
 
@@ -46,7 +56,7 @@ export const WebPlayback = ({ token }: Props) => {
         setTrack(state.track_window.current_track);
         setPaused(state.paused);
 
-        player.getCurrentState().then((state) => {
+        player?.getCurrentState().then((state) => {
           if (!state) {
             setActive(false);
           } else {
@@ -54,8 +64,7 @@ export const WebPlayback = ({ token }: Props) => {
           }
         });
       });
-
-      player.connect();
+      player.connect()//.then(() => player.activateElement().then(() => console.log('activated')));
     };
   }, [token]);
 
@@ -78,6 +87,27 @@ export const WebPlayback = ({ token }: Props) => {
             <b>
               Instance not active. Transfer your playback using your Spotify app
             </b>
+            <br />
+            <button
+              className="btn-spotify"
+              onClick={() => {
+                player.activateElement();
+                deviceId && transferDevice(deviceId, token).then(x => console.log(x));
+                console.log('clicked');
+              }}
+            >
+              {"TRANSFER TO ME"}
+            </button>
+            <br />
+            <button
+              className="btn-spotify"
+              onClick={() => {
+                const addToQueue = deviceId && addTrackToQueue('spotify:track:0AzD1FEuvkXP1verWfaZdv', deviceId, token).then((res) => console.log(res));
+                console.log('clicked');
+              }}
+            >
+              {"QUEUE CBAT"}
+            </button>
           </div>
         </div>
       </>
