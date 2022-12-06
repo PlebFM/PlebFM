@@ -23,8 +23,8 @@ export default function User() {
 
   const dummyDataQueue = [
     {
-      trackTitle: "Bitcoin ipsum dolor sit amet",
-      artistName: "Nonce inputs",
+      trackTitle: "Freedom",
+      artistName: "Rage Against the Machine",
       feeRate: 100,
       playing: false,
       upNext: true,
@@ -43,8 +43,8 @@ export default function User() {
       ]
     },
     {
-      trackTitle: "Bitcoin ipsum dolor sit amet",
-      artistName: "Nonce inputs",
+      trackTitle: "Roll Me Up",
+      artistName: "Willie Nelson, Snoop Dogg, Kris Kristofferson, Jamey Johnson",
       feeRate: 98,
       upNext: false,
       myPick: true,
@@ -65,8 +65,8 @@ export default function User() {
 
   const dummyDataPlayed = [
     {
-      trackTitle: "Bitcoin ipsum dolor sit amet",
-      artistName: "Nonce inputs",
+      trackTitle: "Happiness in Slavery",
+      artistName: "Nine Inch Nails",
       feeRate: 100,
       myPick: true,
       bidders: [
@@ -83,8 +83,8 @@ export default function User() {
       ]
     },
     {
-      trackTitle: "Bitcoin ipsum dolor sit amet",
-      artistName: "Nonce inputs",
+      trackTitle: "Hips Don’t Lie (feat. Wyclef Jean)",
+      artistName: "Shakira",
       feeRate: 98,
       myPick: true,
       bidders: [
@@ -101,8 +101,8 @@ export default function User() {
       ]
     },
     {
-      trackTitle: "Bitcoin ipsum dolor sit amet",
-      artistName: "Nonce inputs",
+      trackTitle: "Legend Has It",
+      artistName: "Run the Jewels",
       feeRate: 87,
       myPick: true,
       bidders: [
@@ -119,8 +119,8 @@ export default function User() {
       ]
     },
     {
-      trackTitle: "Bitcoin ipsum dolor sit amet",
-      artistName: "Nonce inputs",
+      trackTitle: "Friday I'm in Love",
+      artistName: "The Cure",
       feeRate: 76,
       myPick: true,
       bidders: [
@@ -137,8 +137,8 @@ export default function User() {
       ]
     },
     {
-      trackTitle: "Bitcoin ipsum dolor sit amet",
-      artistName: "Nonce inputs",
+      trackTitle: "Enter Sandman",
+      artistName: "Metallica",
       feeRate: 65,
       myPick: true,
       bidders: [
