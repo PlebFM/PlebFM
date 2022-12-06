@@ -11,16 +11,22 @@ import { Bid } from './Bid';
  * @field Bids
  */
 export type Instance = {
+  id: string;
   customerId: string;
   songId: string;
   status: string;
   queueTimestamp: string;
-  playedTimestamp: string | undefined;
+  playedTimestamp: string;
   Bids: Array<Bid>;
   runningTotal: number;
 }
 
 const InstanceSchema = new Schema<Instance>({
+  id: {
+    type: String,
+    unique: true,
+    required: true,
+  },
   customerId: {
     type: String,
     unique: false,
@@ -43,7 +49,7 @@ const InstanceSchema = new Schema<Instance>({
   playedTimestamp: {
     type: String,
     unique: false,
-    required: true
+    required: false
   },
   Bids: {
     type: new Array<Bid>,
