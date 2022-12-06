@@ -14,19 +14,19 @@ export default function NavBar(props:NavBarProps){
       slug: 'profile',
       text: 'Profile',
       icon: <ContactsIcon />,
-      onClick: tempFunc
+      href: "/atl"
     },
     {
       slug: 'queue',
       text: 'Queue',
       icon: <QueueListIcon />,
-      onClick: tempFunc
+      href: "/atl/queue"
     },
     {
       slug: 'search',
       text: 'Search',
       icon: <SearchIcon />,
-      onClick: tempFunc
+      href: "/atl"
     },
   ]
 
@@ -35,10 +35,10 @@ export default function NavBar(props:NavBarProps){
       <ul className="flex space-x-16 justify-center">
         {options.map((option, key)=>(
           <li key={key}>
-            <button onClick={option.onClick} className={props.activeBtn && props.activeBtn === option.slug ? "drop-shadow-glow-white text-white font-medium" : ""}>
+            <a href={option.href} className={props.activeBtn && props.activeBtn === option.slug ? "drop-shadow-glow-white text-white font-medium" : ""}>
               <span className="w-8 h-8 block mx-auto">{option.icon}</span>
               <span className="tracking-wider">{option.text}</span>
-            </button>
+            </a>
           </li>
         ))}
       </ul>
