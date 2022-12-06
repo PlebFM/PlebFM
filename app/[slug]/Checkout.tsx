@@ -174,7 +174,7 @@ export default function Checkout(props:CheckoutProps) {
             <Button
               className="w-full"
               icon={<QueueListIcon />}
-              onClick={()=>{console.log('make this visit queue')}}
+              href="/atl/queue"
               size="small"
             >
               Song Queue
