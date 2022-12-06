@@ -26,6 +26,7 @@ export default function Checkout(props:CheckoutProps) {
   const [readyToCheckout, setReadyToCheckout] = useState(false)
   const [invoicePaid, setInvoicePaid] = useState(false)
   const [totalBid, setTotalBid] = useState(0)
+  const [bid, setBid] = useState(0)
 
 
   const cancelSong = ()=>{
@@ -41,13 +42,13 @@ export default function Checkout(props:CheckoutProps) {
   // User has confirmed bid amount, display invoice OR display that invoice has been successfully paid
   else if(readyToCheckout || invoicePaid) {
     return (
-      <PaymentScreen song={props.song} readyToCheckout={readyToCheckout} invoicePaid={invoicePaid} setInvoicePaid={setInvoicePaid} totalBid={totalBid} />
+      <PaymentScreen song={props.song} readyToCheckout={readyToCheckout} invoicePaid={invoicePaid} setInvoicePaid={setInvoicePaid} totalBid={totalBid} bid={bid} />
     );
   }
   // User has confirmed song, displays radial slider to choose bid amount
   else {
     return (
-      <SelectBid song={props.song} setReadyToCheckout={setReadyToCheckout} cancelSong={cancelSong} setTotalBid={setTotalBid} />
+      <SelectBid song={props.song} setReadyToCheckout={setReadyToCheckout} cancelSong={cancelSong} setTotalBid={setTotalBid} setBid={setBid} />
     )
   }
 

@@ -49,7 +49,6 @@ const InstanceSchema = new Schema<Instance>({
   playedTimestamp: {
     type: String,
     unique: false,
-    required: false
   },
   Bids: {
     type: new Array<Bid>,
@@ -59,7 +58,6 @@ const InstanceSchema = new Schema<Instance>({
   runningTotal: {
     type: Number,
     unique: false,
-    required: true
   }
 })
 
