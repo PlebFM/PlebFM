@@ -54,6 +54,13 @@ module.exports = {
       },
       animation: {
         'spin-slow': 'spin 4s linear infinite',
+        'fade-out': 'fadeout 8s both',
+      },
+      keyframes: {
+        fadeout: {
+          '0%, 75%': { opacity: 1.0 },
+          '100%': { opacity: 0.0 },
+        }
       }
     },
   },
