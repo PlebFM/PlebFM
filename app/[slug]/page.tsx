@@ -11,6 +11,7 @@ import OnboardingIdentity from "./OnboardingIdentity";
 import Search from "./Search";
 import { getCustomer } from "../../lib/customers";
 import Checkout from "./Checkout";
+import LoadingFun from "./LoadingFun"
 
 type Props = { params: {
     slug: string
@@ -20,7 +21,7 @@ type Props = { params: {
 
 export default function Bidding() {
   const pathName = usePathname()?.replaceAll('/', '');
-  const [newUser, setNewUser] = React.useState(true)
+  const [newUser, setNewUser] = React.useState(false)
   const [userProfile, setUserProfile] = React.useState({firstNym: '', lastNym: '', color: ''})
   const [songChoice, setSongChoice] = React.useState('')
 
@@ -52,6 +53,7 @@ export default function Bidding() {
       setUserProfile(JSON.parse(userProfileJSON))
       setUser()
     }
+    else setNewUser(true)
   }
 
   React.useEffect(()=>{
@@ -62,8 +64,10 @@ export default function Bidding() {
     setSongChoice(songChoice)
   }
 
-
-  if(newUser && !userProfile.firstNym) {
+  if(!newUser && !userProfile.firstNym) {
+    return(<LoadingFun />)
+  }
+  else if(newUser && !userProfile.firstNym) {
     return(<Onboarding generateUserFunc={generateUser} />)
   }
   else if(newUser && userProfile.firstNym) {
