@@ -3,6 +3,8 @@ import NavBar from "../../components/NavBar"
 import plebFMLogo from "../../public/plebfm-logo.svg"
 import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import Image from "next/image"
+import {webpack} from "next/dist/compiled/webpack/webpack";
+import javascript = webpack.javascript;
 import { usePathname } from "next/navigation"
 
 const fetchSong = async (query: string, shortName: string): Promise<{name: string, artists:{name: string}[]}[]> => {
@@ -15,7 +17,11 @@ const fetchSong = async (query: string, shortName: string): Promise<{name: strin
   return (await res.json()).items;
 }
 
-export default function Search(){
+interface SearchProps {
+  parentCallback: javascript
+}
+
+export default function Search(props: SearchProps){
   const [searchTerm, setSearchTerm] = React.useState('')
   const [searchResult, setSearchResult] = useState<{name: string, artists:{name: string}[]}[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +42,10 @@ export default function Search(){
 
     return () => clearTimeout(search);
   }, [searchTerm, name])
+
+  const selectSong = (e: React.ChangeEvent<any>)=>{
+    props.parentCallback(e.target.dataset.songId)
+  }
 
   return(
     <>
