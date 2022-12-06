@@ -6,47 +6,75 @@ import { MusicalNoteIcon, QueueListIcon } from "@heroicons/react/24/outline";
 import Button from "../../components/Button";
 import { useEffect, useState } from "react";
 
-function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePaid, totalBid}) {
+function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePaid, totalBid, bid}) {
   const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '', });
-  const [isPaid, setIsPaid] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [startPolling, setStartPolling] = useState(false);
 
-  async function copyTextToClipboard(text: string) {
-    if ('clipboard' in navigator) {
-      return await navigator.clipboard.writeText(text);
-    } else {
-      return document.execCommand('copy', true, text);
+  const getUserProfileFromLocal = ()=> {
+    const userProfileJSON = localStorage.getItem('userProfile')
+    if(userProfileJSON) {
+      return JSON.parse(userProfileJSON);
     }
   }
 
 
   useEffect(() => {
     const getBolt11 = async () => {
+      setLoading(true);
       const response = await fetch('/api/invoice', {
         method: 'POST',
         body: JSON.stringify({ value: props.totalBid, memo: `PlebFM - ${props?.song?.name ?? "Bid"}` }),
       });
-
-      console.log(await response.json());
+      const res = await response.json();
+      setBolt11(res);
     }
     getBolt11();
     // console.log(bolt11);
-  }, [bolt11]);
+  }, []);
 
   useEffect(() => {
+    if (!startPolling || !bolt11.hash) return;
+    const submitBid = async () => {
+      const userProfile = getUserProfileFromLocal();
+      const response = await fetch(`/api/bidding/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          customerName: 'atl', //TODO FIX
+          songId: props.song?.id,
+          bidAmount: props.bid,
+          rHash: bolt11.hash,
+          userId: userProfile.userId // TODO FIX
+        })
+      });
+      const res = await response.json()
+      return res;
+    }
+
     const getPaidStatus = async () => {
       const response = await fetch(`/api/invoice?hash=${bolt11.hash}`);
       const data = await response.json();
-      if (data.settled === true) setIsPaid(true);
+      if (data.settled === true) {
+        console.log('PAID');
+        const bidres = await submitBid();
+        console.log('BID RESULT', bidres);
+        props.setInvoicePaid(true);
+        setStartPolling(false);
+      }
+      return data;
     };
 
-    if (bolt11.hash) {
-      const interval = setInterval(() => {
-        console.log("checking paid status...");
-        getPaidStatus();
-      }, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [bolt11]);
+    const interval = setInterval(async () => {
+      console.log("checking paid status...");
+      const res = await getPaidStatus();
+      console.log('poll', res);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [startPolling, bolt11.hash]);
 
   return (
     <>
@@ -93,19 +121,11 @@ function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePai
         {props.readyToCheckout && !props.invoicePaid ?
           <CopyToClipboard 
             text={bolt11.paymentRequest}
-            onCopy={() => {alert('copied')}}
+            onCopy={() => setStartPolling(true)}
           >
             <Button
               className="w-full"
               icon={<CopyIcon />}
-              // onClick={()=> {
-              //   // props.setInvoicePaid(true);
-              //   const res = copyTextToClipboard(bolt11.paymentRequest);
-              //   res.then(x => {
-
-              //     console.log('COPY RES', x); 
-              //   })
-              // }}
               size="small"
             >
               Copy Invoice
