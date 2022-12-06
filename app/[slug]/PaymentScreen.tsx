@@ -1,18 +1,54 @@
 "use client"
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { CartIcon, CopyIcon } from "@bitcoin-design/bitcoin-icons-react/filled";
 import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import { MusicalNoteIcon, QueueListIcon } from "@heroicons/react/24/outline";
 import Button from "../../components/Button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePaid}) {
+function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePaid, totalBid}) {
+  const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '', });
+  const [isPaid, setIsPaid] = useState(false);
+
+  async function copyTextToClipboard(text: string) {
+    if ('clipboard' in navigator) {
+      return await navigator.clipboard.writeText(text);
+    } else {
+      return document.execCommand('copy', true, text);
+    }
+  }
+
+
   useEffect(() => {
-    console.log("TRACK", props?.song);
-    console.log(props?.song?.album?.images[0]?.url)
-    console.log("INSIDE",props);
-  }, [props])
+    const getBolt11 = async () => {
+      const response = await fetch('/api/invoice', {
+        method: 'POST',
+        body: JSON.stringify({ value: props.totalBid, memo: `PlebFM - ${props?.song?.name ?? "Bid"}` }),
+      });
 
-  return(
+      console.log(await response.json());
+    }
+    getBolt11();
+    // console.log(bolt11);
+  }, [bolt11]);
+
+  useEffect(() => {
+    const getPaidStatus = async () => {
+      const response = await fetch(`/api/invoice?hash=${bolt11.hash}`);
+      const data = await response.json();
+      if (data.settled === true) setIsPaid(true);
+    };
+
+    if (bolt11.hash) {
+      const interval = setInterval(() => {
+        console.log("checking paid status...");
+        getPaidStatus();
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [bolt11]);
+
+  return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         {/* <Image src={albumPlaceholder} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" /> */}
@@ -55,14 +91,26 @@ function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePai
         </div>
 
         {props.readyToCheckout && !props.invoicePaid ?
-          <Button
-            className="w-full"
-            icon={<CopyIcon />}
-            onClick={()=>{alert('Invoice copied to clipboard!'); props.setInvoicePaid(true);}}
-            size="small"
+          <CopyToClipboard 
+            text={bolt11.paymentRequest}
+            onCopy={() => {alert('copied')}}
           >
-            Copy Invoice
-          </Button>
+            <Button
+              className="w-full"
+              icon={<CopyIcon />}
+              // onClick={()=> {
+              //   // props.setInvoicePaid(true);
+              //   const res = copyTextToClipboard(bolt11.paymentRequest);
+              //   res.then(x => {
+
+              //     console.log('COPY RES', x); 
+              //   })
+              // }}
+              size="small"
+            >
+              Copy Invoice
+            </Button>
+          </CopyToClipboard>
         : props.readyToCheckout && props.invoicePaid ?
           <Button
             className="w-full"

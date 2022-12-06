@@ -4,7 +4,7 @@ import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import Button from "../../components/Button";
 import { useState } from "react";
 
-export default function SelectBid(props: {song, setReadyToCheckout, cancelSong}) {
+export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, setTotalBid}) {
   const maxSats = 100;
   const [feeRate, setFeeRate] = useState(0);
   const [feeTotal, setFeeTotal] = useState(0);
@@ -137,7 +137,10 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong})
             <Button
               className="w-full"
               icon={<ArrowRightIcon />}
-              onClick={()=>{props.setReadyToCheckout(true)}}
+              onClick={()=> {
+                props.setTotalBid(feeTotal);
+                props.setReadyToCheckout(true);
+              }}
             >
               Checkout
             </Button>
