@@ -1,5 +1,6 @@
 import Button from "./Button"
 import {ContactsIcon, SearchIcon} from "@bitcoin-design/bitcoin-icons-react/outline"
+import {QueueListIcon} from "@heroicons/react/24/outline"
 
 interface NavBarProps {
   activeBtn?: string
@@ -18,7 +19,7 @@ export default function NavBar(props:NavBarProps){
     {
       slug: 'queue',
       text: 'Queue',
-      icon: <ContactsIcon />,
+      icon: <QueueListIcon />,
       onClick: tempFunc
     },
     {

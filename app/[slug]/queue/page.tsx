@@ -1,7 +1,7 @@
 // "use client"
 import Link from "next/link";
 
-// pleb.fm/shiners/queue
+// pleb.fm/bantam/queue
 export default function Queue() {
   return (
     <>
