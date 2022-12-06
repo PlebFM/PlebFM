@@ -83,7 +83,7 @@ export default function Checkout(props:CheckoutProps) {
     else if(fee > 50 && fee <= 75) setFeeBracket(3)
     else setFeeBracket(4)
   }
-
+  // Displays album art, user has chance to back out of song
   if(!songConfirmed) {
     return(
       <>
@@ -125,6 +125,7 @@ export default function Checkout(props:CheckoutProps) {
       </>
     )
   }
+  // User has confirmed bid amount, display invoice OR display that invoice has been successfully paid
   else if(readyToCheckout || invoicePaid) {
     return(
       <>
@@ -185,6 +186,7 @@ export default function Checkout(props:CheckoutProps) {
       </>
     )
   }
+  // User has confirmed song, displays radial slider to choose bid amount
   else {
     return(
       <>
