@@ -80,8 +80,8 @@ export default function Search(props: SearchProps){
         </div>
 
         {searchResult.length > 0?
-          <div className="absolute top-0 left-0 h-full pt-56 pb-32 overflow-hidden z-[98]">
-            <div className="h-full overflow-y-scroll">
+          <div className="absolute top-0 left-0 w-full h-full pt-56 pb-32 overflow-hidden z-[98]">
+            <div className="h-full overflow-y-scroll w-full">
               {searchResult.map((track, key)=>(
                 <div className="px-7 py-4 border-b border-b-1 border-white/20" key={key} onClick={selectSong} data-song-id="aaaa-bbbb-cccc-ddd">
                   <p className="pointer-events-none">{track.name}</p>
