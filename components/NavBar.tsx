@@ -15,7 +15,7 @@ export default function NavBar(props:NavBarProps){
       slug: 'profile',
       text: 'Profile',
       icon: <ContactsIcon />,
-      href: "/atl"
+      href: "/users/profile"
     },
     {
       slug: 'queue',
