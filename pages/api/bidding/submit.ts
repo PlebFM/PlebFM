@@ -26,20 +26,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // if (!user) return res.status(400).json({ success: false, error: 'User not found.' });
       // console.error(user)
 
-      const matchingInstances = await Instances.findOne({ "Bids.rHash": { $eq: rHash } })
+      const matchingInstances = await Instances.findOne({ "bids.rHash": { $eq: rHash } })
       if (matchingInstances) return res.status(400).json({ success: false, error: 'Duplicate bid found.' });
       console.error(matchingInstances)
 
-      const instance = await Instances.findOneAndUpdate({ songId: songId }, { $push: { Bids: newBid }, $inc: { runningTotal: bidAmount } }).catch(_ => {});
+      const instance = await Instances.findOneAndUpdate({ songId: songId }, { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } }).catch(_ => {});
       if (instance) return res.status(200).json({ success: true, new: false, instance: instance });
 
-      const runningTotal = (instance?.Bids?.reduce((p: any, c: any) => p.bidAmount + c.bidAmount).catch(_ => {}) ?? 0 + bidAmount
+      const runningTotal = (instance?.bids?.reduce((p: any, c: any) => p.bidAmount + c.bidAmount).catch(_ => {}) ?? 0 + bidAmount)
       const newInstance: Instance = await Instances.create({
         customerId: customer.id,
         songId: songId,
         status: "queued",
         queueTimestamp: now,
-        Bids: new Array<Bid>(newBid),
+        bids: new Array<Bid>(newBid),
         runningTotal: runningTotal
       })
 

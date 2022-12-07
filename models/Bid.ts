@@ -8,15 +8,15 @@ import mongoose, { Schema } from 'mongoose';
  * @field rHash
  */
 export type Bid = {
-  userId: string;
+  user: object;
   bidAmount: number;
   timestamp: string;
   rHash: string;
 }
 
 const BidSchema = new Schema<Bid>({
-  userId: {
-    type: String,
+  user: {
+    type: Object,
     unique: false,
     required: true,
   },

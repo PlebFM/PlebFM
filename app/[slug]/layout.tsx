@@ -21,7 +21,6 @@ export default async function LandingLayout({ children, params }: LandingLayoutP
   return (
     <section>
       {children}
-      <NavBar />
     </section>
   );
 }
