@@ -48,7 +48,7 @@ function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePai
           songId: props.song?.id,
           bidAmount: props.bid,
           rHash: bolt11.hash,
-          userId: userProfile.userId // TODO FIX
+          user: userProfile // TODO FIX
         })
       });
       const res = await response.json()

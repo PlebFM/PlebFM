@@ -1,4 +1,4 @@
-export default function LoadingFun() {
+export default function LoadingSpinner() {
   return(
     <div className="w-full h-screen flex justify-center items-center bg-gradient-to-b from-pfm-purple-400 to-pfm-purple-100">
       <svg width="250" height="250" viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-spin-slow drop-shadow-xl">

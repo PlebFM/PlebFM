@@ -8,7 +8,7 @@ import { Bid } from './Bid';
  * @field status
  * @field queueTimestamp
  * @field playedTimestamp
- * @field Bids
+ * @field bids
  */
 export type Instance = {
   customerId: string;
@@ -16,7 +16,7 @@ export type Instance = {
   status: string;
   queueTimestamp: string;
   playedTimestamp: string | undefined;
-  Bids: Array<Bid>;
+  bids: Array<Bid>;
   runningTotal: number;
 }
 
@@ -44,7 +44,7 @@ const InstanceSchema = new Schema<Instance>({
     type: String,
     unique: false,
   },
-  Bids: {
+  bids: {
     type: new Array<Bid>,
     unique: false,
     required: true,

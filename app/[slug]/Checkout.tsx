@@ -14,13 +14,6 @@ interface CheckoutProps {
 }
 
 export default function Checkout(props:CheckoutProps) {
-  // const dummySongData = {
-  //   songId: props.song.songId,
-  //   trackTitle: "A song about my feelings for you to enjoy today",
-  //   artistName: "Jenny Placeholder",
-  //   albumName: "Fake",
-  //   duration: 3.5
-  // }
 
   const [songConfirmed, setSongConfirmed] = useState(false)
   const [readyToCheckout, setReadyToCheckout] = useState(false)
