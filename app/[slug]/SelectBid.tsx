@@ -14,17 +14,17 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, 
   const sliderEmojis = [ '👇', '👍', '😮', '💰', '🔥', ];
   const [sliderMouseDown, setSliderMouseDown] = useState(false)
   let slider = document.getElementById('slider');
-  const handleMouseDown = ()=>{
+  const handleMouseDown = () => {
     setSliderMouseDown(true)
   }
 
-  const handleMouseUp = ()=>{
+  const handleMouseUp = () => {
     setSliderMouseDown(false)
   }
 
   const updateFees = (fee: number)=>{
     setFeeRate(fee)
-    setFeeTotal(Math.floor(fee * Math.floor(props.song.duration_ms / 60_000)))
+    setFeeTotal(Math.floor(fee * props.song.duration_ms / 60_000))
     if(fee === 0) setFeeBracket(0)
     else if(fee > 0 && fee <= 25) setFeeBracket(1)
     else if(fee > 25 && fee <= 50) setFeeBracket(2)
@@ -160,7 +160,6 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, 
 
         }
       </div>
-      <NavBar />
 
     </>
   )
