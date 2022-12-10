@@ -1,7 +1,6 @@
-export default function LoadingSpinner() {
-  return(
-    <div className="w-full h-screen flex justify-center items-center bg-gradient-to-b from-pfm-purple-400 to-pfm-purple-100">
-      <svg width="250" height="250" viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-spin-slow drop-shadow-xl">
+export const Spinner = () => {
+  return (
+    <svg width="250" height="250" viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-spin-slow drop-shadow-xl">
         <circle cx="125" cy="125" r="125" fill="white" fillOpacity="0.1"/>
         <circle cx="125" cy="125" r="108.553" stroke="black" strokeOpacity="0.2" strokeWidth="19.7368" strokeLinecap="round" strokeLinejoin="round"/>
         <circle cx="125" cy="125" r="92.1053" stroke="black" strokeOpacity="0.2" strokeWidth="19.7368" strokeLinecap="round" strokeLinejoin="round"/>
@@ -39,6 +38,13 @@ export default function LoadingSpinner() {
           </filter>
         </defs>
       </svg>
+  )
+}
+
+export default function LoadingSpinner() {
+  return(
+    <div className="w-full h-screen flex justify-center items-center bg-gradient-to-b from-pfm-purple-400 to-pfm-purple-100">
+      <Spinner />
     </div>
   )
 }
