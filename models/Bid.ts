@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import { User } from './User';
 
 /**
  * @type Bid
@@ -8,7 +9,7 @@ import mongoose, { Schema } from 'mongoose';
  * @field rHash
  */
 export type Bid = {
-  user: object;
+  user: User;
   bidAmount: number;
   timestamp: string;
   rHash: string;

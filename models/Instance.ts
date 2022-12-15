@@ -18,7 +18,7 @@ export type Instance = {
   songId: string;
   status: string;
   queueTimestamp: string;
-  playedTimestamp: string;
+  playedTimestamp: string | undefined;
   bids: Array<Bid>;
   runningTotal: number | 0;
 }
