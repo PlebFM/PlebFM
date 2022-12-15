@@ -3,12 +3,14 @@ import { Bid } from './Bid';
 
 /**
  * @type Instance
- * @field songId
+ * @field id
  * @field customerId
+ * @field songId
  * @field status
  * @field queueTimestamp
  * @field playedTimestamp
- * @field Bids
+ * @field bids
+ * @field runningTotal
  */
 export type Instance = {
   id: string;
@@ -17,8 +19,8 @@ export type Instance = {
   status: string;
   queueTimestamp: string;
   playedTimestamp: string;
-  Bids: Array<Bid>;
-  runningTotal: number;
+  bids: Array<Bid>;
+  runningTotal: number | 0;
 }
 
 const InstanceSchema = new Schema<Instance>({
@@ -49,8 +51,9 @@ const InstanceSchema = new Schema<Instance>({
   playedTimestamp: {
     type: String,
     unique: false,
+    required: false,
   },
-  Bids: {
+  bids: {
     type: new Array<Bid>,
     unique: false,
     required: true,
@@ -58,6 +61,7 @@ const InstanceSchema = new Schema<Instance>({
   runningTotal: {
     type: Number,
     unique: false,
+    required: false,
   }
 })
 

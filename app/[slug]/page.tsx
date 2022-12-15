@@ -11,7 +11,7 @@ import OnboardingIdentity from "./OnboardingIdentity";
 import Search from "./Search";
 import { getCustomer } from "../../lib/customers";
 import Checkout from "./Checkout";
-import LoadingFun from "./LoadingFun"
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 type Props = { params: {
     slug: string
@@ -65,7 +65,7 @@ export default function Bidding() {
   }
 
   if(!newUser && !userProfile.firstNym) {
-    return(<LoadingFun />)
+    return(<LoadingSpinner />)
   }
   else if(newUser && !userProfile.firstNym) {
     return(<Onboarding generateUserFunc={generateUser} />)
