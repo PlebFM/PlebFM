@@ -134,10 +134,9 @@ export const addTrackToSpotifyQueue = async (
 
 const tempToken =
     'BQAuRHI33rvZ464_0IYLNkDYd4LIpM67o8_3yZq0lp5b-hTDKR8wZyqkqFixmrnRt1Y9WtdsLlQNCe2m73C2ZlNt577lUx6I4W49UkVeTm67I-Qecbpef7JQuKFr3w-NaPFCl75MTI4VM_9qz7WmwlW1jtu2ecB-f7DVH5Ec8h5CxvfNx34_6TQeleCBhnBZYqIfmMILZvzJhiqS2jf0xRwKEkjVRlDHuQ';
-
+const spotifyQueueEndpoint = 'https://api.spotify.com/v1/me/player/queue';
 export const getSpotifyQueue = async (accessToken: string = tempToken) => {
-    const searchUrl = `https://api.spotify.com/v1/me/player/queue`;
-    const res = await fetch(searchUrl, {
+    const res = await fetch(spotifyQueueEndpoint, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -158,20 +157,40 @@ export const getSpotifyQueue = async (accessToken: string = tempToken) => {
     }
 */
 
-export const reconcileSpotifyQueue = async (
+const addItemToSpotifyQueue = async (songId: string, deviceId: string) => {
+    const response = await fetch(spotifyQueueEndpoint, {
+        method: 'POST',
+        // header: {
+        //     Authorization: '',
+        //     Content-Type: 'application/json'
+        // },
+        // body: {
+        //     songId: '',
+        //     deviceId: ''
+        // }
+    });
+};
+
+export const queueNextSongInSpotify = async (
     accessToken: string,
     customerId: string
 ) => {
-    const result: any = getSpotifyQueue();
-    const nextSpotifySong = result.queue[0].id;
-    // if (nextDbSong !== nextSpotifySong) {
-    //    setNextSpotifySong to nextDbSong
-    // }
+    const spotifyQueueResult: any = getSpotifyQueue();
+    const nextSpotifySong = spotifyQueueResult.queue[0].id;
+    // call route with customerId=customerId and next=true
+    const apiUrl = '/api/leaderboard/queue?customerId=customerId&next=true';
+    const dbResponse = await fetch(apiUrl);
+    const dbQueueResult = await dbResponse.json();
+    // returns list of objects (instances), element 0 will have status: next
+    const nextDbSong = dbQueueResult[0].songId;
+    if (nextDbSong !== nextSpotifySong) {
+        //    add nextDbSong to spotify queue
+    }
     console.log('nextSpotifySong: ', nextSpotifySong);
     // check spotify queue against database queue
     // then reconcile spotify queue
-    if (queue[0].songId !== nextSong.songId) {
-        // erase queue
-        queue.push(dbInstance[0]);
-    }
+    // if (queue[0].songId !== nextSong.songId) {
+    //     // erase queue
+    //     queue.push(dbInstance[0]);
+    // }
 };
