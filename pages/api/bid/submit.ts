@@ -10,10 +10,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'POST') return res.status(403).json({ success: false, error: 'Forbidden!' });
 
-    const { customerName, userId, rHash, songId, bidAmount } = req.body;
+    const { hostId, userId, rHash, songId, bidAmount } = req.body;
     const now: string = Date.now().toString();
 
-    const host = await Customers.findOne({ shortName: customerName });
+    const host = await Customers.findOne({ shortName: hostId });
     if (!host) return res.status(400).json({ success: false, error: 'Host not found!' });
     console.error(host)
 
@@ -31,16 +31,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const rHashDuplicated = await Plays.findOne({ "bids.rHash": { $eq: rHash } }).catch(e => { console.error(e); throw new Error(e) });
     if (rHashDuplicated) return res.status(400).json({ success: false, error: 'Duplicate rHash found!' })
-
-    /**
-     * v2 UpBid
-     * const instance = await Plays.findOneAndUpdate({ songId: songId }, { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } }).catch((e: string | undefined) => { console.error(e); throw new Error(e) });
-     * if (instance) return res.status(200).json({ success: true, new: false, instance: instance });
-     * const runningTotal = (instance.bids.reduce((prev: any, curr: any) => prev.bidAmount + curr.bidAmount) ?? 0 + bidAmount).catch((e: any) => { console.error(e); throw new Error(e) });
-     */
     
-    const newInstance: Play = await Plays.create({
-      instanceId: cuid(),
+    const newPlay: Play = await Plays.create({
+      playId: cuid(),
       hostId: host.hostId,
       songId: songId,
       status: "queued",
@@ -50,7 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       runningTotal: bidAmount
     }).catch((e: string | undefined) => { console.error(e); throw new Error(e) });
 
-    return res.status(200).json({ success: true, new: true, instance: newInstance });
+    return res.status(200).json({ success: true, new: true, instance: newPlay });
 
   } catch (error: any) {
     return res.status(400).json({ success: false, error: error.message });
