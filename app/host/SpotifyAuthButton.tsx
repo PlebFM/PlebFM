@@ -3,7 +3,7 @@
 import { Session } from 'next-auth';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import Customers, { Customer } from '../../models/Customer';
+import Customers, { Customer } from '../../models/Host';
 
 const findHost = async (refreshToken: string) => {
     const params = new URLSearchParams({ spotifyRefreshToken: refreshToken });

@@ -1,4 +1,4 @@
-import { Customer } from "../../models/Customer";
+import { Customer } from "../../models/Host";
 import notFound from "../../app/[slug]/not-found";
 
 const getCustomer = async (slug: string): Promise<Customer> => {

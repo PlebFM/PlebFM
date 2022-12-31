@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import Instances from "../../../models/Instance";
+import Instances from "../../../models/Play";
 
 const sortQueue = async (unsorted: any) => {
   try {
