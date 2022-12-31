@@ -11,7 +11,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (req.method !== 'POST')
             return res
                 .status(403)
-                .json({ success: false, error: 'Forbidden!' });
+                .json({ success: false, message: 'Forbidden!' });
 
         const { hostId, userId, rHash, songId, bidAmount } = req.body;
         const now: string = Date.now().toString();
@@ -20,14 +20,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (!host)
             return res
                 .status(400)
-                .json({ success: false, error: 'Host not found!' });
+                .json({ success: false, message: 'Host not found!' });
         console.error(host);
 
         const user = await Users.findOne({ userId: userId });
         if (!user)
             return res
                 .status(400)
-                .json({ success: false, error: 'User not found!' });
+                .json({ success: false, message: 'User not found!' });
         console.error(user);
 
         const newBid: Bid = {
@@ -47,7 +47,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (rHashDuplicated)
             return res
                 .status(400)
-                .json({ success: false, error: 'Duplicate rHash found!' });
+                .json({ success: false, message: 'Duplicate rHash found!' });
 
         const newPlay: Play = await Plays.create({
             playId: cuid(),
@@ -67,7 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             .status(200)
             .json({ success: true, new: true, instance: newPlay });
     } catch (error: any) {
-        return res.status(400).json({ success: false, error: error.message });
+        return res.status(400).json({ success: false, message: error.message });
     }
 };
 
