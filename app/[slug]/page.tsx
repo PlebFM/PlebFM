@@ -2,7 +2,7 @@
 // pleb.fm/shiners
 // Bidding landing page
 
-import { Customer } from "../../models/Customer";
+import { Customer } from "../../models/Host";
 import { notFound, usePathname } from "next/navigation";
 import "../../app/globals.css"
 import React, { useEffect } from "react";

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Customer } from "../models/Customer";
+import { Customer } from "../models/Host";
 
 export const getCustomers = async (): Promise<Customer[]> => {
   const res = await fetch("http://localhost:3000/api/customers", {

@@ -3,12 +3,14 @@ import { User } from './User';
 
 /**
  * @type Bid
+ * @field bidId
  * @field userId
  * @field bidAmount
  * @field timestamp
  * @field rHash
  */
 export type Bid = {
+  bidId: string;
   user: User;
   bidAmount: number;
   timestamp: string;
@@ -16,6 +18,11 @@ export type Bid = {
 }
 
 const BidSchema = new Schema<Bid>({
+  bidId: {
+    type: String,
+    unique: true,
+    required: true
+  },
   user: {
     type: Object,
     unique: false,
