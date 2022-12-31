@@ -6,6 +6,7 @@ import Image from "next/image"
 import {webpack} from "next/dist/compiled/webpack/webpack";
 import javascript = webpack.javascript;
 import { usePathname } from "next/navigation"
+import { Spinner } from "../../components/LoadingSpinner"
 
 const fetchSong = async (query: string, shortName: string): Promise<{name: string, artists:{name: string}[]}[]> => {
   if (query === "") return [];
@@ -28,12 +29,13 @@ export default function Search(props: SearchProps){
   const name = usePathname()?.replaceAll('/', "") || "";
 
   useEffect(() => {
+    setLoading(true);
     if (!searchTerm || !name) {
       setSearchResult([]);
+      setLoading(false);
       return;
     }
     const search = setTimeout(async () => {
-      setLoading(true);
       const results = await fetchSong(searchTerm.trim(), name) ?? [];
       console.log(JSON.stringify(results[0]));
       setSearchResult(results);
@@ -79,15 +81,19 @@ export default function Search(props: SearchProps){
           : ``}
         </div>
 
-        {searchResult.length > 0?
+        {searchResult.length > 0 || loading ?
           <div className="absolute top-0 left-0 w-full h-full pt-56 pb-32 overflow-hidden z-[98]">
             <div className="h-full overflow-y-scroll w-full">
-              {searchResult.map((track, key)=>(
+              {searchResult.length > 0 ? searchResult.map((track, key)=>(
                 <div className="px-7 py-4 border-b border-b-1 border-white/20" key={key} onClick={selectSong} data-song={JSON.stringify(track)} data-song-id="aaaa-bbbb-cccc-ddd">
                   <p className="pointer-events-none">{track.name}</p>
                   <p className="font-bold text-[12px] pointer-events-none">{track.artists[0].name}</p>
                 </div>
-              ))}
+              )) : loading ? 
+              <div className="w-full h-full flex justify-center items-center">
+                <Spinner />  
+              </div>
+              : ``}
             </div>
           </div>
         : ``}

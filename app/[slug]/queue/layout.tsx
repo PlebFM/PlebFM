@@ -1,3 +1,5 @@
+import NavBar from "../../../components/NavBar"
+
 export interface AccountLayoutProps {
   children: React.ReactNode;
 }
