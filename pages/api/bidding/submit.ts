@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import cuid from "cuid";
 import Customers from "../../../models/Customer";
 import Users from "../../../models/User";
 import Instances, { Instance } from "../../../models/Instance";
@@ -29,11 +30,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const matchingInstances = await Instances.findOne({ "bids.rHash": { $eq: rHash } }).catch(e => { console.error(e); throw new Error(e) });
     if (matchingInstances) return res.status(400).json({ success: false, error: 'Duplicate bid found.' })
 
-    const instance = await Instances.findOneAndUpdate({ songId: songId }, { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } }).catch(e => { console.error(e); throw new Error(e) });
+    const instance = await Instances.findOneAndUpdate({ songId: songId }, { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } }).catch((e: string | undefined) => { console.error(e); throw new Error(e) });
     if (instance) return res.status(200).json({ success: true, new: false, instance: instance });
 
     const runningTotal = (instance.bids.reduce((prev: any, curr: any) => prev.bidAmount + curr.bidAmount) ?? 0 + bidAmount).catch((e: any) => { console.error(e); throw new Error(e) });
     const newInstance: Instance = await Instances.create({
+      id: cuid(),
       customerId: customer.id,
       songId: songId,
       status: "queued",
@@ -41,7 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       playedTimestamp: undefined,
       bids: new Array<Bid>(newBid),
       runningTotal: runningTotal
-    }).catch(e => { console.error(e); throw new Error(e) });
+    }).catch((e: string | undefined) => { console.error(e); throw new Error(e) });
 
     return res.status(200).json({ success: true, new: true, instance: newInstance });
 
