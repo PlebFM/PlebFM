@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "../../../middleware/mongodb";
-import Customers, { Customer } from '../../../models/Customer'
+import Customers, { Customer } from '../../../models/Host'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -20,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const customer: Customer = {
         customerName: customerName,
         shortName: shortName,
-        id: customerId,
+        customerId: customerId,
         spotifyRefreshToken: refreshToken
       }
       const result = await Customers.create(customer);

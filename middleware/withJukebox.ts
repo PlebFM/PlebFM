@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getAccessToken } from "../lib/spotify";
-import Customers, { Customer } from "../models/Customer";
+import Customers, { Customer } from "../models/Host";
 
 // Finds customer with short name and adds appropriate refresh token to request headers
 const withJukebox = (handler: any) => async (req: NextApiRequest, res: NextApiResponse) => {
@@ -12,7 +12,7 @@ const withJukebox = (handler: any) => async (req: NextApiRequest, res: NextApiRe
   }
   if (!shortName) return res.status(400).json('withJukebox - Bad request: requires shortName in body or query')
 
-  const customer: Customer | null = await Customers.findOne({filter: {shortName: shortName}});
+  const customer: Customer | null = await Customers.findOne({ filter: { shortName: shortName } });
   if (!customer) return res.status(400).send(`withJukebox - Bad request: Jukebox with name "${shortName}" not found`)
   const refreshToken = customer.spotifyRefreshToken;
 
