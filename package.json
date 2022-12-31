@@ -34,6 +34,7 @@
     "typescript": "4.9.3"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^4.29.5-appdir.0",
     "@types/cookie": "^0.5.1",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.19",
