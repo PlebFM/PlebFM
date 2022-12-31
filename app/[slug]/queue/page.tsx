@@ -271,7 +271,7 @@ export default function Queue() {
       });
       const response = await fetch(`/api/leaderboard/queue?${queries}`);
       const res = await response.json();
-      const promises = res.queue.map(x => {
+      const promises = res.queue.map((x: any) => {
         const res = fetchSong(x.songId, 'atl').then(song => {
           return {obj: x, song: song}
         });
@@ -282,8 +282,8 @@ export default function Queue() {
       const fixed = songs.map((pair) => {
         const {obj, song} = pair;
 
-        const totalBid = obj.bids.reduce((x, y) => x+=y.bidAmount, 0);
-        const myPick = obj.bids.filter(x => x.userId === userProfile.userId).length > 0;
+        const totalBid = obj.bids.reduce((x: any, y: any) => x+=y.bidAmount, 0);
+        const myPick = obj.bids.filter((x: any) => x.userId === userProfile.userId).length > 0;
         return {
           trackTitle: song.name,
           artistName: song.artists[0].name,
@@ -291,7 +291,7 @@ export default function Queue() {
           playing: false,
           myPick: myPick,
           upNext: obj.status === 'next',
-          bidders: obj.bids.map(x => x.user)
+          bidders: obj.bids.map((x: any) => x.user)
         }
       });
       setQueueData(fixed);
