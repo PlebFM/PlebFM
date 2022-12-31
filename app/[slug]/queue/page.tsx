@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -7,6 +8,18 @@ import NavBar from '../../../components/NavBar';
 import Avatar from '../../../components/Avatar';
 import Tag from '../../../components/Tag';
 import { getSpotifyQueue } from '../../../lib/spotify';
+=======
+'use client'
+import Link from "next/link";
+import Image from "next/image";
+import bokeh3 from "../../../public/pfm-bokeh-3.jpg"
+import { useEffect, useState } from "react"
+import NavBar from "../../../components/NavBar"
+import Avatar from "../../../components/Avatar";
+import Tag from "../../../components/Tag";
+import querystring from 'querystring';
+import LoadingSpinner from "../../../components/LoadingSpinner";
+>>>>>>> 4d2b0a2004b26e44131b5cd7c87c188d683b4b1d
 
 // pleb.fm/bantam/queue
 export default function Queue() {
@@ -234,6 +247,7 @@ export default function Queue() {
         },
     ];
 
+<<<<<<< HEAD
     const [queueData, setQueueData] = React.useState(dummyData);
 
     return (
@@ -245,6 +259,110 @@ export default function Queue() {
                     width="100"
                     className="object-cover w-full h-full blur-2xl opacity-50"
                 />
+=======
+  const getUserProfileFromLocal = ()=> {
+    const userProfileJSON = localStorage.getItem('userProfile')
+    if(userProfileJSON) {
+      return JSON.parse(userProfileJSON);
+    }
+  }
+  const [queueData, setQueueData] = useState([]);
+  const [userProfile, setUserProfile] = useState([]);
+  const [loading, setLoading] = useState(false)
+  // if (songId === "") return [];
+  useEffect(() => {
+
+  }, [])
+  useEffect(() => {
+    setLoading(true);
+    const userProfile = getUserProfileFromLocal();
+    setUserProfile(userProfile);
+    console.log('user', userProfile);
+
+    const fetchSong = async (songId: string, shortName: string) => {
+      const queryString = new URLSearchParams({ id: songId, shortName: shortName });
+      const res = await fetch(`/api/spotify/getSong?${queryString}`, {
+        headers: { 'Access-Control-Allow-Origin': '*' }
+      });
+      if (!res.ok) throw new Error('Failed to search song');
+      const result =  await res.json();
+      // console.log('FETCH RES', result)
+      return result;
+    };
+
+    const getQueue = async () => {
+      const queries = querystring.stringify({
+        shortName: 'atl'
+      });
+      const response = await fetch(`/api/leaderboard/queue?${queries}`);
+      const res = await response.json();
+      const promises = res.queue.map(x => {
+        const res = fetchSong(x.songId, 'atl').then(song => {
+          return {obj: x, song: song}
+        });
+        return res;
+      }) 
+      const songs = await Promise.all(promises);
+      console.log(songs)
+      const fixed = songs.map((pair) => {
+        const {obj, song} = pair;
+
+        const totalBid = obj.bids.reduce((x, y) => x+=y.bidAmount, 0);
+        const myPick = obj.bids.filter(x => x.userId === userProfile.userId).length > 0;
+        return {
+          trackTitle: song.name,
+          artistName: song.artists[0].name,
+          feeRate: totalBid,
+          playing: false,
+          myPick: myPick,
+          upNext: obj.status === 'next',
+          bidders: obj.bids.map(x => x.user)
+        }
+      });
+      setQueueData(fixed);
+      setLoading(false);
+
+    }
+    getQueue();
+  }, []);
+  // {
+  //   trackTitle: "Bitcoin ipsum dolor sit amet",
+  //   artistName: "Nonce inputs",
+  //   feeRate: 10,
+  //   playing: false,
+  //   upNext: false,
+  //   bidders: [
+  //     {
+  //       firstNym: "Fluffy",
+  //       lastNym: "Honeybadger",
+  //       color: "teal"
+  //     },
+  //     {
+  //       firstNym: "Fluffy",
+  //       lastNym: "Honeybadger",
+  //       color: "teal"
+  //     }
+  //   ]
+  // },
+
+
+  return (
+    <>
+      <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
+        <Image src={bokeh3} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" />
+      </div>
+      { loading ? <LoadingSpinner /> : 
+
+      <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+        {queueData.map((song, key)=>(
+          <div className="p-6 border-b border-white/20 w-full" key={key}>
+            {song.playing || song.upNext || song.myPick ?
+            <div className="mb-6">
+              <Tag
+                text={song.playing ? "Now Playing" : song.upNext ? "Up Next" : song.myPick ? "My Pick" : " "}
+                color={song.playing ? "orange" : song.upNext ? "teal" : song.myPick ? "purple" : " "}
+              />
+>>>>>>> 4d2b0a2004b26e44131b5cd7c87c188d683b4b1d
             </div>
 
             <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
@@ -320,6 +438,12 @@ export default function Queue() {
                     </div>
                 ))}
             </div>
+<<<<<<< HEAD
+=======
+          </div>
+        ))}
+      </div> }
+>>>>>>> 4d2b0a2004b26e44131b5cd7c87c188d683b4b1d
 
             <NavBar activeBtn="queue" />
         </>

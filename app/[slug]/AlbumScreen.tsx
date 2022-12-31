@@ -5,6 +5,7 @@ import Image from "next/image"
 import Button from "../../components/Button"
 import bokeh2 from "../../public/pfm-bokeh-2.jpg"
 import { useEffect } from "react"
+import NavBar from "../../components/NavBar"
 export default function AlbumScreen(props: {track, setSongConfirmed, cancelSong}) {
   useEffect(() => {
     console.log("TRACK", props?.track);
@@ -52,6 +53,7 @@ export default function AlbumScreen(props: {track, setSongConfirmed, cancelSong}
           </Button>
         </div>
       </div>
+      <NavBar />
 
     </>
   )
