@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import connectDB from "../../../middleware/mongodb";
 import Instances from "../../../models/Play";
 
 const sortQueue = async (unsorted: any) => {
@@ -103,4 +104,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default connectDB(handler);
