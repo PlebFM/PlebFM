@@ -29,17 +29,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       rHash: rHash,
     }
 
-    const rHashDuplicated = await Instances.findOne({ "bids.rHash": { $eq: rHash } }).catch(e => { console.error(e); throw new Error(e) });
+    const rHashDuplicated = await Plays.findOne({ "bids.rHash": { $eq: rHash } }).catch(e => { console.error(e); throw new Error(e) });
     if (rHashDuplicated) return res.status(400).json({ success: false, error: 'Duplicate rHash found!' })
 
     /**
      * v2 UpBid
-     * const instance = await Instances.findOneAndUpdate({ songId: songId }, { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } }).catch((e: string | undefined) => { console.error(e); throw new Error(e) });
+     * const instance = await Plays.findOneAndUpdate({ songId: songId }, { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } }).catch((e: string | undefined) => { console.error(e); throw new Error(e) });
      * if (instance) return res.status(200).json({ success: true, new: false, instance: instance });
      * const runningTotal = (instance.bids.reduce((prev: any, curr: any) => prev.bidAmount + curr.bidAmount) ?? 0 + bidAmount).catch((e: any) => { console.error(e); throw new Error(e) });
      */
     
-    const newInstance: Instance = await Instances.create({
+    const newInstance: Play = await Plays.create({
       instanceId: cuid(),
       hostId: host.hostId,
       songId: songId,

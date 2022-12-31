@@ -2,8 +2,8 @@ import mongoose, { Schema } from 'mongoose';
 import { Bid } from './Bid';
 
 /**
- * Object created when bid/submit route called. Represents an instance of a song added to queue via
- * a bid.
+ * Object created when bid/submit route called.
+ * Represents an instance of a song added to queue via a bid.
  * @type Play
  * @field playId: cuid of a play
  * @field hostId: cuid of a host
