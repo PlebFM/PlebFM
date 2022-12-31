@@ -7,7 +7,7 @@ import { Bid } from './Bid';
  * @type Play
  * @field playId: cuid of a play
  * @field hostId: cuid of a host
- * @field songId: cuid of a song
+ * @field songId: spotify song uuid
  * @field status: song status in queue (queued | played | next)
  * @field queueTimestamp: datetime when play was created (i.e. bid submitted)
  * @field playedTimestamp: datetime when play was executed (i.e. song played)
