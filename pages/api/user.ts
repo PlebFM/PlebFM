@@ -35,19 +35,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         if (req.method === 'POST') {
             // POST /api/user
-            const user: User = { ...generateUser() };
-            const result = await Users.create(user);
-            res.status(200).json({ success: true, user: result });
+            const user = await Users.create({ ...generateUser() });
+            res.status(200).json({ success: true, message: user });
         } else if (req.method === 'GET') {
             // GET /api/user?userId=...
             const { userId } = req.query;
             if (!userId) throw new Error('userId is required');
-            const result = await Users.find({ userId: userId });
-            res.status(200).json({ success: true, user: result });
+            const user = await Users.find({ userId: userId });
+            res.status(200).json({ success: true, message: user });
         }
     } catch (error: any) {
         console.error(error.message);
-        res.status(500).json(error.message);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
