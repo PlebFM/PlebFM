@@ -37,10 +37,6 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
   }, [player]);
 
   useEffect(() => {
-    // if (token?.error === 'invalid_client' ?? false) {
-    //   console.log('signingout')
-    //   // signOut();
-    // }
     const script = document.createElement("script");
     script.src = "https://sdk.scdn.co/spotify-player.js";
     script.async = true;
@@ -85,7 +81,7 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
       });
 
       player.addListener("player_state_changed", (state) => {
-        console.log("state changed");
+        console.log("state changed", state);
         if (!state) {
           return;
         }
@@ -167,11 +163,11 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
             onClick={() => {
               if (paused)
                 player.resume().then(() => {
-                  console.log("Toggled Pause!");
+                  console.log("Toggled Resume!");
                 });
               else {
                 player.pause().then(() => {
-                  console.log("Toggled Play!");
+                  console.log("Toggled Paused!");
                 });
               }
             }}
