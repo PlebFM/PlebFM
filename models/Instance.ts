@@ -4,7 +4,7 @@ import { Bid } from './Bid';
 /**
  * @type Instance
  * @field id
- * @field customerId
+ * @field hostId
  * @field songId
  * @field status
  * @field queueTimestamp
@@ -14,7 +14,7 @@ import { Bid } from './Bid';
  */
 export type Instance = {
   id: string;
-  customerId: string;
+  hostId: string;
   songId: string;
   status: string;
   queueTimestamp: string;
@@ -29,7 +29,7 @@ const InstanceSchema = new Schema<Instance>({
     unique: true,
     required: true,
   },
-  customerId: {
+  hostId: {
     type: String,
     unique: false,
     required: true,

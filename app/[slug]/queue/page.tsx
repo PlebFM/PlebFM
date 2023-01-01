@@ -8,6 +8,8 @@ import Avatar from "../../../components/Avatar";
 import Tag from "../../../components/Tag";
 import querystring from 'querystring';
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import { Song } from '../../../models/Song';
+import { User } from "../../../models/User";
 
 // pleb.fm/bantam/queue
 export default function Queue() {
@@ -234,6 +236,16 @@ export default function Queue() {
       ]
     },
   ]
+  // Used for frontend hydration
+  type SongObject = {
+    trackTitle: string,
+    artistName: string,
+    feeRate: number,
+    playing: boolean,
+    myPick: boolean,
+    upNext: boolean,
+    bidders: User[],
+  }
 
   const getUserProfileFromLocal = ()=> {
     const userProfileJSON = localStorage.getItem('userProfile')
@@ -241,7 +253,7 @@ export default function Queue() {
       return JSON.parse(userProfileJSON);
     }
   }
-  const [queueData, setQueueData] = useState([]);
+  const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [userProfile, setUserProfile] = useState([]);
   const [loading, setLoading] = useState(false)
   // if (songId === "") return [];
@@ -254,7 +266,7 @@ export default function Queue() {
     setUserProfile(userProfile);
     console.log('user', userProfile);
 
-    const fetchSong = async (songId: string, shortName: string) => {
+    const fetchSong = async (songId: string, shortName: string): Promise<Song> => {
       const queryString = new URLSearchParams({ id: songId, shortName: shortName });
       const res = await fetch(`/api/spotify/getSong?${queryString}`, {
         headers: { 'Access-Control-Allow-Origin': '*' }
@@ -300,26 +312,6 @@ export default function Queue() {
     }
     getQueue();
   }, []);
-  // {
-  //   trackTitle: "Bitcoin ipsum dolor sit amet",
-  //   artistName: "Nonce inputs",
-  //   feeRate: 10,
-  //   playing: false,
-  //   upNext: false,
-  //   bidders: [
-  //     {
-  //       firstNym: "Fluffy",
-  //       lastNym: "Honeybadger",
-  //       color: "teal"
-  //     },
-  //     {
-  //       firstNym: "Fluffy",
-  //       lastNym: "Honeybadger",
-  //       color: "teal"
-  //     }
-  //   ]
-  // },
-
 
   return (
     <>

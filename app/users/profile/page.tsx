@@ -3,7 +3,7 @@
 import Image from "next/image"
 import bokeh5 from "../../../public/pfm-bokeh-5.jpg"
 import Avatar from "../../../components/Avatar"
-import React, {useState } from "react"
+import React, { useState } from "react"
 import Tag from "../../../components/Tag";
 import NavBar from "../../../components/NavBar";
 

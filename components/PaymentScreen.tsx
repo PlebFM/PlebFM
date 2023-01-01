@@ -1,11 +1,10 @@
-"use client"
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { CartIcon, CopyIcon } from "@bitcoin-design/bitcoin-icons-react/filled";
-import bokeh2 from "../../public/pfm-bokeh-2.jpg"
+import bokeh2 from "../public/pfm-bokeh-2.jpg"
 import { MusicalNoteIcon, QueueListIcon } from "@heroicons/react/24/outline";
-import Button from "../../components/Button";
+import Button from "./Button";
 import { useEffect, useState } from "react";
-import NavBar from '../../components/NavBar';
+import NavBar from './NavBar';
 
 function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePaid, totalBid, bid}) {
   const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '', });
@@ -38,7 +37,7 @@ function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePai
     if (!startPolling || !bolt11.hash) return;
     const submitBid = async () => {
       const userProfile = getUserProfileFromLocal();
-      const response = await fetch(`/api/bidding/submit`, {
+      const response = await fetch(`/api/bid/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -1,13 +1,13 @@
-'use client';
-
 import { Session } from 'next-auth';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import Hosts, { Host } from '../../models/Host';
+import Hosts, { Host } from '../models/Host';
 
 const findHost = async (refreshToken: string) => {
+    console.log('FIND HOST', refreshToken);
     const params = new URLSearchParams({ spotifyRefreshToken: refreshToken });
-    const res = await fetch(`${process.env.BASE_URL}/api/hosts?${params}`, {
+    console.log('Findin the host', `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?${params}`)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?${params}`, {
         method: 'GET',
         mode: 'no-cors',
         headers: {
@@ -23,7 +23,7 @@ const findOrCreateNewHost = async (
     refreshToken: string
 ): Promise<Host> => {
     const body = { shortName, hostName, refreshToken };
-    const res = await fetch(`${process.env.BASE_URL}/api/hosts`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts`, {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -45,6 +45,7 @@ const SpotifyAuthButton = () => {
             if (!session) return;
             // @ts-ignore
             const refreshToken = session.refreshToken;
+            if (!refreshToken) signOut();
             const findRes = await findHost(refreshToken);
             if (findRes) {
                 setHost(findRes);
@@ -77,7 +78,7 @@ const SpotifyAuthButton = () => {
         <>
             <p>Not signed in</p>
             <br />
-            <button onClick={() => signIn()}>Sign in</button>
+            <button onClick={() => signIn('spotify')}>Sign in</button>
         </>
     );
 };
