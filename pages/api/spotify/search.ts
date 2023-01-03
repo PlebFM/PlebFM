@@ -1,7 +1,7 @@
-import { getSession } from 'next-auth/react';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withJukebox from '../../../middleware/withJukebox';
 import { searchTrack } from '../../../lib/spotify';
+import connectDB from '../../../middleware/mongodb';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   //@ts-ignore
@@ -16,4 +16,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   return res.status(200).json(response);
 };
 
-export default withJukebox(handler);
+export default connectDB(withJukebox(handler));

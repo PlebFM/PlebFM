@@ -1,13 +1,14 @@
-'use client'
 import Link from "next/link";
 import Image from "next/image";
-import bokeh3 from "../../../public/pfm-bokeh-3.jpg"
+import bokeh3 from "../../public/pfm-bokeh-3.jpg"
 import { useEffect, useState } from "react"
-import NavBar from "../../../components/NavBar"
-import Avatar from "../../../components/Avatar";
-import Tag from "../../../components/Tag";
+import NavBar from "../../components/NavBar"
+import Avatar from "../../components/Avatar";
+import Tag from "../../components/Tag";
 import querystring from 'querystring';
-import LoadingSpinner from "../../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import { User } from "../../models/User";
+import { Song } from "../../models/Song";
 
 // pleb.fm/bantam/queue
 export default function Queue() {
@@ -234,6 +235,16 @@ export default function Queue() {
       ]
     },
   ]
+  // Used for frontend hydration
+  type SongObject = {
+    trackTitle: string,
+    artistName: string,
+    feeRate: number,
+    playing: boolean,
+    myPick: boolean,
+    upNext: boolean,
+    bidderIds: string[],
+  }
 
   const getUserProfileFromLocal = ()=> {
     const userProfileJSON = localStorage.getItem('userProfile')
@@ -241,20 +252,18 @@ export default function Queue() {
       return JSON.parse(userProfileJSON);
     }
   }
-  const [queueData, setQueueData] = useState([]);
+  const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [userProfile, setUserProfile] = useState([]);
   const [loading, setLoading] = useState(false)
-  // if (songId === "") return [];
-  useEffect(() => {
+  const [bidders, setBidders] = useState<User[]>([]);
 
-  }, [])
   useEffect(() => {
     setLoading(true);
     const userProfile = getUserProfileFromLocal();
     setUserProfile(userProfile);
     console.log('user', userProfile);
 
-    const fetchSong = async (songId: string, shortName: string) => {
+    const fetchSong = async (songId: string, shortName: string): Promise<Song> => {
       const queryString = new URLSearchParams({ id: songId, shortName: shortName });
       const res = await fetch(`/api/spotify/getSong?${queryString}`, {
         headers: { 'Access-Control-Allow-Origin': '*' }
@@ -278,12 +287,12 @@ export default function Queue() {
         return res;
       }) 
       const songs = await Promise.all(promises);
-      console.log(songs)
       const fixed = songs.map((pair) => {
         const {obj, song} = pair;
 
         const totalBid = obj.bids.reduce((x: any, y: any) => x+=y.bidAmount, 0);
         const myPick = obj.bids.filter((x: any) => x.userId === userProfile.userId).length > 0;
+        console.log(obj.bids);
         return {
           trackTitle: song.name,
           artistName: song.artists[0].name,
@@ -291,35 +300,16 @@ export default function Queue() {
           playing: false,
           myPick: myPick,
           upNext: obj.status === 'next',
-          bidders: obj.bids.map((x: any) => x.user)
+          bidderIds: obj?.bids?.map((x: any) => x.userId) ?? []
         }
       });
+      console.log('fixed', fixed);
       setQueueData(fixed);
       setLoading(false);
 
     }
     getQueue();
   }, []);
-  // {
-  //   trackTitle: "Bitcoin ipsum dolor sit amet",
-  //   artistName: "Nonce inputs",
-  //   feeRate: 10,
-  //   playing: false,
-  //   upNext: false,
-  //   bidders: [
-  //     {
-  //       firstNym: "Fluffy",
-  //       lastNym: "Honeybadger",
-  //       color: "teal"
-  //     },
-  //     {
-  //       firstNym: "Fluffy",
-  //       lastNym: "Honeybadger",
-  //       color: "teal"
-  //     }
-  //   ]
-  // },
-
 
   return (
     <>
@@ -346,7 +336,8 @@ export default function Queue() {
                   <p className="font-bold">{song.artistName}</p>
                 </div>
                 <div className="flex -space-x-1 items-center">
-                  {song.bidders.slice(0,5).map((bidder, key)=>(
+                  {/* TODO: Add fetching of user object for bids using SWR */}
+                  {bidders.length == 0 ? <p>user pics</p>: (song.bidderIds.length > 5 ? song.bidderIds.slice(0,5) : song.bidders).map((bidder, key)=>(
                     <div className="w-8" key={key}>
                       <Avatar
                         firstNym={bidder.firstNym}
@@ -356,9 +347,9 @@ export default function Queue() {
                       />
                     </div>
                   ))}
-                  {song.bidders.length > 5 ?
+                  {song.bidderIds.length > 5 ?
                   <div className="pl-4 font-semibold text-lg">
-                    +{song.bidders.length - 5}
+                    +{song.bidderIds.length - 5}
                   </div>
                     : ``}
                 </div>

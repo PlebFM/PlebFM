@@ -44,7 +44,7 @@ function PaymentScreen(props: {song, readyToCheckout, invoicePaid, setInvoicePai
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          customerName: 'atl', //TODO FIX
+          hostName: 'atl', //TODO FIX
           songId: props.song?.id,
           bidAmount: props.bid,
           rHash: bolt11.hash,

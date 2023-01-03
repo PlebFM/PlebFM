@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-// import {btoa} from 'next/dist/server/web/sandbox/polyfills';
 import querystring from "querystring";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
