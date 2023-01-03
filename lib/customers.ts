@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
-import { Customer } from "../models/Host";
+import { notFound } from 'next/navigation';
+import { Host } from "../models/Host";
 
-export const getCustomers = async (): Promise<Customer[]> => {
-  const res = await fetch("http://localhost:3000/api/customers", {
+export const getHosts = async (): Promise<Host[]> => {
+  const res = await fetch("http://localhost:3000/api/hosts?shortName=atl", {
     method: 'GET',
     mode: 'no-cors',
     headers: {
@@ -10,12 +10,12 @@ export const getCustomers = async (): Promise<Customer[]> => {
     }
   });
   if (!res.ok) throw new Error('unable to fetch data');
-  const customers = await res.json();
-  return customers.customers;
+  const response = await res.json();
+  return response.message;
 }
 
-export const getCustomer = async (slug: string): Promise<Customer> => {
-  const res = await fetch(`http://localhost:3000/api/customers/${slug}`, {
+export const getHost = async (slug: string): Promise<Host> => {
+  const res = await fetch(`http://localhost:3000/api/hosts/${slug}`, {
     method: 'GET',
     mode: 'no-cors',
     headers: {
@@ -23,9 +23,9 @@ export const getCustomer = async (slug: string): Promise<Customer> => {
     }
   });
   if (!res.ok) {
-    if (res.status === 400) return null;
+    if (res.status === 400) return notFound();;
     throw new Error('unable to fetch data');
   }
-  const customer = await res.json();
-  return customer.customer;
+  const response = await res.json();
+  return response.message;
 }

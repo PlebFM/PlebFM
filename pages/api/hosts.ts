@@ -44,6 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             console.error('Failed to create host', e);
             return null;
         });
+        console.log('result', result)
         return res.status(200).json({ success: true, message: result });
     }
 };
