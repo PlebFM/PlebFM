@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "npx husky install",
-    "format": "npx prettier --write ."
+    "format": "npx prettier --write .",
+    "pretty-quick": "npx pretty-quick --staged"
   },
   "dependencies": {
     "@bitcoin-design/bitcoin-icons-react": "^0.1.9",
@@ -49,7 +50,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged"
+      "pre-commit": "npx pretty-quick --staged"
     }
   }
 }
