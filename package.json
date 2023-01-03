@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "prepare": "npx husky install",
     "format": "npx prettier --write ."
   },
   "dependencies": {
@@ -40,7 +41,7 @@
     "@netlify/plugin-nextjs": "^4.29.5-appdir.0",
     "@types/cookie": "^0.5.1",
     "autoprefixer": "^10.4.13",
-    "husky": "^8.0.3",
+    "husky": "^8.0.0",
     "postcss": "^8.4.19",
     "prettier": "^2.8.1",
     "pretty-quick": "^3.1.3",
