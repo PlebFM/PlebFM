@@ -20,11 +20,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { shortName, next } = req.query;
     /*
-      TODO: question - shouldn't we use customerId for lookup?
-      const { customerId, next } = req.query;
+      TODO: question - shouldn't we use hostId for lookup?
+      const { hostId, next } = req.query;
       Instances = collection of songs with metadata and Bids
-      const instances = await Instances.find({ customerId: customerId, status: "queued" })
-      If no instances exist with that customerId and status, return error
+      const instances = await Instances.find({ hostId: hostId, status: "queued" })
+      If no instances exist with that hostId and status, return error
      */
     const instances = await Instances.find({
       shortName: shortName,
@@ -56,7 +56,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       // set leadingInstance status to "next"
       leadingInstance.status = "next";
 
-      // find the instance to update based on customerId & the instance id, update 
+      // find the instance to update based on hostId & the instance id, update 
       // the doc in the instances collection to be this new doc with status = "next"
       const instance = await Instances.findOneAndUpdate(
         { shortName: shortName, id: leadingInstance.id },

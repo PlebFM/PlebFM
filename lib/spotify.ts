@@ -89,15 +89,13 @@ export const getTrack = async (trackId: string, accessToken: string) => {
         },
     });
     const result = await res.json();
-    console.log(result);
     return result;
 };
 
 export const transferDevice = async (deviceId: string, accessToken: string) => {
-    const searchUrl = `https://api.spotify.com/v1/me/player`;
+    const url = `https://api.spotify.com/v1/me/player`;
     const body = JSON.stringify({ device_ids: [deviceId], play: true });
-    console.log('body', body);
-    const res = await fetch(searchUrl, {
+    const res = await fetch(url, {
         method: 'PUT',
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -106,8 +104,8 @@ export const transferDevice = async (deviceId: string, accessToken: string) => {
         },
         body: body,
     });
-    const result = await res.json();
-    return result;
+    if (res.status === 202) return {success: true};
+    return {success: false};
 };
 
 export const addTrackToSpotifyQueue = async (
@@ -119,8 +117,8 @@ export const addTrackToSpotifyQueue = async (
         uri: trackUri,
         device_id: deviceId,
     });
-    const searchUrl = `https://api.spotify.com/v1/me/player/queue?${queries}`;
-    const res = await fetch(searchUrl, {
+    const url = `https://api.spotify.com/v1/me/player/queue?${queries}`;
+    const res = await fetch(url, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -173,12 +171,12 @@ const addItemToSpotifyQueue = async (songId: string, deviceId: string) => {
 
 export const queueNextSongInSpotify = async (
     accessToken: string,
-    customerId: string
+    hostId: string
 ) => {
     const spotifyQueueResult: any = getSpotifyQueue();
     const nextSpotifySong = spotifyQueueResult.queue[0].id;
-    // call route with customerId=customerId and next=true
-    const apiUrl = '/api/leaderboard/queue?customerId=customerId&next=true';
+    // call route with hostId=hostId and next=true
+    const apiUrl = '/api/leaderboard/queue?hostId=hostId&next=true';
     const dbResponse = await fetch(apiUrl);
     const dbQueueResult = await dbResponse.json();
     // returns list of objects (instances), element 0 will have status: next

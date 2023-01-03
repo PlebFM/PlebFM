@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import cuid from "cuid";
-import Customers from "../../../models/Host";
+import Hosts from "../../../models/Host";
 import Users from "../../../models/User";
 import Plays, { Play } from "../../../models/Play";
 import { Bid } from "../../../models/Bid";
@@ -13,7 +13,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { hostId, userId, rHash, songId, bidAmount } = req.body;
     const now: string = Date.now().toString();
 
-    const host = await Customers.findOne({ shortName: hostId });
+    const host = await Hosts.findOne({ shortName: hostId });
     if (!host) return res.status(400).json({ success: false, error: 'Host not found!' });
     console.error(host)
 
