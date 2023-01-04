@@ -10,33 +10,33 @@ import mongoose, { Schema } from 'mongoose';
  * @field spotifyRefreshToken: string - token generated upon signup to get spotify a
  */
 export type Host = {
-    hostId: string;
-    hostName: string;
-    shortName: string;
-    spotifyRefreshToken: string;
+  hostId: string;
+  hostName: string;
+  shortName: string;
+  spotifyRefreshToken: string;
 };
 
 const HostSchema = new Schema<Host>({
-    hostId: {
-        type: String,
-        unique: true,
-        required: true,
-    },
-    hostName: {
-        type: String,
-        unique: false,
-        required: true,
-    },
-    shortName: {
-        type: String,
-        unique: true,
-        required: true,
-    },
-    spotifyRefreshToken: {
-        type: String,
-        unique: true,
-        required: false,
-    },
+  hostId: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  hostName: {
+    type: String,
+    unique: false,
+    required: true,
+  },
+  shortName: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  spotifyRefreshToken: {
+    type: String,
+    unique: true,
+    required: false,
+  },
 });
 
 const Hosts = mongoose.models.Hosts || mongoose.model('Hosts', HostSchema);

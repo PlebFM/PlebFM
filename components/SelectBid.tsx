@@ -1,63 +1,87 @@
-import { ArrowRightIcon, CartIcon, CopyIcon, CrossIcon } from "@bitcoin-design/bitcoin-icons-react/filled";
-import bokeh2 from "../public/pfm-bokeh-2.jpg"
-import Button from "./Button";
-import { useState } from "react";
-import NavBar from "./NavBar";
+import {
+  ArrowRightIcon,
+  CartIcon,
+  CopyIcon,
+  CrossIcon,
+} from '@bitcoin-design/bitcoin-icons-react/filled';
+import bokeh2 from '../public/pfm-bokeh-2.jpg';
+import Button from './Button';
+import { useState } from 'react';
+import NavBar from './NavBar';
 
-export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, setTotalBid, setBid}) {
+export default function SelectBid(props: {
+  song;
+  setReadyToCheckout;
+  cancelSong;
+  setTotalBid;
+  setBid;
+}) {
   const maxSats = 100;
   const [feeRate, setFeeRate] = useState(0);
   const [feeTotal, setFeeTotal] = useState(0);
-  const [feeBracket, setFeeBracket] = useState(0)
-  const sliderMessages = [ 'Choose your bid', 'Nice!', 'Whoa!', 'High roller!', 'Dayum!' ];
-  const sliderEmojis = [ '👇', '👍', '😮', '💰', '🔥', ];
-  const [sliderMouseDown, setSliderMouseDown] = useState(false)
+  const [feeBracket, setFeeBracket] = useState(0);
+  const sliderMessages = [
+    'Choose your bid',
+    'Nice!',
+    'Whoa!',
+    'High roller!',
+    'Dayum!',
+  ];
+  const sliderEmojis = ['👇', '👍', '😮', '💰', '🔥'];
+  const [sliderMouseDown, setSliderMouseDown] = useState(false);
   let slider = document.getElementById('slider');
   const handleMouseDown = () => {
-    setSliderMouseDown(true)
-  }
+    setSliderMouseDown(true);
+  };
 
   const handleMouseUp = () => {
-    setSliderMouseDown(false)
-  }
+    setSliderMouseDown(false);
+  };
 
-  const updateFees = (fee: number)=>{
-    setFeeRate(fee)
-    setFeeTotal(Math.floor(fee * props.song.duration_ms / 60_000))
-    if(fee === 0) setFeeBracket(0)
-    else if(fee > 0 && fee <= 25) setFeeBracket(1)
-    else if(fee > 25 && fee <= 50) setFeeBracket(2)
-    else if(fee > 50 && fee <= 75) setFeeBracket(3)
-    else setFeeBracket(4)
-  }
+  const updateFees = (fee: number) => {
+    setFeeRate(fee);
+    setFeeTotal(Math.floor((fee * props.song.duration_ms) / 60_000));
+    if (fee === 0) setFeeBracket(0);
+    else if (fee > 0 && fee <= 25) setFeeBracket(1);
+    else if (fee > 25 && fee <= 50) setFeeBracket(2);
+    else if (fee > 50 && fee <= 75) setFeeBracket(3);
+    else setFeeBracket(4);
+  };
 
-  const handleMouseMove = (e: { clientX: number })=>{
-    if(sliderMouseDown) {
+  const handleMouseMove = (e: { clientX: number }) => {
+    if (sliderMouseDown) {
       // @ts-ignore
-      let posInRange = e.clientX < slider.offsetLeft + 40 ? 0 : e.clientX > slider.offsetWidth + slider.offsetLeft - 40 ? slider.offsetWidth - 40 : e.clientX - slider.offsetLeft - 40
+      let posInRange =
+        e.clientX < slider.offsetLeft + 40
+          ? 0
+          : e.clientX > slider.offsetWidth + slider.offsetLeft - 40
+          ? slider.offsetWidth - 40
+          : e.clientX - slider.offsetLeft - 40;
       // @ts-ignore
-      updateFees(Math.floor((posInRange/(slider.offsetWidth - 40 - 40)) * maxSats))
+      updateFees(
+        Math.floor((posInRange / (slider.offsetWidth - 40 - 40)) * maxSats),
+      );
     }
-  }
+  };
   return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
-        { /* eslint-disable */}
-          <img 
-            src={props?.song?.album?.images[0]?.url ?? bokeh2} 
-            alt={props?.song?.album?.name ?? "Album"} 
-            width={100}
-            height={100}
-            className="object-cover w-full h-full blur-2xl opacity-50"
-          />
+        {/* eslint-disable */}
+        <img
+          src={props?.song?.album?.images[0]?.url ?? bokeh2}
+          alt={props?.song?.album?.name ?? 'Album'}
+          width={100}
+          height={100}
+          className="object-cover w-full h-full blur-2xl opacity-50"
+        />
         {/* <Image src={albumPlaceholder} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" /> */}
       </div>
 
       <div className=" px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
         <div className="w-full">
-        <p className="text-xl">{props.song?.name}</p>
-        <p className="text-lg font-bold">{props.song?.artists[0]?.name}</p>
-        <p className="text-base">{props.song?.album?.name}</p>
+          <p className="text-xl">{props.song?.name}</p>
+          <p className="text-lg font-bold">{props.song?.artists[0]?.name}</p>
+          <p className="text-base">{props.song?.album?.name}</p>
         </div>
 
         <div
@@ -68,30 +92,18 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, 
           id="slider"
         >
           <div className="text-4xl font-bold flex flex-col -space-y-1 font-light">
-            <span className="text-5xl">
-              {feeRate}
-            </span>
-            <span className="text-xl">
-              sats/min
-            </span>
+            <span className="text-5xl">{feeRate}</span>
+            <span className="text-xl">sats/min</span>
           </div>
 
           <div className="text-4xl font-bold flex flex-col -space-y-1 font-light">
-            <span className="text-2xl">
-              {feeTotal}
-            </span>
-            <span className="text-base">
-              sats total
-            </span>
+            <span className="text-2xl">{feeTotal}</span>
+            <span className="text-base">sats total</span>
           </div>
 
           <div className="text-4xl font-bold flex flex-col font-light">
-            <span className="text-lg">
-              {sliderMessages[feeBracket]}
-            </span>
-            <span className="text-4xl">
-              {sliderEmojis[feeBracket]}
-            </span>
+            <span className="text-lg">{sliderMessages[feeBracket]}</span>
+            <span className="text-4xl">{sliderEmojis[feeBracket]}</span>
           </div>
 
           <svg
@@ -118,12 +130,12 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, 
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeDasharray="1,260"
-              strokeDashoffset={260 - (260 * (feeRate/100))}
+              strokeDashoffset={260 - 260 * (feeRate / 100)}
             />
           </svg>
         </div>
 
-        {feeRate < 1 ?
+        {feeRate < 1 ? (
           <Button
             className="w-full"
             icon={<CrossIcon />}
@@ -132,12 +144,12 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, 
           >
             Cancel
           </Button>
-        :
+        ) : (
           <>
             <Button
               className="w-full"
               icon={<ArrowRightIcon />}
-              onClick={()=> {
+              onClick={() => {
                 props.setTotalBid(feeTotal);
                 props.setBid(feeRate);
                 props.setReadyToCheckout(true);
@@ -156,10 +168,8 @@ export default function SelectBid(props: {song, setReadyToCheckout, cancelSong, 
               Cancel
             </Button>
           </>
-
-        }
+        )}
       </div>
-
     </>
-  )
+  );
 }
