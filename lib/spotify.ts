@@ -104,8 +104,9 @@ export const transferDevice = async (deviceId: string, accessToken: string) => {
     },
     body: body,
   });
-  const result = await res.json();
-  return result;
+  console.log(res);
+  if (res.status === 202) return { success: true };
+  else return { success: false };
 };
 
 export const addTrackToSpotifyQueue = async (
