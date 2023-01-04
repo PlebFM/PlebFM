@@ -1,13 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
+    './app/**/*.{js,ts,jsx,tsx}',
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     fontFamily: {
-      'sans': ['var(--font-manrope)', 'sans-serif']
+      sans: ['var(--font-manrope)', 'sans-serif'],
     },
     extend: {
       colors: {
@@ -50,7 +50,7 @@ module.exports = {
       },
       dropShadow: {
         'glow-white': '0 0 10px hsla(0, 0%, 100%, 0.75)',
-        'glow-orange': '0 0 10px hsla(35, 100%, 80%, 0.75)'
+        'glow-orange': '0 0 10px hsla(35, 100%, 80%, 0.75)',
       },
       animation: {
         'spin-slow': 'spin 4s linear infinite',
@@ -60,9 +60,9 @@ module.exports = {
         fadeout: {
           '0%, 75%': { opacity: 1.0 },
           '100%': { opacity: 0.0 },
-        }
-      }
+        },
+      },
     },
   },
   plugins: [],
-}
+};

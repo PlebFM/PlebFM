@@ -1,20 +1,29 @@
-'use client'
-import albumPlaceholder from "../../public/album-placeholder.jpg"
-import { ArrowLeftIcon } from "@bitcoin-design/bitcoin-icons-react/filled"
-import Image from "next/image"
-import Button from "../../components/Button"
-import bokeh2 from "../../public/pfm-bokeh-2.jpg"
-import { useEffect } from "react"
-import NavBar from "../../components/NavBar"
-export default function AlbumScreen(props: {track, setSongConfirmed, cancelSong}) {
+'use client';
+import albumPlaceholder from '../../public/album-placeholder.jpg';
+import { ArrowLeftIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
+import Image from 'next/image';
+import Button from '../../components/Button';
+import bokeh2 from '../../public/pfm-bokeh-2.jpg';
+import { useEffect } from 'react';
+import NavBar from '../../components/NavBar';
+export default function AlbumScreen(props: {
+  track;
+  setSongConfirmed;
+  cancelSong;
+}) {
   useEffect(() => {
-    console.log("TRACK", props?.track);
-    console.log(props?.track?.album?.images[0]?.url)
-  }, [props.track])
+    console.log('TRACK', props?.track);
+    console.log(props?.track?.album?.images[0]?.url);
+  }, [props.track]);
   return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
-        <Image src={bokeh2} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" />
+        <Image
+          src={bokeh2}
+          alt=""
+          width="100"
+          className="object-cover w-full h-full blur-2xl opacity-50"
+        />
       </div>
 
       <div className=" px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
@@ -24,10 +33,10 @@ export default function AlbumScreen(props: {track, setSongConfirmed, cancelSong}
           <p className="text-base">{props?.track?.album?.name}</p>
         </div>
 
-      { /* eslint-disable */}
-        <img 
-          src={props?.track?.album?.images[0]?.url ?? bokeh2} 
-          alt={props?.track?.album?.name ?? "Album"} 
+        {/* eslint-disable */}
+        <img
+          src={props?.track?.album?.images[0]?.url ?? bokeh2}
+          alt={props?.track?.album?.name ?? 'Album'}
           width={100}
           height={100}
           className="w-full"
@@ -37,7 +46,9 @@ export default function AlbumScreen(props: {track, setSongConfirmed, cancelSong}
           <Button
             size="small"
             className="w-full"
-            onClick={()=>{props.setSongConfirmed(true)}}
+            onClick={() => {
+              props.setSongConfirmed(true);
+            }}
           >
             Select Song
           </Button>
@@ -54,8 +65,6 @@ export default function AlbumScreen(props: {track, setSongConfirmed, cancelSong}
         </div>
       </div>
       <NavBar />
-
     </>
-  )
-
+  );
 }

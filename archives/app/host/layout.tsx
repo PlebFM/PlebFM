@@ -4,7 +4,7 @@ import { getHost, getHosts } from '../../lib/hosts';
 import SpotifyAuthButton from './SpotifyAuthButton';
 export interface LandingLayoutProps {
   children: React.ReactNode;
-  params: { slug: string }
+  params: { slug: string };
 }
 
 // export async function generateStaticParams() {
@@ -15,7 +15,10 @@ export interface LandingLayoutProps {
 //   }));
 // }
 
-export default async function HostLayout({ children, params }: LandingLayoutProps) {
+export default async function HostLayout({
+  children,
+  params,
+}: LandingLayoutProps) {
   // const nextCookies = cookies();
   // const token = nextCookies.get('spotify-token');
   // console.log(token);
