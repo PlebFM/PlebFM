@@ -1,6 +1,6 @@
-import {BitcoinIcon} from '@bitcoin-design/bitcoin-icons-react/filled'
+import { BitcoinIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
 
-// pleb.fm 
+// pleb.fm
 // "Find your jukebox" screen?
 export default function Index() {
   return (
@@ -8,5 +8,5 @@ export default function Index() {
       <h1 className="text-4xl font-bold">Hello World! Pleb.FM</h1>
       <BitcoinIcon className="w-4 h-4" />
     </>
-  )
+  );
 }

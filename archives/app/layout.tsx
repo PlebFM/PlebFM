@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
 /* eslint-disable @next/next/no-head-element */
-import "./globals.css"
-import { Manrope } from '@next/font/google'
-import { SessionProvider } from "next-auth/react";
+import './globals.css';
+import { Manrope } from '@next/font/google';
+import { SessionProvider } from 'next-auth/react';
 
 const manrope = Manrope({
   weight: 'variable',
   subsets: ['latin'],
-  variable: "--font-manrope"
-})
+  variable: '--font-manrope',
+});
 
 export default function RootLayout({
   children,

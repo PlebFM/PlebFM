@@ -1,11 +1,11 @@
-import SpotifyAuthButton from "./SpotifyAuthButton";
-import {WebPlayback} from "../../components/SpotifyPlayback";
-import {useState} from "react";
+import SpotifyAuthButton from './SpotifyAuthButton';
+import { WebPlayback } from '../../components/SpotifyPlayback';
+import { useState } from 'react';
 
-export default function Login(){
+export default function Login() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  return(
+  return (
     <div>
       <h1>Host Login</h1>
       <SpotifyAuthButton />
@@ -13,9 +13,7 @@ export default function Login(){
         Login Button
       </Link> */}
 
-      {
-       accessToken && <WebPlayback token={accessToken} />
-      }
+      {accessToken && <WebPlayback token={accessToken} />}
     </div>
-  )
+  );
 }

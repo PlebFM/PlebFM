@@ -1,13 +1,16 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import clientPromise from "../../lib/mongodb";
+import { NextApiRequest, NextApiResponse } from 'next';
+import clientPromise from '../../lib/mongodb';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   try {
     const client = await clientPromise;
-    const db = client.db("sample_mflix");
+    const db = client.db('sample_mflix');
 
     const songs = await db
-      .collection("songs")
+      .collection('songs')
       .find({})
       .sort({ bid: -1 })
       .limit(10)
@@ -17,4 +20,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (e) {
     console.error(e);
   }
-};
+}

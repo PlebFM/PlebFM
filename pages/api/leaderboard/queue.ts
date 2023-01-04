@@ -43,7 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const noPlays: Boolean = sortedPlays.length === 0;
         // Return error if plays is empty list
         if (noPlays)
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 message: `No queued Plays exist for host ${hostShortName} / hostId ${host.hostId}!`,
             });
@@ -62,7 +62,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             });
             // If nothing returned, then nothing was updated and thus nothing was found, return error
             if (!play)
-                return res.status(400).json({
+                return res.status(404).json({
                     success: false,
                     message: `No Play found for playId ${winner.playId} & host ${hostShortName}!`,
                 });
@@ -77,7 +77,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             // If no Plays exist with that hostId, somethings wrong, return error
             const noPlays: Boolean = sortedPlays.length === 0;
             if (noPlays)
-                return res.status(400).json({
+                return res.status(404).json({
                     success: false,
                     message: `No Plays found for host ${hostShortName}, hostId ${host.hostId}!`,
                 });
