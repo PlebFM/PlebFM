@@ -3,11 +3,11 @@
 import { Session } from 'next-auth';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import Customers, { Customer } from '../../models/Host';
+import Hosts, { Host } from '../../models/Host';
 
 const findHost = async (refreshToken: string) => {
     const params = new URLSearchParams({ spotifyRefreshToken: refreshToken });
-    const res = await fetch(`http://localhost:3000/api/customers?${params}`, {
+    const res = await fetch(`${process.env.BASE_URL}/api/hosts?${params}`, {
         method: 'GET',
         mode: 'no-cors',
         headers: {
@@ -19,11 +19,11 @@ const findHost = async (refreshToken: string) => {
 };
 const findOrCreateNewHost = async (
     shortName: string,
-    customerName: string,
+    hostName: string,
     refreshToken: string
-): Promise<Customer> => {
-    const body = { shortName, customerName, refreshToken };
-    const res = await fetch('http://localhost:3000/api/customers', {
+): Promise<Host> => {
+    const body = { shortName, hostName, refreshToken };
+    const res = await fetch(`${process.env.BASE_URL}/api/hosts`, {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -38,16 +38,16 @@ const findOrCreateNewHost = async (
 
 const SpotifyAuthButton = () => {
     const { data: session } = useSession();
-    const [customer, setCustomer] = useState<Customer | null>(null);
+    const [host, setHost] = useState<Host | null>(null);
 
     useEffect(() => {
-        const getCustomer = async () => {
+        const getHost = async () => {
             if (!session) return;
             // @ts-ignore
             const refreshToken = session.refreshToken;
             const findRes = await findHost(refreshToken);
             if (findRes) {
-                setCustomer(findRes);
+                setHost(findRes);
                 return;
             }
             const res = await findOrCreateNewHost(
@@ -55,9 +55,9 @@ const SpotifyAuthButton = () => {
                 'jordanBravo',
                 refreshToken
             );
-            setCustomer(res);
+            setHost(res);
         };
-        getCustomer();
+        getHost();
     }, [session]);
 
     if (session) {
@@ -67,7 +67,7 @@ const SpotifyAuthButton = () => {
                 <br />
                 <button onClick={() => signOut()}>Sign out</button>
                 <p>
-                    Customer Obj: {customer ? JSON.stringify(customer) : '...'}
+                    Host Obj: {host ? JSON.stringify(host) : '...'}
                 </p>{' '}
                 <br />
             </>

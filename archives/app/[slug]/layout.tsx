@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { getHost, getHosts } from '../../lib/customers';
+import NavBar from '../../components/NavBar';
+import { getHost, getHosts } from '../../lib/hosts';
 export interface LandingLayoutProps {
   children: React.ReactNode;
   params: { slug: string }
