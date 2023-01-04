@@ -1,3 +1,1 @@
-export default async function TestQueue() {
-
-}
+export default async function TestQueue() {}
