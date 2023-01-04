@@ -34,7 +34,7 @@ export enum Characters {
 
 /**
  * Object created when a user signs up for PlebFM.
- * Represents a user who joins a Host PlebFM 
+ * Represents a user who joins a Host PlebFM
  * @type User
  * @field userId: string - cuid of user object in db
  * @field firstNym: string - user firstNym used to signup

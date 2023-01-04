@@ -1,106 +1,98 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import connectDB from "../../../middleware/mongodb";
-import Instances from "../../../models/Play";
-
-const sortQueue = async (unsorted: any) => {
-  try {
-    return unsorted
-      .sort((prev: any, curr: any) =>
-        prev.queueTimestamp < curr.queueTimestamp ? 1 : -1
-      )
-      .sort((prev: any, curr: any) =>
-        prev.runningTotal < curr.runningTotal ? 1 : -1
-      );
-  } catch (error: any) {
-    throw new Error(error);
-  }
-};
-
+import { NextApiRequest, NextApiResponse } from 'next';
+import connectDB from '../../../middleware/mongodb';
+import Hosts, { Host } from '../../../models/Host';
+import Plays, { Play } from '../../../models/Play';
+/**
+ * POST /api/leaderboard/queue?next=<undefined | "" | true | false>
+ * Optional: next
+ * @param req
+ * @param res
+ * @returns HTTP Status Code <400 | 500 | 200>
+ *          JSON { success: <true | false>, message: <'Error message' | sortedPlays> }
+ */
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { shortName, next } = req.query;
-    /*
-      TODO: question - shouldn't we use hostId for lookup?
-      const { hostId, next } = req.query;
-      Instances = collection of songs with metadata and Bids
-      const instances = await Instances.find({ hostId: hostId, status: "queued" })
-      If no instances exist with that hostId and status, return error
-     */
-    const instances = await Instances.find({
-      shortName: shortName,
-      status: "queued",
-    }).catch((e) => {
-      console.error(e);
-      throw new Error(e);
-    });
-    const noInstances: Boolean = instances.length === 0;
-    if (noInstances)
+    const { hostShortName, next } = req.query;
+    // Lookup host by shortname
+    const host: Host = await Hosts.findOne({ shortName: 'atl' }).catch(
+      (e) => {
+        console.error(e);
+        throw new Error(e);
+      }
+    );
+    // If not host exists, return error
+    if (!host)
       return res
         .status(400)
         .json({
           success: false,
-          error: `No instances for shortName=${shortName}!`,
+          message: `No host for given host shortName ${hostShortName}!`,
         });
-
-    // queue = collection of Instances sorted by timestamp and runningTotal
-    let queue = await sortQueue(instances).catch((e) => {
-      console.error(e);
-      throw new Error(e);
-    });
-
-    // Next = query param to toggle updating the queue, if exists and is true, 
-    // update leadingInstance status to "next"
-    if (next && next === "true") {
-      // leadingInstance = song with highest sum of all bidAmounts in Bids array
-      const leadingInstance = queue[0];
-      // set leadingInstance status to "next"
-      leadingInstance.status = "next";
-
-      // find the instance to update based on hostId & the instance id, update 
-      // the doc in the instances collection to be this new doc with status = "next"
-      const instance = await Instances.findOneAndUpdate(
-        { shortName: shortName, id: leadingInstance.id },
-        { $set: { leadingInstance } }
+    // Query Plays: Get play objs where hostId = host.hostId & status = queued
+    // sort by highest runningTotal and oldest queueTimestamp if ties occur
+    let sortedPlays: Array<Play> = await Plays.find({
+      hostId: host.hostId,
+      status: 'queued',
+    })
+      .sort({ runningTotal: -1, queueTimestamp: 1 })
+      .catch((e) => {
+        console.error(e);
+        throw new Error(e);
+      });
+    // Plays.find returns a list of results
+    // If no results found, list will be empty []
+    // Check for response emptiness
+    const noPlays: Boolean = sortedPlays.length === 0;
+    // Return error if plays is empty list
+    if (noPlays)
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: `No queued Plays exist for host ${hostShortName} / hostId ${host.hostId}!`,
+        });
+    // Use "next=true" query param to toggle updating the queue
+    if (next === 'true') {
+      // Grab first play obj in queue => play obj w/ highest runningTotal and oldest timestamp
+      const winner = sortedPlays[0];
+      // Query Plays: Get leading play object from db and update status to "next"
+      // Since playId is a globally unique cuid, should return 1 play obj
+      const play: Play = await Plays.findOneAndUpdate(
+        { playId: winner.playId },
+        { $set: { status: 'next' } }
       ).catch((e) => {
         console.error(e);
         throw new Error(e);
       });
-      // if nothing returned, then nothing was updated and thus nothing was found, return error
-      if (!instance)
+      // If nothing returned, then nothing was updated and thus nothing was found, return error
+      if (!play)
         return res
           .status(400)
           .json({
             success: false,
-            error: `No instance found for shortName=${shortName} and instanceId=${leadingInstance.id}!`,
+            message: `No Play found for playId ${winner.playId} & host ${hostShortName}!`,
           });
-
-      // Repull instances including updated instance
-      const instances = await Instances.find({ shortName: shortName }).catch(
-        (e) => {
+      // Query Plays: Get all Play objects where hostId = host.hostId
+      // Include all statuses, sort by highest runningTotal and oldest queueTimestamp if ties occur
+      sortedPlays = await Plays.find({ hostId: host.hostId })
+        .sort({ runningTotal: -1, queueTimestamp: 1 })
+        .catch((e) => {
           console.error(e);
           throw new Error(e);
-        }
-      );
-      // If no instances exist with that shortName, return error
-      const noInstances: Boolean = instances.length === 0;
-      if (noInstances)
+        });
+      // If no Plays exist with that hostId, somethings wrong, return error
+      const noPlays: Boolean = sortedPlays.length === 0;
+      if (noPlays)
         return res
           .status(400)
           .json({
             success: false,
-            error: `No instances for shortName=${shortName}!`,
+            message: `No Plays found for host ${hostShortName}, hostId ${host.hostId}!`,
           });
-
-      // reset queue to the new updated list of instances sorted again by timestamp and runningTotal
-      queue = await sortQueue(instances).catch((e) => {
-        console.error(e);
-        throw new Error(e);
-      });
     }
-
-    return res.status(200).json({ success: true, queue: queue });
+    return res.status(200).json({ success: true, message: sortedPlays });
   } catch (error: any) {
-    return res.status(400).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
