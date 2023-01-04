@@ -1,7 +1,7 @@
-import { getSession, signOut } from "next-auth/react";
-import Script from "next/script";
-import { useState, useEffect, SetStateAction, Dispatch } from "react";
-import { addTrackToSpotifyQueue, transferDevice } from "../lib/spotify";
+import { getSession, signOut } from 'next-auth/react';
+import Script from 'next/script';
+import { useState, useEffect, SetStateAction, Dispatch } from 'react';
+import { addTrackToSpotifyQueue, transferDevice } from '../lib/spotify';
 
 type Props = {
   token: string;
@@ -21,33 +21,33 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
   }, [player, paused]);
   useEffect(() => {
     if (!player) return;
-    console.log("playerrrr", player);
-    player.getCurrentState().then((state) => {
+    console.log('playerrrr', player);
+    player.getCurrentState().then(state => {
       if (!state) {
-        console.error("User is not playing music through the Web Playback SDK");
+        console.error('User is not playing music through the Web Playback SDK');
         return;
       }
       const current_track = state.track_window.current_track;
       const next_track = state.track_window.next_tracks[0];
 
-      console.log("Currently Playing", current_track);
-      console.log("Playing Next", next_track);
-      console.log("CURRENT STATE", state);
+      console.log('Currently Playing', current_track);
+      console.log('Playing Next', next_track);
+      console.log('CURRENT STATE', state);
     });
   }, [player]);
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
+    const script = document.createElement('script');
+    script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.async = true;
     document.body.appendChild(script);
 
     //@ts-ignore
     window.onSpotifyWebPlaybackSDKReady = () => {
-      console.log("ready");
+      console.log('ready');
       const player = new window.Spotify.Player({
-        name: "Pleb.FM",
-        getOAuthToken: (cb) => {
+        name: 'Pleb.FM',
+        getOAuthToken: cb => {
           // console.log(token);
           cb(token);
         },
@@ -55,33 +55,33 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
       });
 
       setPlayer(player);
-      player.on("playback_error", ({ message }) => {
-        console.error("Failed to perform playback", message);
+      player.on('playback_error', ({ message }) => {
+        console.error('Failed to perform playback', message);
       });
 
-      player.on("account_error", ({ message }) => {
-        console.error("Failed to validate Spotify account", message);
+      player.on('account_error', ({ message }) => {
+        console.error('Failed to validate Spotify account', message);
       });
 
-      player.on("authentication_error", ({ message }) => {
-        console.error("Failed to authenticate", message);
+      player.on('authentication_error', ({ message }) => {
+        console.error('Failed to authenticate', message);
       });
 
-      player.on("initialization_error", ({ message }) => {
-        console.error("Failed to initialize", message);
+      player.on('initialization_error', ({ message }) => {
+        console.error('Failed to initialize', message);
       });
 
-      player.addListener("ready", ({ device_id }) => {
+      player.addListener('ready', ({ device_id }) => {
         setDeviceId(device_id);
-        console.log("Ready with Device ID", device_id);
+        console.log('Ready with Device ID', device_id);
       });
 
-      player.addListener("not_ready", ({ device_id }) => {
-        console.log("Device ID has gone offline", device_id);
+      player.addListener('not_ready', ({ device_id }) => {
+        console.log('Device ID has gone offline', device_id);
       });
 
-      player.addListener("player_state_changed", (state) => {
-        console.log("state changed", state);
+      player.addListener('player_state_changed', state => {
+        console.log('state changed', state);
         if (!state) {
           return;
         }
@@ -89,7 +89,7 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
         setTrack(state.track_window.current_track);
         if (state.paused !== paused) setPaused(state.paused);
 
-        player?.getCurrentState().then((state) => {
+        player?.getCurrentState().then(state => {
           if (!state) {
             setActive(false);
           } else {
@@ -120,11 +120,11 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
             onClick={() => {
               player.activateElement();
               deviceId &&
-                transferDevice(deviceId, token).then((x) => console.log(x));
-              console.log("clicked");
+                transferDevice(deviceId, token).then(x => console.log(x));
+              console.log('clicked');
             }}
           >
-            {"START"}
+            {'START'}
           </button>
           <br />
           <button
@@ -132,14 +132,14 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
               const addToQueue =
                 deviceId &&
                 addTrackToSpotifyQueue(
-                  "spotify:track:0AzD1FEuvkXP1verWfaZdv",
+                  'spotify:track:0AzD1FEuvkXP1verWfaZdv',
                   deviceId,
-                  token
-                ).then((res) => console.log(res));
-              console.log("clicked");
+                  token,
+                ).then(res => console.log(res));
+              console.log('clicked');
             }}
           >
-            {"QUEUE CBAT"}
+            {'QUEUE CBAT'}
           </button>
         </div>
       </>
@@ -163,16 +163,16 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
             onClick={() => {
               if (paused)
                 player.resume().then(() => {
-                  console.log("Toggled Resume!");
+                  console.log('Toggled Resume!');
                 });
               else {
                 player.pause().then(() => {
-                  console.log("Toggled Paused!");
+                  console.log('Toggled Paused!');
                 });
               }
             }}
           >
-            {paused ? "RESUME" : "PAUSE"}
+            {paused ? 'RESUME' : 'PAUSE'}
           </button>
 
           {/* <button
