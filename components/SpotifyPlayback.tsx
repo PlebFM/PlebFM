@@ -8,20 +8,26 @@ type Props = {
   paused: boolean;
   setPaused: Dispatch<SetStateAction<boolean>>;
 };
+// declare global {
+//   interface Window { Spotify: {Player: ({}) => void,  Track: {}}; }
+// }
+
+// window.Spotify = window.Spotify || {Player: () => {}, Track: {}};
 
 export const WebPlayback = ({ token, paused, setPaused }: Props) => {
   const [is_active, setActive] = useState<boolean>(false);
+  //@ts-ignore
   const [player, setPlayer] = useState<Spotify.Player | null>(null);
+  //@ts-ignore
   const [current_track, setTrack] = useState<Spotify.Track | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   useEffect(() => {
-    if (!player || !player.is_active) return;
+    if (!player) return;
     if (paused) player.pause();
     else player.resume();
   }, [player, paused]);
   useEffect(() => {
     if (!player) return;
-    console.log('playerrrr', player);
     player.getCurrentState().then(state => {
       if (!state) {
         console.error('User is not playing music through the Web Playback SDK');

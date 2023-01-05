@@ -6,15 +6,16 @@ import {
 } from '@bitcoin-design/bitcoin-icons-react/filled';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import Button from './Button';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import NavBar from './NavBar';
+import { Song } from '../models/Song';
 
 export default function SelectBid(props: {
-  song;
-  setReadyToCheckout;
-  cancelSong;
-  setTotalBid;
-  setBid;
+  song: Song;
+  setReadyToCheckout: Dispatch<SetStateAction<boolean>>;
+  cancelSong: () => void;
+  setTotalBid: Dispatch<SetStateAction<number>>;
+  setBid: Dispatch<SetStateAction<number>>;
 }) {
   const maxSats = 100;
   const [feeRate, setFeeRate] = useState(0);
@@ -29,6 +30,7 @@ export default function SelectBid(props: {
   ];
   const sliderEmojis = ['👇', '👍', '😮', '💰', '🔥'];
   const [sliderMouseDown, setSliderMouseDown] = useState(false);
+  const ref = useRef(null);
   let slider = document.getElementById('slider');
   const handleMouseDown = () => {
     setSliderMouseDown(true);
@@ -49,6 +51,7 @@ export default function SelectBid(props: {
   };
 
   const handleMouseMove = (e: { clientX: number }) => {
+    if (!slider) return;
     if (sliderMouseDown) {
       // @ts-ignore
       let posInRange =
@@ -90,6 +93,7 @@ export default function SelectBid(props: {
           onPointerUp={handleMouseUp}
           onPointerMove={handleMouseMove}
           id="slider"
+          ref={ref}
         >
           <div className="text-4xl font-bold flex flex-col -space-y-1 font-light">
             <span className="text-5xl">{feeRate}</span>

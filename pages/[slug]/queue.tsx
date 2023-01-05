@@ -243,7 +243,7 @@ export default function Queue() {
     playing: boolean;
     myPick: boolean;
     upNext: boolean;
-    bidderIds: string[];
+    bidders: User[];
   };
 
   const getUserProfileFromLocal = () => {
@@ -311,7 +311,7 @@ export default function Queue() {
           playing: false,
           myPick: myPick,
           upNext: obj.status === 'next',
-          bidderIds: obj?.bids?.map((x: any) => x.userId) ?? [],
+          bidders: obj?.bids?.map((x: any) => x.userId) ?? [],
         };
       });
       console.log('fixed', fixed);
@@ -374,8 +374,8 @@ export default function Queue() {
                     {bidders.length == 0 ? (
                       <p>user pics</p>
                     ) : (
-                      (song.bidderIds.length > 5
-                        ? song.bidderIds.slice(0, 5)
+                      (song.bidders.length > 5
+                        ? song.bidders.slice(0, 5)
                         : song.bidders
                       ).map((bidder, key) => (
                         <div className="w-8" key={key}>
@@ -388,9 +388,9 @@ export default function Queue() {
                         </div>
                       ))
                     )}
-                    {song.bidderIds.length > 5 ? (
+                    {song.bidders.length > 5 ? (
                       <div className="pl-4 font-semibold text-lg">
-                        +{song.bidderIds.length - 5}
+                        +{song.bidders.length - 5}
                       </div>
                     ) : (
                       ``

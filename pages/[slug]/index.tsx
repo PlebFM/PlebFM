@@ -90,7 +90,7 @@ export default function Bidding() {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
-  const { params } = context;
+  const { params, req } = context;
   if (!params?.slug)
     return {
       notFound: true,
@@ -98,7 +98,7 @@ export const getServerSideProps: GetServerSideProps = async (
     };
 
   //@ts-ignore
-  const host = await getHost(params?.slug);
+  const host = await getHost(params?.slug, req.headers.host ?? null);
 
   if (!host)
     return {

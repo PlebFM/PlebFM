@@ -3,6 +3,7 @@ type Song = {
   album: { images: { url: string }[]; name: string };
   name: string;
   artists: { name: string }[];
+  id: string;
 };
 
 export type { Song };

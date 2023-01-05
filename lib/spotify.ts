@@ -1,5 +1,4 @@
 import querystring from 'querystring';
-import Instances from '../models/Instance';
 
 export const getAccessToken = async (refreshToken: string) => {
   const client_id = process.env.SPOTIFY_CLIENT_ID;
