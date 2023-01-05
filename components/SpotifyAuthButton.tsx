@@ -6,10 +6,7 @@ import Hosts, { Host } from '../models/Host';
 const findHost = async (refreshToken: string) => {
   console.log('FIND HOST', refreshToken);
   const params = new URLSearchParams({ spotifyRefreshToken: refreshToken });
-  console.log(
-    'Findin the host',
-    `${process.env.VERCEL_URL}/api/hosts?${params}`,
-  );
+  console.log('Findin the host', `/api/hosts?${params}`);
   const res = await fetch(`/api/hosts?${params}`, {
     method: 'GET',
     mode: 'no-cors',
