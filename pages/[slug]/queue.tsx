@@ -286,6 +286,10 @@ export default function Queue() {
       });
       const response = await fetch(`/api/leaderboard/queue?${queries}`);
       const res = await response.json();
+      if (!res?.queue) {
+        setLoading(false);
+        return;
+      }
       const promises = res.queue.map((x: any) => {
         const res = fetchSong(x.songId, 'atl').then(song => {
           return { obj: x, song: song };
@@ -333,6 +337,14 @@ export default function Queue() {
       </div>
       {loading ? (
         <LoadingSpinner />
+      ) : queueData.length === 0 ? (
+        <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+          <div className="p-6 border-b border-white/20 w-full">
+            <p>
+              Queue is currently empty. Bid on a song to see it in the queue!
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
           {queueData.map((song, key) => (
