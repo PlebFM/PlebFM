@@ -6,21 +6,15 @@ import Hosts, { Host } from '../models/Host';
 const findHost = async (refreshToken: string) => {
   console.log('FIND HOST', refreshToken);
   const params = new URLSearchParams({ spotifyRefreshToken: refreshToken });
-  console.log(
-    'Findin the host',
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?${params}`,
-  );
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?${params}`,
-    {
-      method: 'GET',
-      mode: 'no-cors',
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        Accept: 'application/json',
-      },
+  console.log('Findin the host', `/api/hosts?${params}`);
+  const res = await fetch(`/api/hosts?${params}`, {
+    method: 'GET',
+    mode: 'no-cors',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      Accept: 'application/json',
     },
-  );
+  });
   return await res.json();
 };
 const findOrCreateNewHost = async (
@@ -29,7 +23,7 @@ const findOrCreateNewHost = async (
   refreshToken: string,
 ): Promise<Host> => {
   const body = { shortName, hostName, refreshToken };
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts`, {
+  const res = await fetch(`/api/hosts`, {
     method: 'POST',
     mode: 'no-cors',
     headers: {

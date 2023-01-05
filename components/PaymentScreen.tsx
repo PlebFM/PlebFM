@@ -3,16 +3,17 @@ import { CartIcon, CopyIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import { MusicalNoteIcon, QueueListIcon } from '@heroicons/react/24/outline';
 import Button from './Button';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import NavBar from './NavBar';
+import { Song } from '../models/Song';
 
 function PaymentScreen(props: {
-  song;
-  readyToCheckout;
-  invoicePaid;
-  setInvoicePaid;
-  totalBid;
-  bid;
+  song: Song;
+  readyToCheckout: boolean;
+  invoicePaid: boolean;
+  setInvoicePaid: Dispatch<SetStateAction<boolean>>;
+  totalBid: number;
+  bid: number;
 }) {
   const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '' });
   const [loading, setLoading] = useState(false);

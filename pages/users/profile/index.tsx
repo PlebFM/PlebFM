@@ -5,7 +5,17 @@ import Avatar from '../../../components/Avatar';
 import React, { useState, useEffect } from 'react';
 import Tag from '../../../components/Tag';
 import NavBar from '../../../components/NavBar';
-import { dummyDataQueue, dummyDataPlayed } from './dummyData';
+import { dummyDataQueue, dummyDataPlayed } from '../../../data/dummy.data';
+
+export type Track = {
+  trackTitle: string;
+  artistName: string;
+  feeRate: number;
+  myPick: boolean;
+  bidders: Array<{ firstNym: string; lastNym: string; color: string }>;
+  playing?: boolean;
+  upNext?: boolean;
+};
 
 export default function User() {
   const [userProfile, setUserProfile] = useState({
@@ -25,8 +35,9 @@ export default function User() {
     getUserProfileFromLocal();
   }, []);
 
-  const [queueData, setQueueData] = React.useState(dummyDataQueue);
-  const [queueDataPlayed, setQueueDataPlayed] = React.useState(dummyDataPlayed);
+  const [queueData, setQueueData] = useState<Track[]>(dummyDataQueue);
+  const [queueDataPlayed, setQueueDataPlayed] =
+    useState<Track[]>(dummyDataPlayed);
 
   return (
     <>

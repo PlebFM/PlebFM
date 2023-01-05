@@ -35,6 +35,7 @@ export default function Login() {
   useEffect(() => {
     if (!session) return;
     const foo = async () => {
+      //@ts-ignore
       const accessToken = session.accessToken ?? '';
       // const accessToken = await getAccessToken(session.refreshToken);
       if (!accessToken) console.warn('ACCESS TOKEN MISSING FOR SPOTIFY');
@@ -54,7 +55,7 @@ export default function Login() {
       <h1>Host Login</h1>
       <SpotifyAuthButton />
 
-      {accessToken && <WebPlayback token={accessToken} />}
+      {/* {accessToken && <WebPlayback token={accessToken} />} */}
     </div>
   );
 }
