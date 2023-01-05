@@ -1,4 +1,6 @@
-export const dummyDataQueue = [
+import { Track } from '../pages/users/profile';
+
+export const dummyDataQueue: Track[] = [
   {
     trackTitle: 'Freedom',
     artistName: 'Rage Against the Machine',
@@ -40,7 +42,7 @@ export const dummyDataQueue = [
   },
 ];
 
-export const dummyDataPlayed = [
+export const dummyDataPlayed: Track[] = [
   {
     trackTitle: 'Happiness in Slavery',
     artistName: 'Nine Inch Nails',

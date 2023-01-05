@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Host } from '../models/Host';
 
 export const getHosts = async (): Promise<Host[]> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts`, {
+  const res = await fetch(`/api/hosts`, {
     method: 'GET',
     mode: 'no-cors',
     headers: {
@@ -14,19 +14,19 @@ export const getHosts = async (): Promise<Host[]> => {
   return hosts.hosts;
 };
 
-export const getHost = async (slug: string): Promise<Host> => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts/${slug}`,
-    {
-      method: 'GET',
-      mode: 'no-cors',
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+export const getHost = async (
+  slug: string,
+  url?: string,
+): Promise<Host | void> => {
+  const res = await fetch(`https://${url}/api/hosts/${slug}`, {
+    method: 'GET',
+    mode: 'no-cors',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
     },
-  );
+  });
   if (!res.ok) {
-    if (res.status === 400) return null;
+    if (res.status === 400) return;
     throw new Error('unable to fetch data');
   }
   const host = await res.json();

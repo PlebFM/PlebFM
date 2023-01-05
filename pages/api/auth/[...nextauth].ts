@@ -38,9 +38,9 @@ async function refreshAccessToken(token: AuthToken): Promise<AuthToken> {
         Authorization: `Basic ${basic}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      //@ts-ignore
       body: new URLSearchParams({
         grant_type: 'client_credentials',
+        //@ts-ignore
         refreshToken: response.body.refreshToken,
       }),
     });

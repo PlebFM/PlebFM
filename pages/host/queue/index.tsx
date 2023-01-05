@@ -4,7 +4,7 @@ import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
 import Tag from '../../../components/Tag';
 import Avatar from '../../../components/Avatar';
 import qr from '../../../public/qr.png';
-import { feed, dummyData } from './data';
+import { feed, dummyData } from '../../../data/dummy.data1.js';
 import { getSession, useSession } from 'next-auth/react';
 import { WebPlayback } from '../../../components/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
@@ -19,6 +19,7 @@ export default function Queue() {
   useEffect(() => {
     if (!session) return;
     const foo = async () => {
+      //@ts-ignore
       const accessToken = session.accessToken ?? '';
       if (!accessToken) console.warn('ACCESS TOKEN MISSING FOR SPOTIFY');
       setAccessToken(accessToken);

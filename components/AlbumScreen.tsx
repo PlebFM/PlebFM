@@ -3,12 +3,14 @@ import { ArrowLeftIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
 import Image from 'next/image';
 import Button from './Button';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
-import { useEffect } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import NavBar from './NavBar';
+import { Song } from '../models/Song';
+
 export default function AlbumScreen(props: {
-  track;
-  setSongConfirmed;
-  cancelSong;
+  track: Song;
+  setSongConfirmed: Dispatch<SetStateAction<boolean>>;
+  cancelSong: () => void;
 }) {
   useEffect(() => {
     console.log('TRACK', props?.track);

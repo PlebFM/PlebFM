@@ -8,19 +8,16 @@ const findHost = async (refreshToken: string) => {
   const params = new URLSearchParams({ spotifyRefreshToken: refreshToken });
   console.log(
     'Findin the host',
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?${params}`,
+    `${process.env.VERCEL_URL}/api/hosts?${params}`,
   );
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?${params}`,
-    {
-      method: 'GET',
-      mode: 'no-cors',
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        Accept: 'application/json',
-      },
+  const res = await fetch(`/api/hosts?${params}`, {
+    method: 'GET',
+    mode: 'no-cors',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      Accept: 'application/json',
     },
-  );
+  });
   return await res.json();
 };
 const findOrCreateNewHost = async (
@@ -29,7 +26,7 @@ const findOrCreateNewHost = async (
   refreshToken: string,
 ): Promise<Host> => {
   const body = { shortName, hostName, refreshToken };
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts`, {
+  const res = await fetch(`/api/hosts`, {
     method: 'POST',
     mode: 'no-cors',
     headers: {
