@@ -38,9 +38,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Plays.find returns a list of results
     // If no results found, list will be empty []
     // Check for response emptiness
-    const noPlays: Boolean = sortedPlays.length === 0;
     // Return error if plays is empty list
-    if (noPlays)
+    if (sortedPlays.length === 0)
       return res.status(400).json({
         success: false,
         message: `No queued Plays exist for host ${hostShortName} / hostId ${host.hostId}!`,
@@ -73,16 +72,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           throw new Error(e);
         });
       // If no Plays exist with that hostId, somethings wrong, return error
-      const noPlays: Boolean = sortedPlays.length === 0;
-      if (noPlays)
+      if (sortedPlays.length === 0)
         return res.status(400).json({
           success: false,
           message: `No Plays found for host ${hostShortName}, hostId ${host.hostId}!`,
         });
     }
-    return res.status(200).json({ success: true, message: sortedPlays });
   } catch (error: any) {
-    return res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
