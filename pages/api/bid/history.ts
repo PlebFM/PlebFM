@@ -5,31 +5,29 @@ import connectDB from '../../../middleware/mongodb';
 import { Bid } from '../../../models/Bid';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    try {
-        const { userId } = req.query;
+  try {
+    const { userId } = req.query;
 
-        const user = await Users.findOne({ userId });
-        if (!user)
-            return res
-                .status(404)
-                .json({ success: false, message: 'User not found!' });
+    const user = await Users.findOne({ userId });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found!' });
 
-        const plays = await Plays.find({ 'bids.userId': userId });
-        if (plays.length === 0)
-            return res
-                .status(404)
-                .json({ success: false, message: 'User not found!' });
+    const plays = await Plays.find({ 'bids.userId': userId });
+    if (plays.length === 0)
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found!' });
 
-        const bids = plays.filter((play: Play) =>
-            play.bids.filter((bid: Bid) => bid.user.userId === userId)
-        );
+    const bids = plays.filter((play: Play) =>
+      play.bids.filter((bid: Bid) => bid.user.userId === userId),
+    );
 
-        return res
-            .status(200)
-            .json({ success: true, new: false, message: bids });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, message: error.message });
-    }
+    return res.status(200).json({ success: true, new: false, message: bids });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 export default connectDB(handler);

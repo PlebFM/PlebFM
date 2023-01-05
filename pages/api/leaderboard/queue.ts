@@ -81,6 +81,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
-}
+};
 
 export default connectDB(handler);
