@@ -1,4 +1,3 @@
-import { AnyARecord } from 'dns';
 import { MongoError } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 import connectDB from '../../../middleware/mongodb';
