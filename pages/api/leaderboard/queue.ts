@@ -12,7 +12,8 @@ import Plays, { Play } from '../../../models/Play';
  */
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { hostShortName, next } = req.query;
+    const { hostShortName, next, limit } = req.query;
+    // const queryOptions = ;
     // Lookup host by shortname
     const host: Host = await Hosts.findOne({ shortName: 'atl' }).catch(e => {
       console.error(e);
@@ -26,10 +27,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     // Query Plays: Get play objs where hostId = host.hostId & status = queued
     // sort by highest runningTotal and oldest queueTimestamp if ties occur
-    let sortedPlays: Array<Play> = await Plays.find({
-      hostId: host.hostId,
-      status: 'queued',
-    })
+    let sortedPlays: Array<Play> = await Plays.find(
+      {
+        filter: {
+          hostId: host.hostId,
+          status: 'queued',
+        },
+      },
+      { options: { limit: limit } },
+    )
       .sort({ runningTotal: -1, queueTimestamp: 1 })
       .catch(e => {
         console.error(e);
