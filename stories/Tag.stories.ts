@@ -7,8 +7,31 @@ const meta: Meta<typeof Tag> = {
   component: Tag,
   tags: ['autodocs'],
   argTypes: {
+    text: {
+      name: 'Text',
+      type: { name: 'string', required: true },
+      defaultValue: 'Tag',
+      description: 'Text for the tag',
+      table: {
+        type: { summary: 'stringsdsd' },
+        defaultValue: { summary: 'Tag' },
+      },
+      control: {
+        type: 'text',
+      },
+    },
     color: {
-      control: 'text',
+      name: 'Color',
+      type: { name: 'string', required: false },
+      defaultValue: 'orange',
+      description:
+        'Choose a tag color from the PlebFM palette. Orange (default), purple, or teal.',
+      table: {
+        type: { summary: 'string' },
+        defaultValue: { summary: 'orange' },
+      },
+      control: 'select',
+      options: ['orange', 'purple', 'teal'],
     },
   },
 };
@@ -36,3 +59,18 @@ export const Teal: Story = {
     color: 'teal',
   },
 };
+
+// const Template = (args) => ({
+//   //👇 Your template goes here
+// });
+//
+// export const CustomSource = Template.bind({});
+// CustomSource.parameters = {
+//   docs: {
+//     source: {
+//       code: 'Your code snippet goes here.',
+//       language: "yml",
+//       type: "auto",
+//     },
+//   },
+// };

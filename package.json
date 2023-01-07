@@ -10,14 +10,12 @@
     "prepare": "npx husky install",
     "format": "npx prettier --write .",
     "pretty-quick": "npx pretty-quick --staged",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
     "storybook": "concurrently \"npm:watch:*\"",
     "build-storybook": "concurrently \"npm:build:*\"",
     "build:css": "npx tailwindcss -i ./src/tailwind.css -o ./public/tailwind.css",
     "build:storybook": "storybook build",
     "watch:css": "npx tailwindcss -i ./styles/globals.css -o ./public/globals.css --watch",
-    "watch:storybook": "storybook dev -p 6006"
+    "watch:storybook": "storybook dev -p 6007"
   },
   "dependencies": {
     "@bitcoin-design/bitcoin-icons-react": "^0.1.9",
