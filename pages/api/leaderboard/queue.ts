@@ -26,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         message: 'Expected query param hostShortName!',
       });
     }
-    // Lookup host by shortname
+    // Lookup host
     const host: Host = await Hosts.findOne({ shortName: hostShortName }).catch(
       e => {
         console.error(e);
