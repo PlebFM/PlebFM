@@ -1,4 +1,6 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c8e78b64-9e0b-482a-96ee-2155db9c4bef/deploy-status)](https://app.netlify.com/sites/pleb-fm/deploys)
+![Builds](https://github.com/PlebFM/PlebFM/actions/workflows/build.yaml/badge.svg) [![Netlify Status](https://api.netlify.com/api/v1/badges/c8e78b64-9e0b-482a-96ee-2155db9c4bef/deploy-status)](https://app.netlify.com/sites/pleb-fm/deploys) 
+
+
 
 # Pleb.FM
 

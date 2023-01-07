@@ -1,4 +1,4 @@
-name: Build before merge
+name: Builds
 
 on:
   pull_request:
