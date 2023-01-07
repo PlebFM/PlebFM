@@ -11,6 +11,7 @@ import { getHost, getHosts } from '../../lib/hosts';
 import Checkout from '../../components/Checkout';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import Layout from '../../components/Layout';
 
 type Props = {
   params: {
@@ -67,23 +68,46 @@ export default function Bidding() {
   };
 
   if (!newUser && !userProfile.firstNym) {
-    return <LoadingSpinner />;
+    return (
+      <Layout>
+        <LoadingSpinner />
+      </Layout>
+    );
   } else if (newUser && !userProfile.firstNym) {
-    return <Onboarding generateUserFunc={generateUser} />;
+    return (
+      <Layout title="Welcome">
+        <Onboarding generateUserFunc={generateUser} />
+      </Layout>
+    );
   } else if (newUser && userProfile.firstNym) {
     return (
-      <OnboardingIdentity userProfile={userProfile} setNewUserFunc={setUser} />
+      <Layout
+        title={'Welcome, ' + userProfile.firstNym + ' ' + userProfile.lastNym}
+      >
+        <OnboardingIdentity
+          userProfile={userProfile}
+          setNewUserFunc={setUser}
+        />
+      </Layout>
     );
   } else {
     if (songChoice.length > 0)
       return (
-        <Checkout
-          song={JSON.parse(songChoice)}
-          parentCallback={setSongChoice}
-          slug={pathName || ''}
-        />
+        <Layout title="Checkout">
+          <Checkout
+            song={JSON.parse(songChoice)}
+            parentCallback={setSongChoice}
+            slug={pathName || ''}
+          />
+        </Layout>
       );
-    else return <Search setSong={setSongChoice} />;
+    else {
+      return (
+        <Layout title="Song Search">
+          <Search setSong={setSongChoice} />
+        </Layout>
+      );
+    }
   }
 }
 
