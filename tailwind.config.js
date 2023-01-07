@@ -5,6 +5,7 @@ module.exports = {
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
   ],
+  darkMode: ['class', '[data-mode="dark"]'],
   theme: {
     fontFamily: {
       sans: ['var(--font-manrope)', 'sans-serif'],

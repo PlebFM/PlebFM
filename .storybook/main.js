@@ -13,4 +13,5 @@ module.exports = {
   docs: {
     autodocs: 'tag',
   },
+  staticDirs: ['../public'],
 };
