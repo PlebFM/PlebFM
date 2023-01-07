@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Users from '../../../models/User';
 import Plays, { Play } from '../../../models/Play';
 import connectDB from '../../../middleware/mongodb';
-import { Bid } from '../../../models/Bid';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -14,14 +13,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .status(404)
         .json({ success: false, message: 'User not found!' });
 
-    const plays = await Plays.find({ 'bids.userId': userId });
+    const plays = await Plays.aggregate([
+      {
+        $project: {
+          bids: {
+            $filter: {
+              input: '$bids',
+              as: 'bid',
+              cond: { $eq: ['$$bid.userId', 'clcdgr6p90000x9f73yzr3mvk'] },
+            },
+          },
+        },
+      },
+    ]);
+
     if (plays.length === 0)
       return res
         .status(404)
         .json({ success: false, message: 'User not found!' });
 
     const bids = plays.filter((play: Play) =>
-      play.bids.filter((bid: Bid) => bid.user.userId === userId),
+      play.bids.filter((bid: any) => {
+        return bid.user.userId === userId;
+      }),
     );
 
     return res.status(200).json({ success: true, new: false, message: bids });
