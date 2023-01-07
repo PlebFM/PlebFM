@@ -13,7 +13,7 @@ const meta: Meta<typeof Tag> = {
       defaultValue: 'Tag',
       description: 'Text for the tag',
       table: {
-        type: { summary: 'stringsdsd' },
+        type: { summary: 'string' },
         defaultValue: { summary: 'Tag' },
       },
       control: {
