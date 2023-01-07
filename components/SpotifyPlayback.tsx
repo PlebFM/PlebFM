@@ -14,6 +14,13 @@ type Props = {
 
 // window.Spotify = window.Spotify || {Player: () => {}, Track: {}};
 
+const exampleUri = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
+const tempButtonStyle = {
+  backgroundColor: 'black',
+  borderStyle: 'solid',
+  borderColor: 'white',
+};
+
 export const WebPlayback = ({ token, paused, setPaused }: Props) => {
   const [is_active, setActive] = useState<boolean>(false);
   //@ts-ignore
@@ -54,7 +61,7 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
       const player = new window.Spotify.Player({
         name: 'Pleb.FM',
         getOAuthToken: cb => {
-          // console.log(token);
+          console.log('token: ', token);
           cb(token);
         },
         volume: 0.5,
@@ -80,6 +87,36 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
       player.addListener('ready', ({ device_id }) => {
         setDeviceId(device_id);
         console.log('Ready with Device ID', device_id);
+
+        const play = ({
+          spotify_uri,
+          playerInstance: {
+            _options: { getOAuthToken, device_id },
+          },
+        }: {
+          spotify_uri: string;
+          playerInstance: any;
+        }) => {
+          getOAuthToken((token: string) => {
+            console.log('doing fetch PUT');
+            fetch(
+              `https://api.spotify.com/v1/me/player/play?device_id=${device_id}`,
+              {
+                method: 'PUT',
+                body: JSON.stringify({ uris: [spotify_uri] }),
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+          });
+        };
+
+        play({
+          playerInstance: player,
+          spotify_uri: exampleUri,
+        });
       });
 
       player.addListener('not_ready', ({ device_id }) => {
@@ -97,15 +134,19 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
 
         player?.getCurrentState().then(state => {
           if (!state) {
+            console.log('state: ', state);
+            console.log('setting active to false');
             setActive(false);
           } else {
+            console.log('state: ', state);
+            console.log('setting active to true');
             setActive(true);
           }
         });
       });
       player.connect(); //.then(() => player.activateElement().then(() => console.log('activated')));
     };
-  }, [token]);
+  }, []);
 
   if (!player) {
     return (
@@ -129,6 +170,7 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
                 transferDevice(deviceId, token).then(x => console.log(x));
               console.log('clicked');
             }}
+            style={tempButtonStyle}
           >
             {'START'}
           </button>
@@ -137,15 +179,14 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
             onClick={() => {
               const addToQueue =
                 deviceId &&
-                addTrackToSpotifyQueue(
-                  'spotify:track:0AzD1FEuvkXP1verWfaZdv',
-                  deviceId,
-                  token,
-                ).then(res => console.log(res));
+                addTrackToSpotifyQueue(exampleUri, deviceId, token).then(res =>
+                  console.log(res),
+                );
               console.log('clicked');
             }}
+            style={tempButtonStyle}
           >
-            {'QUEUE CBAT'}
+            {'QUEUE SONG'}
           </button>
         </div>
       </>
@@ -155,7 +196,9 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
       <>
         <div>
           <div>{current_track?.name}</div>
+          <br />
           <div>{current_track?.artists[0].name}</div>
+          <br />
 
           {/* <button
                 onClick={() => {
@@ -170,13 +213,19 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
               if (paused)
                 player.resume().then(() => {
                   console.log('Toggled Resume!');
+                  setPaused(false);
                 });
               else {
                 player.pause().then(() => {
                   console.log('Toggled Paused!');
+                  setPaused(true);
                 });
               }
+              // player.togglePlay().then(() => {
+              //   console.log('Toggled playback!')
+              // });
             }}
+            style={tempButtonStyle}
           >
             {paused ? 'RESUME' : 'PAUSE'}
           </button>
