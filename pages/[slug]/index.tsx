@@ -8,6 +8,7 @@ import Onboarding from '../../components/Onboarding';
 import OnboardingIdentity from '../../components/OnboardingIdentity';
 import Search from '../../components/Search';
 import { getHost, getHosts } from '../../lib/hosts';
+import { updateFeed } from '../../lib/feed';
 import Checkout from '../../components/Checkout';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
@@ -40,6 +41,9 @@ export default function Bidding() {
     });
     const userData = await result.json();
     userData.user.color = userData.user.avatar;
+    const update = await updateFeed('join', pathName, userData.userId);
+    if (!update) console.log('Error');
+    console.log(update);
     let timer = setTimeout(() => {
       setUserProfile(userData.user);
       localStorage.setItem('userProfile', JSON.stringify(userData.user));

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "list": "cat $PWD/package.json | grep 'scripts' -A 11",
     "prepare": "npx husky install",
     "format": "npx prettier --write .",
     "pretty-quick": "npx pretty-quick --staged"
