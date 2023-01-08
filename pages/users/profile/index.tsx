@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import Tag from '../../../components/Tag';
 import NavBar from '../../../components/NavBar';
 import { dummyDataQueue, dummyDataPlayed } from '../../../data/dummy.data';
+import Layout from '../../../components/Layout';
 
 export type Track = {
   trackTitle: string;
@@ -40,7 +41,7 @@ export default function User() {
     useState<Track[]>(dummyDataPlayed);
 
   return (
-    <>
+    <Layout title="Your Profile">
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
           src={bokeh5}
@@ -192,6 +193,6 @@ export default function User() {
 
         <NavBar activeBtn="profile" />
       </div>
-    </>
+    </Layout>
   );
 }
