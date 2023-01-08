@@ -1,3 +1,4 @@
+import { MongoError } from 'mongodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 import connectDB from '../../../middleware/mongodb';
 import Hosts, { Host } from '../../../models/Host';
@@ -7,21 +8,34 @@ import Plays, { Play } from '../../../models/Play';
  * Optional: next
  * @param req
  * @param res
- * @returns HTTP Status Code <400 | 500 | 200>
+ * @returns HTTP Status Code <404 | 500 | 200>
  *          JSON { success: <true | false>, message: <'Error message' | sortedPlays> }
  */
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { hostShortName, next, limit } = req.query;
-    // const queryOptions = ;
+    if (req.method !== 'GET') {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid request method!',
+      });
+    }
+    const { hostShortName, next } = req.query;
+    if (!hostShortName) {
+      return res.status(404).json({
+        success: false,
+        message: 'Expected query param hostShortName!',
+      });
+    }
     // Lookup host by shortname
-    const host: Host = await Hosts.findOne({ shortName: 'atl' }).catch(e => {
-      console.error(e);
-      throw new Error(e);
-    });
+    const host: Host = await Hosts.findOne({ shortName: hostShortName }).catch(
+      e => {
+        console.error(e);
+        throw new Error(e);
+      },
+    );
     // If not host exists, return error
     if (!host)
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: `No host for given host shortName ${hostShortName}!`,
       });
@@ -41,12 +55,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         console.error(e);
         throw new Error(e);
       });
-    // Plays.find returns a list of results
-    // If no results found, list will be empty []
-    // Check for response emptiness
-    // Return error if plays is empty list
+    // Plays.find returns a list of results. If no results found, list will be empty []
+    // Check for response emptiness. Return error if plays is empty list
     if (sortedPlays.length === 0)
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: `No queued Plays exist for host ${hostShortName} / hostId ${host.hostId}!`,
       });
@@ -61,11 +73,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         { $set: { status: 'next' } },
       ).catch(e => {
         console.error(e);
-        throw new Error(e);
+        throw new MongoError(e);
       });
       // If nothing returned, then nothing was updated and thus nothing was found, return error
       if (!play)
-        return res.status(400).json({
+        return res.status(404).json({
           success: false,
           message: `No Play found for playId ${winner.playId} & host ${hostShortName}!`,
         });
@@ -75,11 +87,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .sort({ runningTotal: -1, queueTimestamp: 1 })
         .catch(e => {
           console.error(e);
-          throw new Error(e);
+          throw new MongoError(e);
         });
       // If no Plays exist with that hostId, somethings wrong, return error
       if (sortedPlays.length === 0)
-        return res.status(400).json({
+        return res.status(404).json({
           success: false,
           message: `No Plays found for host ${hostShortName}, hostId ${host.hostId}!`,
         });
