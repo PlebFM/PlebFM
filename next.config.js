@@ -12,6 +12,15 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/.well-known/nostr.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json',
+          },
+        ],
+      },
+      {
         source: '/:path*',
         headers: [
           { key: 'Cache-Control', value: 'no-store' },
