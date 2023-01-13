@@ -19,15 +19,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         message: 'Invalid request method!',
       });
     }
-    const { hostShortName, next } = req.query;
-    if (!hostShortName) {
+    const { shortName, next } = req.query;
+    if (!shortName) {
       return res.status(404).json({
         success: false,
-        message: 'Expected query param hostShortName!',
+        message: 'Expected query param shortName!',
       });
     }
     // Lookup host
-    const host: Host = await Hosts.findOne({ shortName: hostShortName }).catch(
+    const host: Host = await Hosts.findOne({ shortName: shortName }).catch(
       e => {
         console.error(e);
         throw new Error(e);
@@ -37,7 +37,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!host)
       return res.status(404).json({
         success: false,
-        message: `No host for given host shortName ${hostShortName}!`,
+        message: `No host for given host shortName ${shortName}!`,
       });
     // Query Plays: Get play objs where hostId = host.hostId & status = queued
     // sort by highest runningTotal and oldest queueTimestamp if ties occur
@@ -55,7 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (sortedPlays.length === 0)
       return res.status(404).json({
         success: false,
-        message: `No queued Plays exist for host ${hostShortName} / hostId ${host.hostId}!`,
+        message: `No queued Plays exist for host ${shortName} / hostId ${host.hostId}!`,
       });
     // Use "next=true" query param to toggle updating the queue
     if (next === 'true') {
@@ -74,7 +74,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (!play)
         return res.status(404).json({
           success: false,
-          message: `No Play found for playId ${winner.playId} & host ${hostShortName}!`,
+          message: `No Play found for playId ${winner.playId} & host ${shortName}!`,
         });
       // Query Plays: Get all Play objects where hostId = host.hostId
       // Include all statuses, sort by highest runningTotal and oldest queueTimestamp if ties occur
@@ -88,7 +88,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (sortedPlays.length === 0)
         return res.status(404).json({
           success: false,
-          message: `No Plays found for host ${hostShortName}, hostId ${host.hostId}!`,
+          message: `No Plays found for host ${shortName}, hostId ${host.hostId}!`,
         });
     }
   } catch (error: any) {

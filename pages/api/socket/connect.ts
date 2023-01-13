@@ -7,7 +7,7 @@ const socketHandler = async (_: NextApiRequest, res: NextApiResponse) => {
     if (!socket)
       return res
         .status(404)
-        .json({ success: false, message: 'FATAL: no socket exists on res!' });
+        .json({ success: false, message: 'FATAL: no socket exists!' });
 
     const socketServer: any = socket?.server ?? null;
     if (!socketServer)

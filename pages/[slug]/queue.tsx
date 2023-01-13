@@ -10,6 +10,8 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { User } from '../../models/User';
 import { Song } from '../../models/Song';
 import Layout from '../../components/Layout';
+import io from 'socket.io-client';
+let socket;
 
 // pleb.fm/bantam/queue
 export default function Queue() {
@@ -236,6 +238,7 @@ export default function Queue() {
       ],
     },
   ];
+
   // Used for frontend hydration
   type SongObject = {
     trackTitle: string;
@@ -258,6 +261,15 @@ export default function Queue() {
   const [loading, setLoading] = useState(false);
   const [bidders, setBidders] = useState<User[]>([]);
 
+  const socketInitializer = async () => {
+    await fetch('/api/socket/connect');
+    socket = io();
+
+    socket.on('connect', () => {
+      console.log('connected');
+    });
+  };
+
   useEffect(() => {
     setLoading(true);
     const userProfile = getUserProfileFromLocal();
@@ -275,6 +287,7 @@ export default function Queue() {
       const res = await fetch(`/api/spotify/getSong?${queryString}`, {
         headers: { 'Access-Control-Allow-Origin': '*' },
       });
+      console.log('getSong res', res);
       if (!res.ok) throw new Error('Failed to search song');
       const result = await res.json();
       // console.log('FETCH RES', result)
@@ -287,6 +300,7 @@ export default function Queue() {
       });
       const response = await fetch(`/api/leaderboard/queue?${queries}`);
       const res = await response.json();
+      console.log('queue res', res);
       if (!res?.queue) {
         setLoading(false);
         return;
@@ -325,6 +339,7 @@ export default function Queue() {
     };
     getQueue();
   }, []);
+  socketInitializer();
 
   return (
     <Layout title="Queue">

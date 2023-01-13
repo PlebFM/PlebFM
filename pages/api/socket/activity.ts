@@ -4,33 +4,20 @@ import { Server } from 'socket.io';
 const handler = async (_: NextApiRequest, res: NextApiResponse) => {
   try {
     const socket: any = res?.socket ?? null;
-    if (!socket)
-      return res
-        .status(404)
-        .json({ success: false, message: 'FATAL: no socket exists on res!' });
-
-    const socketServer: any = socket?.server ?? null;
-    if (!socketServer)
+    const io: any = socket?.server?.io ?? null;
+    if (!io)
       return res.status(404).json({
         success: false,
-        message: 'FATAL: no server exists on socket!',
+        message:
+          'No socket connection present. Use /api/socket/connect to create websocket connection!',
       });
 
-    const serverIO: any = socketServer?.io ?? null;
-    if (!serverIO) {
-      console.info('Socket server initializing ...');
-      socket.server.io = new Server(socketServer);
-      console.info('Socket server initialized!');
-    }
-
-    const io = socket.server.io;
-    return await io.on('connection', (socket: any) => {
-      console.log('connect');
-      socket.broadcast.emit('a user connected');
-      socket.on('hello', (msg: any) => {
-        socket.emit(msg);
+    io.on('connection', (socket: any) => {
+      socket.on('input-change', (msg: any) => {
+        socket.broadcast.emit('update-input', msg);
       });
     });
+    res.end();
   } catch (error) {}
 };
 
