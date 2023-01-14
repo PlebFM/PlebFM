@@ -53,14 +53,39 @@ module.exports = {
         'glow-white': '0 0 10px hsla(0, 0%, 100%, 0.75)',
         'glow-orange': '0 0 10px hsla(35, 100%, 80%, 0.75)',
       },
+      boxShadow: {
+        'glow-white': '0 0 30px hsla(0, 0%, 100%, 0.25)',
+      },
       animation: {
         'spin-slow': 'spin 4s linear infinite',
         'fade-out': 'fadeout 8s both',
+        'electric-slide-1': '1.0s linear 0s 3 both electric-slide',
+        'electric-slide-2': '0.9s linear 0.2s 3 both electric-slide',
+        'electric-slide-3': '1.1s linear 0.4s 3 both electric-slide',
+        'electric-slide-4': '0.9s linear 0.6s 3 both electric-slide',
       },
       keyframes: {
         fadeout: {
           '0%, 75%': { opacity: 1.0 },
           '100%': { opacity: 0.0 },
+        },
+        'electric-slide': {
+          '0%': {
+            transform: 'translateX(-100%)',
+            opacity: 0,
+          },
+          '33.333%': {
+            transform: 'translateX(0%)',
+            opacity: 0.25,
+          },
+          '66.666%': {
+            transform: 'translateX(100%)',
+            opacity: 0.1,
+          },
+          '100%': {
+            transform: 'translateX(200%)',
+            opacity: 0,
+          },
         },
       },
     },
