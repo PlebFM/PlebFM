@@ -9,6 +9,7 @@ import querystring from 'querystring';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { User } from '../../models/User';
 import { Song } from '../../models/Song';
+import Layout from '../../components/Layout';
 
 // pleb.fm/bantam/queue
 export default function Queue() {
@@ -326,7 +327,7 @@ export default function Queue() {
   }, []);
 
   return (
-    <>
+    <Layout title="Queue">
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
           src={bokeh3}
@@ -417,6 +418,6 @@ export default function Queue() {
       )}
 
       <NavBar activeBtn="queue" />
-    </>
+    </Layout>
   );
 }
