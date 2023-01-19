@@ -15,7 +15,7 @@ export default function Layout(props: LayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/pleb-fm-favicon.svg" />
       </Head>
-      {props.children}
+      <main className="max-w-3xl m-auto fixed-w">{props.children}</main>
     </>
   );
 }
