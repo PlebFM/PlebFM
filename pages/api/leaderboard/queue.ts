@@ -84,7 +84,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       // Query Plays: Get all Play objects where hostId = host.hostId
       // Include all statuses, sort by highest runningTotal and oldest queueTimestamp if ties occur
-      sortedPlays = await Plays.find({ hostId: host.hostId })
+      sortedPlays = await Plays.find(
+        { hostId: host.hostId },
+        { options: { limit: limit ?? 10 } },
+      )
         .sort({ runningTotal: -1, queueTimestamp: 1 })
         .catch(e => {
           console.error(e);
