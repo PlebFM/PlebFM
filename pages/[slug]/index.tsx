@@ -1,6 +1,5 @@
 // pleb.fm/shiners
 // Bidding landing page
-
 // import { Host } from "../models/Host";
 import { notFound, usePathname } from 'next/navigation';
 import React, { useEffect } from 'react';

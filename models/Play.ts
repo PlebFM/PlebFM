@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { Bid } from './Bid';
+import BidSchema from './Bid';
 
 /**
  * Object created when bid/submit route called.
@@ -19,10 +19,10 @@ export type Play = {
   hostId: string;
   songId: string;
   status: string;
+  bids: typeof BidSchema[];
+  runningTotal: number | 0;
   queueTimestamp: string;
   playedTimestamp?: string;
-  bids: Array<Bid>;
-  runningTotal: number | 0;
 };
 
 const PlaySchema = new Schema<Play>({
@@ -44,19 +44,23 @@ const PlaySchema = new Schema<Play>({
     type: String,
     required: true,
   },
-  queueTimestamp: {
-    type: String,
-    required: true,
-  },
-  playedTimestamp: {
-    type: String,
-  },
   bids: {
-    type: new Array<Bid>(),
+    type: [BidSchema],
+    index: -1,
     required: true,
   },
   runningTotal: {
     type: Number,
+    index: -1,
+    required: true,
+  },
+  queueTimestamp: {
+    type: String,
+    index: 1,
+    required: true,
+  },
+  playedTimestamp: {
+    type: String,
   },
 });
 

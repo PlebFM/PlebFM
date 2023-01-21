@@ -63,15 +63,19 @@ export default function Search(props: SearchProps) {
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
           src={bokeh2}
-          alt=""
+          alt="xl"
           width="100"
           className="object-cover w-full h-full blur-2xl opacity-50"
         />
       </div>
 
       <div className="py-12 pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
-        <div className="px-6 py-12 space-y-6 flex flex-col fixed top-0 left-0 z-[99]">
-          <Image src={plebFMLogo} alt="PlebFM" className="w-3/5 mx-auto" />
+        <div className="px-6 py-0 space-y-6 flex flex-col top-0 left-0 z-[99]">
+          <Image
+            src={plebFMLogo}
+            alt="PlebFM"
+            className="w-auto mx-auto lg:w-full"
+          />
 
           <div className="text-left space-y-2">
             <label className="uppercase font-bold text-left tracking-widest text-xs">
