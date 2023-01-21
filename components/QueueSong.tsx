@@ -1,5 +1,6 @@
 import Tag from './Tag';
 import Avatar from './Avatar';
+import React from 'react';
 
 interface QueueSongProps {
   trackTitle: string;
@@ -16,6 +17,16 @@ interface QueueSongProps {
 }
 
 export default function QueueSong(props: QueueSongProps) {
+  const [boostFXPlayed, setBoostFXPlayed] = React.useState(false);
+
+  if (props.boosted) {
+    let boostFXTimer = setTimeout(() => {
+      setBoostFXPlayed(true);
+      console.log('boost FX played');
+      clearTimeout(boostFXTimer);
+    }, 2000);
+  }
+
   return (
     <div
       className={
@@ -71,14 +82,14 @@ export default function QueueSong(props: QueueSongProps) {
         </div>
         <p className="font-bold">{props.feeRate} sats</p>
       </div>
-      {props.boosted ? (
+      {props.boosted && !boostFXPlayed ? (
         <>
           <div className="text-white">
             <svg
               viewBox="0 0 1200 200"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-full absolute -top-[50%] left-0 opacity-75"
+              className="w-full absolute -top-[25%] left-0 opacity-75"
             >
               <path
                 d="M4 20C43.3333 41.6667 116 90.8 124 114L272 196C293.667 177 348.8 139.2 396 128L460 60H636L735 4L819 87C818.667 109 828.4 161.8 870 197C887 185.333 934.6 158.6 989 145C1043.4 131.4 1057 150.667 1057 162L1196 20"
@@ -95,7 +106,7 @@ export default function QueueSong(props: QueueSongProps) {
               viewBox="0 0 1200 200"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-full absolute -top-[50%] left-0 opacity-50"
+              className="w-full absolute -top-[25%] left-0 opacity-50"
             >
               <path
                 d="M1196 180C1207.5 156.5 1086 116.8 1094 140L1054 196L994 4C990.666 29.3333 970.8 83.9995 918 83.9995C865.2 83.9995 806.666 62.6661 784 51.9995L692 196C689.333 174 675.2 130.799 640 109.999L584 140C561 117 505.399 61.3995 466.999 22.9995C428.599 -15.4005 397 26.3328 386 51.9995L294 4L178 196L146 109.999L4 196"
