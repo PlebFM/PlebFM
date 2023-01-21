@@ -18,6 +18,7 @@ a {
   box-sizing: border-box;
 }
 
-html[data-mode='dark'] {
+html[data-mode='dark'],
+.dark {
   @apply bg-slate-800 text-white;
 }
