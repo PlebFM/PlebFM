@@ -4,8 +4,9 @@ import connectDB from '../../../middleware/mongodb';
 import Hosts, { Host } from '../../../models/Host';
 import Plays, { Play } from '../../../models/Play';
 /**
- * POST /api/leaderboard/queue?next=<undefined | "" | true | false>
- * Optional: next
+ * POST /api/leaderboard/queue
+ * Query - Optional: ?next=<undefined | "" | true | false>
+ * Query - Optional: limit=11+, default=10
  * @param req
  * @param res
  * @returns HTTP Status Code <404 | 500 | 200>
@@ -19,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         message: 'Invalid request method!',
       });
     }
-    const { hostShortName, next } = req.query;
+    const { hostShortName, limit, next } = req.query;
     if (!hostShortName) {
       return res.status(404).json({
         success: false,
@@ -27,12 +28,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
     // Lookup host by shortname
-    const host: Host = await Hosts.findOne({ shortName: hostShortName }).catch(
-      e => {
-        console.error(e);
-        throw new Error(e);
-      },
-    );
+    const host: Host = await Hosts.findOne({
+      shortName: hostShortName,
+    }).catch(e => {
+      console.error(e);
+      throw new Error(e);
+    });
     // If not host exists, return error
     if (!host)
       return res.status(404).json({
@@ -41,10 +42,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     // Query Plays: Get play objs where hostId = host.hostId & status = queued
     // sort by highest runningTotal and oldest queueTimestamp if ties occur
-    let sortedPlays: Array<Play> = await Plays.find({
-      hostId: host.hostId,
-      status: 'queued',
-    })
+    let sortedPlays: Array<Play> = await Plays.find(
+      {
+        filter: {
+          hostId: host.hostId,
+          status: 'queued',
+        },
+      },
+      { options: { limit: limit ?? 10 } },
+    )
       .sort({ runningTotal: -1, queueTimestamp: 1 })
       .catch(e => {
         console.error(e);
@@ -78,7 +84,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       // Query Plays: Get all Play objects where hostId = host.hostId
       // Include all statuses, sort by highest runningTotal and oldest queueTimestamp if ties occur
-      sortedPlays = await Plays.find({ hostId: host.hostId })
+      sortedPlays = await Plays.find(
+        { hostId: host.hostId },
+        { options: { limit: limit ?? 10 } },
+      )
         .sort({ runningTotal: -1, queueTimestamp: 1 })
         .catch(e => {
           console.error(e);
