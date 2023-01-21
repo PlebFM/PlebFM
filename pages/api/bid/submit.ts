@@ -26,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const newBid: Bid = {
       bidId: cuid(),
-      user: user,
+      userId: user.userId,
       bidAmount: bidAmount,
       timestamp: now,
       rHash: rHash,
