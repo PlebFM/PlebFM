@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import UserSchema, { User } from './User';
 
 /**
  * Object created when bid/submit route called.
@@ -12,7 +13,7 @@ import { Schema } from 'mongoose';
  */
 export type Bid = {
   bidId: string;
-  userId: string;
+  user: User;
   bidAmount: number;
   timestamp: string;
   rHash: string;
@@ -24,8 +25,8 @@ const BidSchema = new Schema<Bid>({
     unique: true,
     required: true,
   },
-  userId: {
-    type: String,
+  user: {
+    type: UserSchema,
     unique: false,
     required: true,
   },
