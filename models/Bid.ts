@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { User } from './User';
+import UserSchema, { User } from './User';
 
 /**
  * Object created when bid/submit route called.
@@ -26,7 +26,7 @@ const BidSchema = new Schema<Bid>({
     required: true,
   },
   user: {
-    type: Object,
+    type: UserSchema,
     unique: false,
     required: true,
   },
