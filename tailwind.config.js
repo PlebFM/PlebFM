@@ -53,14 +53,56 @@ module.exports = {
         'glow-white': '0 0 10px hsla(0, 0%, 100%, 0.75)',
         'glow-orange': '0 0 10px hsla(35, 100%, 80%, 0.75)',
       },
+      boxShadow: {
+        'glow-white': '0 0 30px hsla(0, 0%, 100%, 0.25)',
+      },
       animation: {
         'spin-slow': 'spin 4s linear infinite',
         'fade-out': 'fadeout 8s both',
+        'lightning-draw-1': '0.75s linear 0s 2 both lightning-draw-1',
+        'lightning-draw-2': '0.75s linear 0.25s 2 both lightning-draw-2',
+        'boost-glow-shudder':
+          '0.175s ease 0s 10 both shudder, 10s ease 0s 1 both boost-glow',
       },
       keyframes: {
         fadeout: {
           '0%, 75%': { opacity: 1.0 },
           '100%': { opacity: 0.0 },
+        },
+        'lightning-draw-1': {
+          '0%': {
+            'stroke-dashoffset': 800,
+          },
+          '100%': {
+            'stroke-dashoffset': -1500,
+          },
+        },
+        'lightning-draw-2': {
+          '0%': {
+            'stroke-dashoffset': 800,
+          },
+          '100%': {
+            'stroke-dashoffset': -1850,
+          },
+        },
+        shudder: {
+          '0%, 100%': {
+            transform: 'rotateZ(0deg)',
+          },
+          '25%': {
+            transform: 'rotateZ(0.5deg)',
+          },
+          '75%': {
+            transform: 'rotateZ(-0.5deg)',
+          },
+        },
+        'boost-glow': {
+          '0%': {
+            boxShadow: '0 0 30px hsla(0, 0%, 100%, 0.5)',
+          },
+          '100%': {
+            boxShadow: '0 0 30px hsla(0, 0%, 100%, 0.0)',
+          },
         },
       },
     },
