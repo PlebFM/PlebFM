@@ -21,33 +21,23 @@ const tempButtonStyle = {
   borderColor: 'white',
 };
 
+const track = {
+  name: '',
+  album: {
+    images: [{ url: '' }],
+  },
+  artists: [{ name: '' }],
+};
+
 export const WebPlayback = ({ token, paused, setPaused }: Props) => {
   const [is_active, setActive] = useState<boolean>(false);
+  console.log('is_active: ', is_active);
+  console.log('paused: ', paused);
   //@ts-ignore
   const [player, setPlayer] = useState<Spotify.Player | null>(null);
   //@ts-ignore
   const [current_track, setTrack] = useState<Spotify.Track | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
-  useEffect(() => {
-    if (!player) return;
-    if (paused) player.pause();
-    else player.resume();
-  }, [player, paused]);
-  useEffect(() => {
-    if (!player) return;
-    player.getCurrentState().then(state => {
-      if (!state) {
-        console.error('User is not playing music through the Web Playback SDK');
-        return;
-      }
-      const current_track = state.track_window.current_track;
-      const next_track = state.track_window.next_tracks[0];
-
-      console.log('Currently Playing', current_track);
-      console.log('Playing Next', next_track);
-      console.log('CURRENT STATE', state);
-    });
-  }, [player]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -57,7 +47,6 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
 
     //@ts-ignore
     window.onSpotifyWebPlaybackSDKReady = () => {
-      console.log('ready');
       const player = new window.Spotify.Player({
         name: 'Pleb.FM',
         getOAuthToken: cb => {
@@ -68,6 +57,45 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
       });
 
       setPlayer(player);
+
+      player.addListener('ready', ({ device_id }) => {
+        setDeviceId(device_id);
+        console.log('Ready with Device ID', device_id);
+
+        // const play = ({
+        //   spotify_uri,
+        //   playerInstance: {
+        //     _options: { getOAuthToken, device_id },
+        //   },
+        // }: {
+        //   spotify_uri: string;
+        //   playerInstance: any;
+        // }) => {
+        //   getOAuthToken((token: string) => {
+        //     console.log('doing fetch PUT');
+        //     fetch(
+        //       `https://api.spotify.com/v1/me/player/play?device_id=${device_id}`,
+        //       {
+        //         method: 'PUT',
+        //         body: JSON.stringify({ uris: [spotify_uri] }),
+        //         headers: {
+        //           'Content-Type': 'application/json',
+        //           Authorization: `Bearer ${token}`,
+        //         },
+        //       },
+        //     );
+        //   });
+        // };
+        //
+        // play({
+        //   playerInstance: player,
+        //   spotify_uri: exampleUri,
+        // });
+      });
+
+      player.addListener('not_ready', ({ device_id }) => {
+        console.log('Device ID has gone offline', device_id);
+      });
       player.on('playback_error', ({ message }) => {
         console.error('Failed to perform playback', message);
       });
@@ -84,45 +112,6 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
         console.error('Failed to initialize', message);
       });
 
-      player.addListener('ready', ({ device_id }) => {
-        setDeviceId(device_id);
-        console.log('Ready with Device ID', device_id);
-
-        const play = ({
-          spotify_uri,
-          playerInstance: {
-            _options: { getOAuthToken, device_id },
-          },
-        }: {
-          spotify_uri: string;
-          playerInstance: any;
-        }) => {
-          getOAuthToken((token: string) => {
-            console.log('doing fetch PUT');
-            fetch(
-              `https://api.spotify.com/v1/me/player/play?device_id=${device_id}`,
-              {
-                method: 'PUT',
-                body: JSON.stringify({ uris: [spotify_uri] }),
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-          });
-        };
-
-        play({
-          playerInstance: player,
-          spotify_uri: exampleUri,
-        });
-      });
-
-      player.addListener('not_ready', ({ device_id }) => {
-        console.log('Device ID has gone offline', device_id);
-      });
-
       player.addListener('player_state_changed', state => {
         console.log('state changed', state);
         if (!state) {
@@ -130,7 +119,8 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
         }
 
         setTrack(state.track_window.current_track);
-        if (state.paused !== paused) setPaused(state.paused);
+        // if (state.paused !== paused)
+        setPaused(state.paused);
 
         player?.getCurrentState().then(state => {
           if (!state) {
@@ -148,6 +138,28 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
     };
   }, []);
 
+  // useEffect(() => {
+  //   if (!player) return;
+  //   if (paused) player.pause();
+  //   else player.resume();
+  // }, [player, paused]);
+
+  // useEffect(() => {
+  //   if (!player) return;
+  //   player.getCurrentState().then(state => {
+  //     if (!state) {
+  //       console.error('User is not playing music through the Web Playback SDK');
+  //       return;
+  //     }
+  //     const current_track = state.track_window.current_track;
+  //     const next_track = state.track_window.next_tracks[0];
+  //
+  //     console.log('Currently Playing', current_track);
+  //     console.log('Playing Next', next_track);
+  //     console.log('CURRENT STATE', state);
+  //   });
+  // }, [player]);
+
   if (!player) {
     return (
       <>
@@ -162,13 +174,14 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
   } else if (!is_active) {
     return (
       <>
+        {/*}
         <div>
           <button
             onClick={() => {
               player.activateElement();
               deviceId &&
                 transferDevice(deviceId, token).then(x => console.log(x));
-              console.log('clicked');
+              console.log('START button clicked');
             }}
             style={tempButtonStyle}
           >
@@ -189,16 +202,28 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
             {'QUEUE SONG'}
           </button>
         </div>
+          */}
+        <div>
+          Instance not active. Transfer your playback using your spotify app
+        </div>
       </>
     );
   } else {
     return (
       <>
         <div>
-          <div>{current_track?.name}</div>
+          <div>Song: {current_track?.name}</div>
           <br />
-          <div>{current_track?.artists[0].name}</div>
+          <div>Artist: {current_track?.artists[0].name}</div>
           <br />
+
+          <button
+            onClick={() => {
+              player.togglePlay();
+            }}
+          >
+            {paused ? 'Play' : 'Pause'}
+          </button>
 
           {/* <button
                 onClick={() => {
@@ -208,14 +233,18 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
                 &lt;&lt;
               </button> */}
 
-          <button
+          {/* <button
             onClick={() => {
-              if (paused)
-                player.resume().then(() => {
-                  console.log('Toggled Resume!');
-                  setPaused(false);
-                });
-              else {
+              if (paused) {
+                player
+                  .resume()
+                  .then(data => {
+                    console.log('data: ', data);
+                    console.log('Toggled Resume!');
+                    setPaused(false);
+                  })
+                  .catch(error => console.log('myError: ', error));
+              } else {
                 player.pause().then(() => {
                   console.log('Toggled Paused!');
                   setPaused(true);
@@ -229,6 +258,8 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
           >
             {paused ? 'RESUME' : 'PAUSE'}
           </button>
+          <br />
+          <div>paused state: {paused ? 'true' : 'false'}</div> */}
 
           {/* <button
                 onClick={() => {
