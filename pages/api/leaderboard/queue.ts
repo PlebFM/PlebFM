@@ -3,15 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import connectDB from '../../../middleware/mongodb';
 import Hosts, { Host } from '../../../models/Host';
 import Plays, { Play } from '../../../models/Play';
-/**
- * POST /api/leaderboard/queue
- * Query - Optional: ?next=<undefined | "" | true | false>
- * Query - Optional: limit=11+, default=10
- * @param req
- * @param res
- * @returns HTTP Status Code <404 | 500 | 200>
- *          JSON { success: <true | false>, message: <'Error message' | sortedPlays> }
- */
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET')
