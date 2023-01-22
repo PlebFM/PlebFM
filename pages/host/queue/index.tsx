@@ -6,7 +6,7 @@ import Avatar from '../../../components/Avatar';
 import qr from '../../../public/qr.png';
 import { feed, dummyData } from '../../../data/dummy.data1.js';
 import { getSession, useSession } from 'next-auth/react';
-import { WebPlayback } from '../../../components/SpotifyPlayback';
+import WebPlayback from '../../../components/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
 
 export default function Queue() {
@@ -95,13 +95,7 @@ export default function Queue() {
             </div>
           </div>
           <div className="text-3xl p-16 flex flex-col space-y-6">
-            {accessToken && (
-              <WebPlayback
-                paused={paused}
-                setPaused={setPaused}
-                token={accessToken}
-              />
-            )}
+            {accessToken && <WebPlayback token={accessToken} />}
             <p>Song Title</p>
             <p className="font-bold">Artist name</p>
             <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative ">
