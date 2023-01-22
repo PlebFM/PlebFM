@@ -64,11 +64,19 @@ const SpotifyAuthButton = () => {
 
   if (session) {
     return (
-      <>
-        <p>Signed in as {session?.user?.email ?? 'Spotify User'}</p> <br />
-        <button onClick={() => signOut()}>Sign out</button>
-        <p>Host Obj: {host ? JSON.stringify(host) : '...'}</p> <br />
-      </>
+      <div className="flex flex-col space-y-8">
+        <p>Signed in as {session?.user?.email ?? 'Spotify User'}</p>
+
+        <Button onClick={() => signOut()}>Sign Out</Button>
+
+        <p>Host Obj:</p>
+
+        <code className="bg-pfm-purple-100 p-4">
+          {host ? JSON.stringify(host) : '...'}
+        </code>
+
+        <Button href="/host/queue">Go to Leaderboard</Button>
+      </div>
     );
   }
   return (
