@@ -96,8 +96,6 @@ export default function Queue() {
           </div>
           <div className="text-3xl p-16 flex flex-col space-y-6">
             {accessToken && <WebPlayback token={accessToken} />}
-            <p>Song Title</p>
-            <p className="font-bold">Artist name</p>
             <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative ">
               <div
                 className="bg-pfm-orange-500 h-full rounded-full"

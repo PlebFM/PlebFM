@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { addTrackToSpotifyQueue } from '../lib/spotify';
 
 const track = {
   name: '',
@@ -16,6 +17,7 @@ function WebPlayback(props: WebPlaybackProps) {
   const [is_paused, setPaused] = useState(false);
   const [is_active, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
+  const [device_id, setDeviceId] = useState('');
   const [current_track, setTrack] = useState(track);
 
   useEffect(() => {
@@ -40,6 +42,7 @@ function WebPlayback(props: WebPlaybackProps) {
 
       player.addListener('ready', ({ device_id }) => {
         console.log('Ready with Device ID', device_id);
+        setDeviceId(device_id);
       });
 
       player.addListener('not_ready', ({ device_id }) => {
@@ -62,6 +65,9 @@ function WebPlayback(props: WebPlaybackProps) {
       player.connect();
     };
   }, []);
+
+  const searchResultURI = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
+  const urlEncodedSearchResultURI = 'spotify%3Atrack%3A2rBHnIxbhkMGLpqmsNX91M';
 
   if (!is_active) {
     return (
@@ -120,8 +126,27 @@ function WebPlayback(props: WebPlaybackProps) {
                 &gt;&gt;
               </button>
             </div>
+            <br />
+
+            {/* Add song to spotify queue */}
+            <p>Search result: Bombtrack by Rage Against The Machine</p>
+            <p>Search result URI: {searchResultURI}</p>
+            <button
+              onClick={() => {
+                addTrackToSpotifyQueue(
+                  urlEncodedSearchResultURI,
+                  props.token,
+                  device_id,
+                );
+              }}
+              style={{ borderWidth: '5px' }}
+            >
+              Add track to spotify queue
+            </button>
           </div>
         </div>
+        <br />
+        <br />
       </>
     );
   }
