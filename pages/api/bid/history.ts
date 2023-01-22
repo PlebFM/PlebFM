@@ -4,24 +4,20 @@ import connectDB from '../../../middleware/mongodb';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
+    if (req.method !== 'GET')
+      return res.status(403).json({ success: false, error: 'Forbidden!' });
+
     const { userId, limit } = req.query;
-
-    // const user = await Users.findOne({ userId });
-    // if (!user)
-    //     return res
-    //         .status(404)
-    //         .json({ success: false, message: 'User not found!' });
-
-    const mongooseFilter = {
+    const queryArgs = {
       bids: { $elemMatch: { 'user.userId': userId } },
       options: {},
     };
     if (limit && limit !== '')
-      mongooseFilter.options = {
-        limit: limit,
+      queryArgs.options = {
+        limit: Number(limit),
       };
 
-    const plays = await Plays.find(mongooseFilter);
+    const plays = await Plays.find(queryArgs);
     if (plays.length === 0)
       return res
         .status(404)
