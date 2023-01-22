@@ -12,6 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(403).json({ success: false, error: 'Forbidden!' });
 
     const { hostId, userId, rHash, songId, bidAmount } = req.body;
+    const { isNew } = req.query;
     const now: string = Date.now().toString();
 
     const host = await Hosts.findOne({ shortName: hostId });
@@ -43,7 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .status(400)
         .json({ success: false, error: 'Duplicate rHash found!' });
 
-    const newPlay: Play = await Plays.create({
+    const play: Play = await Plays.create({
       playId: cuid(),
       hostId: host.hostId,
       songId: songId,
@@ -57,9 +58,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       throw new Error(e);
     });
 
-    return res
-      .status(200)
-      .json({ success: true, new: true, instance: newPlay });
+    return res.status(200).json({ success: true, message: play });
   } catch (error: any) {
     return res.status(400).json({ success: false, error: error.message });
   }

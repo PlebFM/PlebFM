@@ -8,22 +8,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(403).json({ success: false, error: 'Forbidden!' });
 
     const { userId, limit } = req.query;
+
+    let queryLimit;
+    const limitCast = Number(limit);
     const queryArgs = {
       bids: { $elemMatch: { 'user.userId': userId } },
       options: {},
     };
-    if (limit && limit !== '')
+    if (limit !== '' && !isNaN(limitCast)) {
+      queryLimit = limitCast;
       queryArgs.options = {
-        limit: Number(limit),
+        limit: queryLimit,
       };
+    }
 
+    // possibly delete queryArgs.options?
     const plays = await Plays.find(queryArgs);
     if (plays.length === 0)
       return res
         .status(404)
         .json({ success: false, message: 'No plays found for user!' });
 
-    return res.status(200).json({ success: true, new: false, message: plays });
+    return res.status(200).json({ success: true, message: plays });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
