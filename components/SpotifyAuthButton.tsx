@@ -2,6 +2,7 @@ import { Session } from 'next-auth';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Hosts, { Host } from '../models/Host';
+import Button from './Button';
 
 const findHost = async (refreshToken: string) => {
   console.log('FIND HOST', refreshToken);
@@ -72,9 +73,7 @@ const SpotifyAuthButton = () => {
   }
   return (
     <>
-      <p>Not signed in</p>
-      <br />
-      <button onClick={() => signIn('spotify')}>Sign in</button>
+      <Button onClick={() => signIn('spotify')}>Sign In</Button>
     </>
   );
 };
