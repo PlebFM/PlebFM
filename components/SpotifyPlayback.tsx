@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Button from './Button';
+import {
+  PlayIcon,
+  PauseIcon,
+  ForwardIcon,
+  BackwardIcon,
+} from '@heroicons/react/24/outline';
 
 const track = {
   name: '',
@@ -17,6 +24,7 @@ function WebPlayback(props: WebPlaybackProps) {
   const [is_active, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
   const [current_track, setTrack] = useState(track);
+  const [songProgress, setSongProgress] = useState(0.1);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -65,64 +73,78 @@ function WebPlayback(props: WebPlaybackProps) {
 
   if (!is_active) {
     return (
-      <>
-        <div className="container">
-          <div className="main-wrapper">
-            <b>
-              {' '}
-              Instance not active. Transfer your playback using your Spotify app{' '}
-            </b>
-          </div>
-        </div>
-      </>
+      <div className="text-3xl p-16 flex flex-col space-y-6 mb-8">
+        Instance not active. Transfer your playback using your Spotify app.
+      </div>
     );
   } else {
     return (
-      <>
-        <div className="container">
-          <div className="main-wrapper">
-            <img
-              src={current_track.album.images[0].url}
-              className="now-playing__cover"
-              alt=""
-            />
+      <div className="text-3xl p-8 flex flex-col space-y-6 mb-32">
+        <img
+          src={current_track.album.images[0].url}
+          className="w-64 h-64"
+          alt={current_track.name + ' album art'}
+        />
 
-            <div className="now-playing__side">
-              <div className="now-playing__name">{current_track.name}</div>
-              <div className="now-playing__artist">
-                {current_track.artists[0].name}
-              </div>
+        <p>{current_track.name}</p>
 
-              <button
-                className="btn-spotify"
-                onClick={() => {
-                  if (player) player.previousTrack();
-                }}
-              >
-                &lt;&lt;
-              </button>
+        <p className="font-bold">{current_track.artists[0].name}</p>
 
-              <button
-                className="btn-spotify"
-                onClick={() => {
-                  if (player) player.togglePlay();
-                }}
-              >
-                {is_paused ? 'PLAY' : 'PAUSE'}
-              </button>
-
-              <button
-                className="btn-spotify"
-                onClick={() => {
-                  if (player) player.nextTrack();
-                }}
-              >
-                &gt;&gt;
-              </button>
-            </div>
-          </div>
+        <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative ">
+          <div
+            className="bg-pfm-orange-500 h-full rounded-full"
+            style={{
+              width: songProgress * 100 + '%',
+              transition: '2s ease',
+            }}
+          ></div>
+          <div
+            className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
+            style={{
+              left: songProgress * 100 - 1.5 + '%',
+              transition: '2s ease',
+            }}
+          ></div>
         </div>
-      </>
+
+        <div className="flex flex-row space-x-2">
+          <Button
+            className="btn-spotify"
+            size="small"
+            icon={<BackwardIcon />}
+            iconOnly={true}
+            onClick={() => {
+              if (player) player.previousTrack();
+            }}
+          >
+            Previous Song
+          </Button>
+
+          <Button
+            className="btn-spotify"
+            size="small"
+            icon={is_paused ? <PlayIcon /> : <PauseIcon />}
+            onClick={() => {
+              if (player) player.togglePlay();
+            }}
+            iconOnly={true}
+          >
+            {is_paused ? 'Play' : 'Pause'}
+          </Button>
+
+          <Button
+            className="btn-spotify"
+            size="small"
+            icon={<ForwardIcon />}
+            iconOnly={true}
+            onClick={() => {
+              if (player) player.nextTrack();
+            }}
+          >
+            Next Song
+          </Button>
+        </div>
+      </div>
     );
   }
 }

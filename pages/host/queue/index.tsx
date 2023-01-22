@@ -94,27 +94,8 @@ export default function Queue() {
               ))}
             </div>
           </div>
-          <div className="text-3xl p-16 flex flex-col space-y-6">
-            {accessToken && <WebPlayback token={accessToken} />}
-            <p>Song Title</p>
-            <p className="font-bold">Artist name</p>
-            <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative ">
-              <div
-                className="bg-pfm-orange-500 h-full rounded-full"
-                style={{
-                  width: songProgress * 100 + '%',
-                  transition: '2s ease',
-                }}
-              ></div>
-              <div
-                className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
-                style={{
-                  left: songProgress * 100 - 1.5 + '%',
-                  transition: '2s ease',
-                }}
-              ></div>
-            </div>
-          </div>
+
+          {accessToken && <WebPlayback token={accessToken} />}
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">
           <div className="text-white relative z-50 flex flex-col items-center min-h-screen font-thin bg-pfm-purple-300/50">
