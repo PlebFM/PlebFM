@@ -9,20 +9,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { userId, limit } = req.query;
 
-    let queryLimit;
     const limitCast = Number(limit);
     const queryArgs = {
-      bids: { $elemMatch: { 'user.userId': userId } },
+      bids: { $elemMatch: { 'user.userId': 'clb9vyqmg0007ufyxb5049st0' } },
       options: {},
     };
     if (limit !== '' && !isNaN(limitCast)) {
-      queryLimit = limitCast;
       queryArgs.options = {
-        limit: queryLimit,
+        limit: limitCast,
       };
-    }
+    } else delete queryArgs.options;
 
-    // possibly delete queryArgs.options?
     const plays = await Plays.find(queryArgs);
     if (plays.length === 0)
       return res
