@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next-dev-https --https --port 3000",
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 next-dev-https --https --port 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -38,6 +38,7 @@
     "next-dev-https": "^0.1.1",
     "node-fetch": "^3.3.0",
     "postcss": "^8.4.19",
+    "qrcode.react": "^3.1.0",
     "react": "18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "18.2.0",
