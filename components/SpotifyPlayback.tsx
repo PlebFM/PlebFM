@@ -1,85 +1,56 @@
-import { getSession, signOut } from 'next-auth/react';
-import Script from 'next/script';
-import { useState, useEffect, SetStateAction, Dispatch } from 'react';
-import { addTrackToSpotifyQueue, transferDevice } from '../lib/spotify';
+import React, { useState, useEffect } from 'react';
+import Button from './Button';
+import {
+  PlayIcon,
+  PauseIcon,
+  ForwardIcon,
+  BackwardIcon,
+} from '@heroicons/react/24/outline';
+import { addTrackToSpotifyQueue, transferPlayback } from '../lib/spotify';
 
-type Props = {
-  token: string;
-  paused: boolean;
-  setPaused: Dispatch<SetStateAction<boolean>>;
+const track = {
+  name: '',
+  album: {
+    images: [{ url: '' }],
+  },
+  artists: [{ name: '' }],
 };
-// declare global {
-//   interface Window { Spotify: {Player: ({}) => void,  Track: {}}; }
-// }
 
-// window.Spotify = window.Spotify || {Player: () => {}, Track: {}};
+interface WebPlaybackProps {
+  token: string;
+}
 
-export const WebPlayback = ({ token, paused, setPaused }: Props) => {
-  const [is_active, setActive] = useState<boolean>(false);
-  //@ts-ignore
-  const [player, setPlayer] = useState<Spotify.Player | null>(null);
-  //@ts-ignore
-  const [current_track, setTrack] = useState<Spotify.Track | null>(null);
-  const [deviceId, setDeviceId] = useState<string | null>(null);
-  useEffect(() => {
-    if (!player) return;
-    if (paused) player.pause();
-    else player.resume();
-  }, [player, paused]);
-  useEffect(() => {
-    if (!player) return;
-    player.getCurrentState().then(state => {
-      if (!state) {
-        console.error('User is not playing music through the Web Playback SDK');
-        return;
-      }
-      const current_track = state.track_window.current_track;
-      const next_track = state.track_window.next_tracks[0];
-
-      console.log('Currently Playing', current_track);
-      console.log('Playing Next', next_track);
-      console.log('CURRENT STATE', state);
-    });
-  }, [player]);
+function WebPlayback(props: WebPlaybackProps) {
+  const [is_paused, setPaused] = useState(false);
+  const [is_active, setActive] = useState(false);
+  const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
+  const [device_id, setDeviceId] = useState('');
+  const [current_track, setTrack] = useState(track);
+  const [songProgress, setSongProgress] = useState(0.1);
 
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.async = true;
+
     document.body.appendChild(script);
 
-    //@ts-ignore
     window.onSpotifyWebPlaybackSDKReady = () => {
-      console.log('ready');
       const player = new window.Spotify.Player({
-        name: 'Pleb.FM',
+        name: 'PlebFM',
         getOAuthToken: cb => {
-          // console.log(token);
-          cb(token);
+          cb(props.token);
         },
         volume: 0.5,
       });
 
+      console.log(player);
+
       setPlayer(player);
-      player.on('playback_error', ({ message }) => {
-        console.error('Failed to perform playback', message);
-      });
-
-      player.on('account_error', ({ message }) => {
-        console.error('Failed to validate Spotify account', message);
-      });
-
-      player.on('authentication_error', ({ message }) => {
-        console.error('Failed to authenticate', message);
-      });
-
-      player.on('initialization_error', ({ message }) => {
-        console.error('Failed to initialize', message);
-      });
 
       player.addListener('ready', ({ device_id }) => {
-        setDeviceId(device_id);
         console.log('Ready with Device ID', device_id);
+        setDeviceId(device_id);
       });
 
       player.addListener('not_ready', ({ device_id }) => {
@@ -87,109 +58,144 @@ export const WebPlayback = ({ token, paused, setPaused }: Props) => {
       });
 
       player.addListener('player_state_changed', state => {
-        console.log('state changed', state);
         if (!state) {
           return;
         }
 
         setTrack(state.track_window.current_track);
-        if (state.paused !== paused) setPaused(state.paused);
+        setPaused(state.paused);
 
-        player?.getCurrentState().then(state => {
-          if (!state) {
-            setActive(false);
-          } else {
-            setActive(true);
-          }
+        player.getCurrentState().then(state => {
+          !state ? setActive(false) : setActive(true);
         });
       });
-      player.connect(); //.then(() => player.activateElement().then(() => console.log('activated')));
-    };
-  }, [token]);
 
-  if (!player) {
+      player.connect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (device_id) {
+      transferPlayback(device_id, props.token);
+    }
+  }, [device_id]);
+
+  const searchResultURI = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
+
+  if (!is_active) {
     return (
-      <>
-        <Script src="https://sdk.scdn.co/spotify-player.js" />
-        <div>
-          <div>
-            <b>Spotify Player is null</b>
-          </div>
-        </div>
-      </>
-    );
-  } else if (!is_active) {
-    return (
-      <>
-        <div>
-          <button
+      <div className="text-3xl p-16 flex flex-col space-y-6 mb-8">
+        Instance not active. Transfer your playback using your Spotify app, or
+        click the button below.
+        <div className="flex flex-col space-y-2 mt-3">
+          {/* Transfer playback to PlebFM  */}
+          <Button
+            size={'small'}
             onClick={() => {
-              player.activateElement();
-              deviceId &&
-                transferDevice(deviceId, token).then(x => console.log(x));
-              console.log('clicked');
+              transferPlayback(device_id, props.token);
+              console.log('transferPlayback called');
             }}
           >
-            {'START'}
-          </button>
-          <br />
-          <button
-            onClick={() => {
-              const addToQueue =
-                deviceId &&
-                addTrackToSpotifyQueue(
-                  'spotify:track:0AzD1FEuvkXP1verWfaZdv',
-                  deviceId,
-                  token,
-                ).then(res => console.log(res));
-              console.log('clicked');
-            }}
-          >
-            {'QUEUE CBAT'}
-          </button>
+            Transfer playback to PlebFM
+          </Button>
         </div>
-      </>
+      </div>
     );
   } else {
     return (
       <>
-        <div>
-          <div>{current_track?.name}</div>
-          <div>{current_track?.artists[0].name}</div>
+        <div className="text-3xl p-8 flex flex-col space-y-6 mb-32">
+          <img
+            src={current_track.album.images[0].url}
+            className="w-64 h-64"
+            alt={current_track.name + ' album art'}
+          />
 
-          {/* <button
-                onClick={() => {
-                  player.previousTrack();
-                }}
-              >
-                &lt;&lt;
-              </button> */}
+          <p>{current_track.name}</p>
 
-          <button
-            onClick={() => {
-              if (paused)
-                player.resume().then(() => {
-                  console.log('Toggled Resume!');
+          <p className="font-bold">{current_track.artists[0].name}</p>
+
+          <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative ">
+            <div
+              className="bg-pfm-orange-500 h-full rounded-full"
+              style={{
+                width: songProgress * 100 + '%',
+                transition: '2s ease',
+              }}
+            ></div>
+            <div
+              className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
+              style={{
+                left: songProgress * 100 - 1.5 + '%',
+                transition: '2s ease',
+              }}
+            ></div>
+          </div>
+
+          <div className="flex flex-row space-x-2">
+            <Button
+              className="btn-spotify"
+              size="small"
+              icon={<BackwardIcon />}
+              iconOnly={true}
+              onClick={() => {
+                if (player) player.previousTrack();
+              }}
+            >
+              Previous Song
+            </Button>
+
+            <Button
+              className="btn-spotify"
+              size="small"
+              icon={is_paused ? <PlayIcon /> : <PauseIcon />}
+              onClick={() => {
+                if (player) player.togglePlay();
+              }}
+              iconOnly={true}
+            >
+              {is_paused ? 'Play' : 'Pause'}
+            </Button>
+
+            <Button
+              className="btn-spotify"
+              size="small"
+              icon={<ForwardIcon />}
+              iconOnly={true}
+              onClick={() => {
+                if (player) player.nextTrack();
+              }}
+            >
+              Next Song
+            </Button>
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            {/* Add song to spotify queue */}
+            <p className="text-xs">
+              Search result: Bombtrack by Rage Against The Machine
+            </p>
+            <p className="text-xs">Search result URI: {searchResultURI}</p>
+            <Button
+              size={'small'}
+              onClick={() => {
+                addTrackToSpotifyQueue(
+                  searchResultURI,
+                  device_id,
+                  props.token,
+                ).then(res => {
+                  if (res.status !== 202)
+                    alert('failed adding to spotify queue');
                 });
-              else {
-                player.pause().then(() => {
-                  console.log('Toggled Paused!');
-                });
-              }
-            }}
-          >
-            {paused ? 'RESUME' : 'PAUSE'}
-          </button>
-
-          {/* <button
-                onClick={() => {
-                  player.nextTrack();
-                }}
-              >
-                &gt;&gt;
-              </button> */}
+              }}
+            >
+              Add track
+            </Button>
+          </div>
         </div>
       </>
     );
   }
-};
+}
+
+export default WebPlayback;

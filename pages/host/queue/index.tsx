@@ -6,7 +6,7 @@ import Avatar from '../../../components/Avatar';
 import qr from '../../../public/qr.png';
 import { feed, dummyData } from '../../../data/dummy.data1.js';
 import { getSession, useSession } from 'next-auth/react';
-import { WebPlayback } from '../../../components/SpotifyPlayback';
+import WebPlayback from '../../../components/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
 
 export default function Queue() {
@@ -56,70 +56,46 @@ export default function Queue() {
 
       <div className="flex flex-row w-full h-screen justify-between relative z-[99] overflow-hidden">
         <div className="w-1/2 h-full text-white flex flex-col justify-between">
-          <div className="flex flex-row justify-between p-16 pt-0 pr-0">
-            <div className="bg-[#e4f1fb] p-4 mt-16 w-[200px] h-[200px] inline mix-blend-multiply rounded-2xl">
-              <Image
-                src={qr}
-                alt="https://pleb.fm/atl"
-                width="200"
-                height="200"
-                className="w-full"
-              />
-            </div>
-            <div className="w-3/5 flex flex-col space-y-2 pr-4 pt-4">
-              {feed.map((update, key) => (
-                <div
-                  key={key}
-                  className={
-                    'flex space-x-4 justify-start items-center overflow-hidden bg-pfm-purple-400/50 h-12 rounded p-4 animate-fade-out'
-                  }
-                >
-                  <div className="w-12">
-                    <Avatar
-                      firstNym={update.user.firstNym}
-                      lastNym={update.user.lastNym}
-                      color={update.user.color}
-                      size="xs"
-                    />
-                  </div>
-                  <p className="w-[300%]">
-                    <strong>
-                      {update.user.firstNym} {update.user.lastNym}
-                    </strong>{' '}
-                    {update.action}{' '}
-                    {(update.song + ' by ' + update.artist).slice(0, 12) +
-                      '...'}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/*<div className="flex flex-row justify-between p-16 pt-0 pr-0">*/}
+          {/*  <div className="bg-[#e4f1fb] p-4 mt-16 w-[200px] h-[200px] inline mix-blend-multiply rounded-2xl">*/}
+          {/*    <Image*/}
+          {/*      src={qr}*/}
+          {/*      alt="https://pleb.fm/atl"*/}
+          {/*      width="200"*/}
+          {/*      height="200"*/}
+          {/*      className="w-full"*/}
+          {/*    />*/}
+          {/*  </div>*/}
+          {/*  <div className="w-3/5 flex flex-col space-y-2 pr-4 pt-4">*/}
+          {/*    {feed.map((update, key) => (*/}
+          {/*      <div*/}
+          {/*        key={key}*/}
+          {/*        className={*/}
+          {/*          'flex space-x-4 justify-start items-center overflow-hidden bg-pfm-purple-400/50 h-12 rounded p-4 animate-fade-out'*/}
+          {/*        }*/}
+          {/*      >*/}
+          {/*        <div className="w-12">*/}
+          {/*          <Avatar*/}
+          {/*            firstNym={update.user.firstNym}*/}
+          {/*            lastNym={update.user.lastNym}*/}
+          {/*            color={update.user.color}*/}
+          {/*            size="xs"*/}
+          {/*          />*/}
+          {/*        </div>*/}
+          {/*        <p className="w-[300%]">*/}
+          {/*          <strong>*/}
+          {/*            {update.user.firstNym} {update.user.lastNym}*/}
+          {/*          </strong>{' '}*/}
+          {/*          {update.action}{' '}*/}
+          {/*          {(update.song + ' by ' + update.artist).slice(0, 12) +*/}
+          {/*            '...'}*/}
+          {/*        </p>*/}
+          {/*      </div>*/}
+          {/*    ))}*/}
+          {/*  </div>*/}
+          {/*</div>*/}
           <div className="text-3xl p-16 flex flex-col space-y-6">
-            {accessToken && (
-              <WebPlayback
-                paused={paused}
-                setPaused={setPaused}
-                token={accessToken}
-              />
-            )}
-            <p>Song Title</p>
-            <p className="font-bold">Artist name</p>
-            <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative ">
-              <div
-                className="bg-pfm-orange-500 h-full rounded-full"
-                style={{
-                  width: songProgress * 100 + '%',
-                  transition: '2s ease',
-                }}
-              ></div>
-              <div
-                className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
-                style={{
-                  left: songProgress * 100 - 1.5 + '%',
-                  transition: '2s ease',
-                }}
-              ></div>
-            </div>
+            {accessToken && <WebPlayback token={accessToken} />}
           </div>
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">

@@ -1,6 +1,4 @@
 import { ReactNode } from 'react';
-import { webpack } from 'next/dist/compiled/webpack/webpack';
-import javascript = webpack.javascript;
 
 interface ButtonProps {
   href?: string;
@@ -13,7 +11,8 @@ interface ButtonProps {
   disabled?: boolean;
   vertical?: boolean;
   icon?: ReactNode;
-  onClick?: javascript;
+  onClick?: () => void;
+  iconOnly?: boolean;
 }
 
 export default function Button(props: ButtonProps) {
@@ -38,6 +37,9 @@ export default function Button(props: ButtonProps) {
   if (props.size === 'large') className += ' p-6 space-x-4 text-2xl';
   else if (props.size === 'small') className += ' p-3 space-x-2 text-base';
   else className += ' p-5 space-x-3 text-xl';
+
+  if (props.iconOnly) className += ' space-x-0';
+
   if (props.className) className += ' ' + props.className;
 
   const Icon = () => {
@@ -69,7 +71,9 @@ export default function Button(props: ButtonProps) {
   if (props.href) {
     return (
       <a href={props.href} className={className}>
-        <span>{props.children}</span>
+        <span className={props.iconOnly ? 'sr-only' : ''}>
+          {props.children}
+        </span>
         <Icon />
       </a>
     );
@@ -80,7 +84,9 @@ export default function Button(props: ButtonProps) {
         disabled={props.disabled}
         onClick={props.onClick}
       >
-        <span>{props.children}</span>
+        <span className={props.iconOnly ? 'sr-only' : ''}>
+          {props.children}
+        </span>
         <Icon />
       </button>
     );

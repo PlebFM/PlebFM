@@ -2,6 +2,7 @@ import { Session } from 'next-auth';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Hosts, { Host } from '../models/Host';
+import Button from './Button';
 
 const findHost = async (refreshToken: string) => {
   console.log('FIND HOST', refreshToken);
@@ -63,18 +64,24 @@ const SpotifyAuthButton = () => {
 
   if (session) {
     return (
-      <>
-        <p>Signed in as {session?.user?.email ?? 'Spotify User'}</p> <br />
-        <button onClick={() => signOut()}>Sign out</button>
-        <p>Host Obj: {host ? JSON.stringify(host) : '...'}</p> <br />
-      </>
+      <div className="flex flex-col space-y-8">
+        <p>Signed in as {session?.user?.email ?? 'Spotify User'}</p>
+
+        <Button onClick={() => signOut()}>Sign Out</Button>
+
+        <p>Host Obj:</p>
+
+        <code className="bg-pfm-purple-100 p-4">
+          {host ? JSON.stringify(host) : '...'}
+        </code>
+
+        <Button href="/host/queue">Go to Leaderboard</Button>
+      </div>
     );
   }
   return (
     <>
-      <p>Not signed in</p>
-      <br />
-      <button onClick={() => signIn('spotify')}>Sign in</button>
+      <Button onClick={() => signIn('spotify')}>Sign In</Button>
     </>
   );
 };
