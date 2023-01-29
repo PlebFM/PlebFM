@@ -150,20 +150,29 @@ function WebPlayback(props: WebPlaybackProps) {
             >
               Next Song
             </Button>
+          </div>
 
-            <br />
-
+          <div className="flex flex-col space-y-2">
             {/* Add song to spotify queue */}
-            <p>Search result: Bombtrack by Rage Against The Machine</p>
-            <p>Search result URI: {searchResultURI}</p>
-            <button
+            <p className="text-xs">
+              Search result: Bombtrack by Rage Against The Machine
+            </p>
+            <p className="text-xs">Search result URI: {searchResultURI}</p>
+            <Button
+              size={'small'}
               onClick={() => {
-                addTrackToSpotifyQueue(searchResultURI, props.token, device_id);
+                addTrackToSpotifyQueue(
+                  searchResultURI,
+                  device_id,
+                  props.token,
+                ).then(res => {
+                  if (res.status !== 202)
+                    alert('failed adding to spotify queue');
+                });
               }}
-              style={{ borderWidth: '5px' }}
             >
-              Add track to spotify queue
-            </button>
+              Add track
+            </Button>
           </div>
         </div>
       </>

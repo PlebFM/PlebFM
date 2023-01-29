@@ -126,7 +126,7 @@ export const addTrackToSpotifyQueue = async (
       Accept: '*/*',
     },
   });
-  const result = await res.json();
+  const result = await res;
   return result;
 };
 
