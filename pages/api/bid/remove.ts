@@ -29,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       { status: playedStatus },
     );
 
-    return res.status(200).json({ success: true, new: false, message: play });
+    return res.status(200).json({ success: true, message: play });
   } catch (error: any) {
     return res.status(400).json({ success: false, message: error.message });
   }
