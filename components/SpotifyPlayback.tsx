@@ -158,11 +158,7 @@ function WebPlayback(props: WebPlaybackProps) {
             <p>Search result URI: {searchResultURI}</p>
             <button
               onClick={() => {
-                addTrackToSpotifyQueue(
-                  urlEncodedSearchResultURI,
-                  props.token,
-                  device_id,
-                );
+                addTrackToSpotifyQueue(searchResultURI, props.token, device_id);
               }}
               style={{ borderWidth: '5px' }}
             >
