@@ -6,7 +6,7 @@ import {
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
-import { addTrackToSpotifyQueue } from '../lib/spotify';
+import { addTrackToSpotifyQueue, transferDevice } from '../lib/spotify';
 
 const track = {
   name: '',
@@ -80,7 +80,20 @@ function WebPlayback(props: WebPlaybackProps) {
   if (!is_active) {
     return (
       <div className="text-3xl p-16 flex flex-col space-y-6 mb-8">
-        Instance not active. Transfer your playback using your Spotify app.
+        Instance not active. Transfer your playback using your Spotify app, or
+        click the button below.
+        <div className="flex flex-col space-y-2 mt-3">
+          {/* Transfer device playback to PlebFM  */}
+          <Button
+            size={'small'}
+            onClick={() => {
+              transferDevice(device_id, props.token);
+              console.log('transferDevice called');
+            }}
+          >
+            Transfer playback to PlebFM
+          </Button>
+        </div>
       </div>
     );
   } else {
