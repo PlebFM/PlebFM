@@ -1,3 +1,4 @@
+import { QRCodeSVG } from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { CartIcon, CopyIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
@@ -130,14 +131,21 @@ function PaymentScreen(props: {
         </div>
 
         {props.readyToCheckout && !props.invoicePaid ? (
-          <CopyToClipboard
-            text={bolt11.paymentRequest}
-            onCopy={() => setStartPolling(true)}
-          >
-            <Button className="w-full" icon={<CopyIcon />} size="small">
-              Copy Invoice
-            </Button>
-          </CopyToClipboard>
+          <>
+            <QRCodeSVG
+              value={bolt11.paymentRequest}
+              width={'200px'}
+              height={'200px'}
+            />
+            <CopyToClipboard
+              text={bolt11.paymentRequest}
+              onCopy={() => setStartPolling(true)}
+            >
+              <Button className="w-full" icon={<CopyIcon />} size="small">
+                Copy Invoice
+              </Button>
+            </CopyToClipboard>
+          </>
         ) : props.readyToCheckout && props.invoicePaid ? (
           <Button
             className="w-full"
