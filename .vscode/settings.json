@@ -1,6 +1,7 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
+  "sort-imports.on-save": false,
   "cSpell.words": [
     "amet",
     "Bankasaurus",
@@ -10,5 +11,7 @@
     "leaderboard",
     "sats",
     "Zazzy"
-  ]
+  ],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
