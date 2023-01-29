@@ -26,7 +26,7 @@ function WebPlayback(props: WebPlaybackProps) {
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
   const [device_id, setDeviceId] = useState('');
   const [current_track, setTrack] = useState(track);
-  const [songProgress, setSongProgress] = useState(0.1);
+  const [songProgress, setSongProgress] = useState(0);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -57,6 +57,9 @@ function WebPlayback(props: WebPlaybackProps) {
         console.log('Device ID has gone offline', device_id);
       });
 
+      let myTimer: any = null;
+      let progress: number = songProgress;
+
       player.addListener('player_state_changed', state => {
         if (!state) {
           return;
@@ -64,6 +67,23 @@ function WebPlayback(props: WebPlaybackProps) {
 
         setTrack(state.track_window.current_track);
         setPaused(state.paused);
+
+        if (state.paused) {
+          clearInterval(myTimer);
+          myTimer = null;
+
+          progress = state.position / state.duration;
+          setSongProgress(progress);
+        } else {
+          progress = state.position / state.duration;
+          setSongProgress(progress);
+          if (!myTimer) {
+            myTimer = setInterval(() => {
+              progress += 1000 / state.duration;
+              setSongProgress(progress + 1000 / state.duration);
+            }, 1000);
+          }
+        }
 
         player.getCurrentState().then(state => {
           !state ? setActive(false) : setActive(true);
@@ -115,19 +135,17 @@ function WebPlayback(props: WebPlaybackProps) {
 
           <p className="font-bold">{current_track.artists[0].name}</p>
 
-          <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative ">
+          <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative">
             <div
-              className="bg-pfm-orange-500 h-full rounded-full"
+              className="bg-pfm-orange-500 h-full rounded-full rounded-r-none"
               style={{
                 width: songProgress * 100 + '%',
-                transition: '2s ease',
               }}
             ></div>
             <div
               className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
               style={{
                 left: songProgress * 100 - 1.5 + '%',
-                transition: '2s ease',
               }}
             ></div>
           </div>
