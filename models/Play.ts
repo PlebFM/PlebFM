@@ -1,6 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import BidSchema from './Bid';
-
+import { Bid } from './Bid';
 /**
  * Object created when bid/submit route called.
  * Represents an instance of a song added to queue via a bid.
@@ -19,7 +18,7 @@ export type Play = {
   hostId: string;
   songId: string;
   status: string;
-  bids: typeof BidSchema[];
+  bids: Bid[];
   runningTotal: number | 0;
   queueTimestamp: string;
   playedTimestamp?: string;
@@ -45,7 +44,7 @@ const PlaySchema = new Schema<Play>({
     required: true,
   },
   bids: {
-    type: [BidSchema],
+    type: new Array<Bid>(),
     index: -1,
     required: true,
   },
