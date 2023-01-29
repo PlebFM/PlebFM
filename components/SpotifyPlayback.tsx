@@ -6,7 +6,7 @@ import {
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
-import { addTrackToSpotifyQueue, transferDevice } from '../lib/spotify';
+import { addTrackToSpotifyQueue, transferPlayback } from '../lib/spotify';
 
 const track = {
   name: '',
@@ -74,8 +74,13 @@ function WebPlayback(props: WebPlaybackProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (device_id) {
+      transferPlayback(device_id, props.token);
+    }
+  }, [device_id]);
+
   const searchResultURI = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
-  const urlEncodedSearchResultURI = 'spotify%3Atrack%3A2rBHnIxbhkMGLpqmsNX91M';
 
   if (!is_active) {
     return (
@@ -83,12 +88,12 @@ function WebPlayback(props: WebPlaybackProps) {
         Instance not active. Transfer your playback using your Spotify app, or
         click the button below.
         <div className="flex flex-col space-y-2 mt-3">
-          {/* Transfer device playback to PlebFM  */}
+          {/* Transfer playback to PlebFM  */}
           <Button
             size={'small'}
             onClick={() => {
-              transferDevice(device_id, props.token);
-              console.log('transferDevice called');
+              transferPlayback(device_id, props.token);
+              console.log('transferPlayback called');
             }}
           >
             Transfer playback to PlebFM

@@ -90,7 +90,10 @@ export const getTrack = async (trackId: string, accessToken: string) => {
   return result;
 };
 
-export const transferDevice = async (deviceId: string, accessToken: string) => {
+export const transferPlayback = async (
+  deviceId: string,
+  accessToken: string,
+) => {
   const searchUrl = `https://api.spotify.com/v1/me/player`;
   const body = JSON.stringify({ device_ids: [deviceId], play: true });
   console.log('body', body);
@@ -118,7 +121,7 @@ export const addTrackToSpotifyQueue = async (
     device_id: deviceId,
   });
   const searchUrl = `https://api.spotify.com/v1/me/player/queue?${queries}`;
-  const res = await fetch(searchUrl, {
+  const result = await fetch(searchUrl, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -126,7 +129,6 @@ export const addTrackToSpotifyQueue = async (
       Accept: '*/*',
     },
   });
-  const result = await res;
   return result;
 };
 
