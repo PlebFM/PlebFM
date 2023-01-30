@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { MongoError } from 'mongodb';
 import Plays from '../../../models/Play';
 import connectDB from '../../../middleware/mongodb';
 
@@ -8,18 +9,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(403).json({ success: false, error: 'Forbidden!' });
 
     const { userId, limit } = req.query;
-
     const limitCast = Number(limit);
     const queryArgs: any = {
       bids: { $elemMatch: { 'user.userId': userId } },
     };
-    if (limit !== '' && !isNaN(limitCast)) {
+
+    if (limit && limit !== '' && !isNaN(limitCast))
       queryArgs['options'] = {
         limit: limitCast,
       };
-    }
 
-    const plays = await Plays.find(queryArgs);
+    const plays = await Plays.find(queryArgs).catch(e => {
+      console.error(e);
+      throw new MongoError(e);
+    });
+
     if (plays.length === 0)
       return res
         .status(404)

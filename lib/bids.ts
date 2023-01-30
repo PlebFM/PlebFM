@@ -1,6 +1,6 @@
-import { Update } from '../models/Feed';
+import { Update } from '../models/Updates';
 
-export const updateFeed = async (
+export const createNewPlay = async (
   type: string,
   slug: any,
   userId: string,

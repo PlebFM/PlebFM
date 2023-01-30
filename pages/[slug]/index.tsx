@@ -7,7 +7,7 @@ import Onboarding from '../../components/Onboarding';
 import OnboardingIdentity from '../../components/OnboardingIdentity';
 import Search from '../../components/Search';
 import { getHost, getHosts } from '../../lib/hosts';
-import { updateFeed } from '../../lib/feed';
+import { updateFeed } from '../../lib/bids';
 import Checkout from '../../components/Checkout';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';

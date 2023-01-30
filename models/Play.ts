@@ -14,14 +14,14 @@ import { Bid } from './Bid';
  * @field runningTotal: sum of all amounts in Bid Array
  */
 export type Play = {
-  playId: string;
-  hostId: string;
-  songId: string;
-  status: string;
+  playId: String;
+  hostId: String;
+  songId: String;
+  status: String;
   bids: Bid[];
-  runningTotal: number | 0;
-  queueTimestamp: string;
-  playedTimestamp?: string;
+  runningTotal: Number | 0;
+  queueTimestamp: Number;
+  playedTimestamp?: String;
 };
 
 const PlaySchema = new Schema<Play>({
@@ -54,7 +54,7 @@ const PlaySchema = new Schema<Play>({
     required: true,
   },
   queueTimestamp: {
-    type: String,
+    type: Number,
     index: 1,
     required: true,
   },

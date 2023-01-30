@@ -31,7 +31,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       shortName: hostShortName,
     }).catch(e => {
       console.error(e);
-      throw new Error(e);
+      throw new MongoError(e);
     });
 
     // If not host exists, return error
@@ -55,7 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       .sort({ runningTotal: -1, queueTimestamp: 1 })
       .catch(e => {
         console.error(e);
-        throw new Error(e);
+        throw new MongoError(e);
       });
 
     // Plays.find returns a list of results. If no results found, list will be empty []

@@ -321,3 +321,89 @@ const users = [
     __v: 0,
   },
 ];
+
+const updates = [
+  {
+    type: 'bid',
+    delivered: false,
+    play: {
+      _id: ObjectId('638f9265f8e6eeda8c9b7567'),
+      songId: '4lH6nENd1y81jp7Yt9lTBX',
+      status: 'queued',
+      queueTimestamp: 1675030015917,
+      runningTotal: 23,
+      __v: 0,
+      bids: [
+        {
+          user: {
+            _id: ObjectId('638d06abcb30ffcbc926b38c'),
+            userId: 'clb9u0o4v0000x98fflh5ftiq',
+            firstNym: 'Zazzy',
+            lastNym: 'Fawkes',
+            avatar: 'orangeLight',
+            __v: 0,
+          },
+          bidAmount: 23,
+          timestamp: 1675030015917,
+          rHash:
+            '3f88f429ab6015dd612e92422abff0ada256ee0e0829f1d925f94f0bfcf74e68',
+        },
+      ],
+      hostId: 'nonce33jfkasjkdf',
+      playId: 'clccbk7jp0000uwd81zis9n2s',
+    },
+    timestamp: 1675030015917,
+  },
+  {
+    type: 'play',
+    delivered: false,
+    play: {
+      songId: '4lH6nENd1y81jp7Yt9lXBT',
+      status: 'queued',
+      queueTimestamp: 1675030015917,
+      runningTotal: 55,
+      __v: 0,
+      bids: [
+        {
+          user: {
+            _id: ObjectId('638d06abcb30ffcbc926b38c'),
+            userId: 'clb9u0o4v0000x98fflh5ftiq',
+            firstNym: 'Zazzy',
+            lastNym: 'Fawkes',
+            avatar: 'orangeLight',
+            __v: 0,
+          },
+          bidAmount: 55,
+          timestamp: 1675030015917,
+          rHash:
+            '047a5d66ee5b84c6a0ebe10df730b3b901f91a0457cc8ecf65a18812b9e66a2c',
+        },
+      ],
+      hostId: 'nonce33jfkasjkdf',
+      playId: 'cldhxujnv0000pxno1hbt6rbq',
+    },
+    timestamp: 1675030015917,
+  },
+  {
+    type: 'join',
+    delivered: false,
+    host: {
+      _id: ObjectId('638d05e16de3adbc77ad76c5'),
+      customerName: 'Atlanta BitDevs',
+      shortName: 'atl',
+      spotifyRefreshToken:
+        'AQA7FKNk95V4cd28Ump02BRNICgjnz9jAsjXvbXUWA_jk1MjSji-AQuqAA0RWc2mqrSZDLQ_mIgbHVWcgYgL5rc1rkYABfQH8fNuA5e4MEJk3RG7TwhY8oDcOg_ddlAXipA',
+      __v: 0,
+      hostId: 'nonce33jfkasjkdf',
+    },
+    user: {
+      _id: ObjectId('638d154f0882498b034439bb'),
+      userId: 'clb9w90cs000bufyx0dfu7wnf',
+      firstNym: 'Fluffy',
+      lastNym: 'Kitty',
+      avatar: 'purpleLight',
+      __v: 0,
+    },
+    timestamp: 1675030015900,
+  },
+];

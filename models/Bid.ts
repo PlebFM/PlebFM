@@ -1,4 +1,4 @@
-import UserSchema from './User';
+import User from './User';
 
 /**
  * Object created when bid/submit route called.
@@ -11,9 +11,9 @@ import UserSchema from './User';
  * @field rHash: string - r_hash of a LN invoice
  */
 export type Bid = {
-  bidId: string;
-  user: typeof UserSchema;
-  bidAmount: number;
-  timestamp: string;
-  rHash: string;
+  bidId: String;
+  user: typeof User;
+  bidAmount: Number;
+  timestamp: Number;
+  rHash: String;
 };
