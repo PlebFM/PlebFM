@@ -25,11 +25,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (data.settled) {
         // @ts-ignore
         const submitResult = await submitBid(
-          hostId,
+          hostId as string,
           rHash,
-          songId,
-          bidAmount,
-          userId,
+          songId as string,
+          parseInt((bidAmount as string) ?? '0'),
+          userId as string,
         );
         return res.status(201).json({ settled: true, submit: submitResult });
       }
