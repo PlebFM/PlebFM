@@ -2,6 +2,7 @@ import { SongObject } from '../pages/[slug]/queue';
 
 interface TagProps {
   song: SongObject;
+  profile?: boolean;
 }
 export default function Tag(props: TagProps) {
   if (

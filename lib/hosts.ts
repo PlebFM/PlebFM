@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import { Host } from '../models/Host';
 
 export const getHosts = async (): Promise<Host[]> => {
@@ -18,7 +17,7 @@ export const getHost = async (
   slug: string,
   url?: string,
 ): Promise<Host | void> => {
-  const res = await fetch(`https://${url}/api/hosts/${slug}`, {
+  const res = await fetch(`https:/${url}/api/hosts/${slug}`, {
     method: 'GET',
     mode: 'no-cors',
     headers: {

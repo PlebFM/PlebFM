@@ -161,9 +161,13 @@ export const Spinner = () => {
   );
 };
 
-export default function LoadingSpinner() {
+export default function LoadingSpinner({
+  background = 'bg-gradient-to-b from-pfm-purple-400 to-pfm-purple-100',
+}) {
   return (
-    <div className="w-full h-screen flex justify-center items-center bg-gradient-to-b from-pfm-purple-400 to-pfm-purple-100">
+    <div
+      className={`w-full h-screen flex justify-center items-center ${background}`}
+    >
       <Spinner />
     </div>
   );

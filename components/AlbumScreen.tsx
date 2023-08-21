@@ -12,10 +12,10 @@ export default function AlbumScreen(props: {
   setSongConfirmed: Dispatch<SetStateAction<boolean>>;
   cancelSong: () => void;
 }) {
-  useEffect(() => {
-    console.log('TRACK', props?.track);
-    console.log(props?.track?.album?.images[0]?.url);
-  }, [props.track]);
+  // useEffect(() => {
+  //   console.log('TRACK', props?.track);
+  //   console.log(props?.track?.album?.images[0]?.url);
+  // }, [props.track]);
   return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">

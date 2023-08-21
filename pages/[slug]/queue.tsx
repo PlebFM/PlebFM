@@ -23,7 +23,10 @@ export type SongObject = {
   upNext: boolean;
   bidders: User[];
 };
-const fetchSong = async (songId: string, shortName: string): Promise<Song> => {
+export const fetchSong = async (
+  songId: string,
+  shortName: string,
+): Promise<Song> => {
   const queryString = new URLSearchParams({
     id: songId,
     shortName: shortName,
@@ -36,24 +39,31 @@ const fetchSong = async (songId: string, shortName: string): Promise<Song> => {
   // console.log('FETCH RES', result)
   return result;
 };
-const cleanSong = (rawSong: { obj: any; song: any }, userProfile: User) => {
+export const cleanSong = (
+  rawSong: { obj: any; song: any },
+  userProfile: User,
+) => {
   const { obj, song } = rawSong;
   const bidders = obj.bids.map((x: any) => x.user);
-  console.log(bidders);
   const totalBid = (obj.runningTotal * 1000.0 * 60) / song.duration_ms;
   const myPick = bidders.some((x: User) => x.userId === userProfile.userId);
   return {
     trackTitle: song.name,
     artistName: song.artists[0].name,
     feeRate: totalBid,
-    playing: false,
+    playing: obj.status === 'playing',
     myPick,
     upNext: obj.status === 'next',
     bidders,
+    queued: obj.status === 'queued',
+    status: obj.status,
   };
 };
-const getQueue = async user => {
-  const url = `/api/leaderboard/queue?hostShortName=atl`;
+export const getQueue = async (user: User, isProfile: boolean = false) => {
+  let url = `/api/leaderboard/queue?hostShortName=atl`;
+  if (isProfile) {
+    url += `&userId=${user.userId}`;
+  }
   const response = await fetch(url);
   const res = await response.json();
   if (!res?.queue) {
@@ -71,230 +81,6 @@ const getQueue = async user => {
 };
 
 export default function Queue() {
-  const dummyData = [
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 100,
-      playing: true,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 98,
-      playing: false,
-      upNext: true,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 87,
-      playing: false,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 76,
-      playing: false,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 65,
-      playing: false,
-      upNext: false,
-      myPick: true,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Zazzy',
-          lastNym: 'Fawkes',
-          color: 'orange',
-        },
-        {
-          firstNym: 'Squealing',
-          lastNym: 'Kitty',
-          color: 'purpleLight',
-        },
-        {
-          firstNym: 'Silent',
-          lastNym: 'Bankasaurus',
-          color: 'purpleDark',
-        },
-        {
-          firstNym: 'Insidious',
-          lastNym: 'Goldbug',
-          color: 'tealLight',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 54,
-      playing: false,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 43,
-      playing: false,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 32,
-      playing: false,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 21,
-      playing: false,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-    {
-      trackTitle: 'Bitcoin ipsum dolor sit amet',
-      artistName: 'Nonce inputs',
-      feeRate: 10,
-      playing: false,
-      upNext: false,
-      bidders: [
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-        {
-          firstNym: 'Fluffy',
-          lastNym: 'Honeybadger',
-          color: 'teal',
-        },
-      ],
-    },
-  ];
-
   const getUserProfileFromLocal = () => {
     const userProfileJSON = localStorage.getItem('userProfile');
     if (userProfileJSON) {
