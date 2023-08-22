@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import fetch from 'node-fetch';
 import Users, {
   Adjectives,
   Characters,

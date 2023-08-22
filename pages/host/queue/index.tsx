@@ -9,6 +9,8 @@ import { getSession, useSession } from 'next-auth/react';
 import WebPlayback from '../../../components/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
 import { fetchSong } from '../../[slug]/queue';
+import Layout from '../../../components/Layout';
+import Head from 'next/head';
 
 const getLeaderboardQueue = async () => {
   let url = `/api/leaderboard/queue?hostShortName=atl`;
@@ -87,6 +89,11 @@ export default function Queue() {
 
   return (
     <>
+      <Head>
+        <title>PlebFM</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/pleb-fm-favicon.svg" />
+      </Head>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
           src={bokeh4}

@@ -23,6 +23,8 @@ interface WebPlaybackProps {
 
 function WebPlayback(props: WebPlaybackProps) {
   const [isPaused, setPaused] = useState(false);
+  const [trackDuration, setDuration] = useState(false);
+  const [trackPosition, setPosition] = useState(false);
   const [isActive, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
   const [deciceId, setDeviceId] = useState('');
@@ -60,31 +62,35 @@ function WebPlayback(props: WebPlaybackProps) {
 
       let myTimer: any = null;
       let progress: number = songProgress;
-
       player.addListener('player_state_changed', state => {
-        if (!state) {
-          return;
-        }
-
-        setTrack(state.track_window.current_track);
-        setPaused(state.paused);
-
-        if (state.paused) {
+        if (!state) return;
+        const { paused, position, duration } = state;
+        if (paused === isPaused) return;
+        setPaused(paused);
+        if (paused) {
           clearInterval(myTimer);
           myTimer = null;
 
-          progress = state.position / state.duration;
+          progress = position / duration;
           setSongProgress(progress);
         } else {
-          progress = state.position / state.duration;
+          progress = position / duration;
           setSongProgress(progress);
           if (!myTimer) {
             myTimer = setInterval(() => {
-              progress += 1000 / state.duration;
-              setSongProgress(progress + 1000 / state.duration);
+              progress += 1000 / duration;
+              setSongProgress(progress + 1000 / duration);
             }, 1000);
           }
         }
+      });
+
+      player.addListener('player_state_changed', state => {
+        if (!state) return;
+        const {
+          track_window: { current_track },
+        } = state;
+        if (current_track != track) setTrack(current_track);
 
         player.getCurrentState().then(state => {
           !state ? setActive(false) : setActive(true);
