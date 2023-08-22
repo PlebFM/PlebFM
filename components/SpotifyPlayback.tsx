@@ -23,20 +23,32 @@ interface WebPlaybackProps {
 
 function WebPlayback(props: WebPlaybackProps) {
   const [isPaused, setPaused] = useState(false);
-  const [trackDuration, setDuration] = useState(false);
-  const [trackPosition, setPosition] = useState(false);
+  const [trackDuration, setDuration] = useState<number>();
+  const [trackPosition, setPosition] = useState<number>();
   const [isActive, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
   const [deciceId, setDeviceId] = useState('');
   const [track, setTrack] = useState(emptyTrack);
-  const [songProgress, setSongProgress] = useState(0);
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://sdk.scdn.co/spotify-player.js';
-    script.async = true;
+    const interval = setInterval(() => {
+      if (isPaused || !trackPosition) return;
+      setPosition(trackPosition + 1000);
+    }, 1000);
 
-    document.body.appendChild(script);
+    return () => clearInterval(interval);
+  }, [isPaused, trackPosition]);
+
+  useEffect(() => {
+    const existing_script = document.getElementById('spotify-player');
+    if (!existing_script) {
+      const script = document.createElement('script');
+      script.src = 'https://sdk.scdn.co/spotify-player.js';
+      script.id = 'spotify-player';
+      script.async = true;
+
+      document.body.appendChild(script);
+    }
 
     window.onSpotifyWebPlaybackSDKReady = () => {
       const player = new window.Spotify.Player({
@@ -46,8 +58,6 @@ function WebPlayback(props: WebPlaybackProps) {
         },
         volume: 0.5,
       });
-
-      console.log(player);
 
       setPlayer(player);
 
@@ -60,40 +70,29 @@ function WebPlayback(props: WebPlaybackProps) {
         console.log('Device ID has gone offline', device_id);
       });
 
-      let myTimer: any = null;
-      let progress: number = songProgress;
-      player.addListener('player_state_changed', state => {
-        if (!state) return;
-        const { paused, position, duration } = state;
-        if (paused === isPaused) return;
-        setPaused(paused);
-        if (paused) {
-          clearInterval(myTimer);
-          myTimer = null;
-
-          progress = position / duration;
-          setSongProgress(progress);
-        } else {
-          progress = position / duration;
-          setSongProgress(progress);
-          if (!myTimer) {
-            myTimer = setInterval(() => {
-              progress += 1000 / duration;
-              setSongProgress(progress + 1000 / duration);
-            }, 1000);
-          }
-        }
-      });
-
       player.addListener('player_state_changed', state => {
         if (!state) return;
         const {
+          paused,
+          position,
+          duration,
           track_window: { current_track },
         } = state;
-        if (current_track != track) setTrack(current_track);
-
+        console.log('Currently Playing', current_track);
+        console.log('Position in Song', position);
+        console.log('Duration of Song', duration);
+        setPosition(position);
+        setDuration(duration);
+        setPaused(paused);
+        setTrack(current_track);
         player.getCurrentState().then(state => {
           !state ? setActive(false) : setActive(true);
+          if (state) {
+            setActive(true);
+            setPosition(state.position);
+          } else {
+            setActive(false);
+          }
         });
       });
 
@@ -121,6 +120,7 @@ function WebPlayback(props: WebPlaybackProps) {
           <Button
             size={'small'}
             onClick={() => {
+              player?.activateElement();
               transferPlayback(deciceId, props.token);
               console.log('transferPlayback called');
             }}
@@ -148,18 +148,22 @@ function WebPlayback(props: WebPlaybackProps) {
             <div
               className="bg-pfm-orange-500 h-full rounded-full rounded-r-none"
               style={{
-                width: songProgress * 100 + '%',
+                width:
+                  ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 + '%',
               }}
             ></div>
             <div
               className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
               style={{
-                left: songProgress * 100 - 1.5 + '%',
+                left:
+                  ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 -
+                  1.5 +
+                  '%',
               }}
             ></div>
           </div>
 
-          <div className="flex flex-row space-x-2">
+          <div className="flex flex-row space-x-2 items-center">
             <Button
               className="btn-spotify"
               size="small"
@@ -190,11 +194,34 @@ function WebPlayback(props: WebPlaybackProps) {
               icon={<ForwardIcon />}
               iconOnly={true}
               onClick={() => {
-                if (player) player.nextTrack();
+                if (player) {
+                  player.nextTrack();
+                }
               }}
             >
               Next Song
             </Button>
+            {trackPosition && trackDuration ? (
+              <p className="text-sm pl-4">
+                {Math.floor(trackPosition / 1000 / 60)
+                  .toString()
+                  .padStart(2, '0')}{' '}
+                :{' '}
+                {(Math.floor(trackPosition / 1000) % 60)
+                  .toString()
+                  .padStart(2, '0')}{' '}
+                {'  /  '}
+                {Math.floor(trackDuration / 1000 / 60)
+                  .toString()
+                  .padStart(2, '0')}{' '}
+                :{' '}
+                {(Math.floor(trackDuration / 1000) % 60)
+                  .toString()
+                  .padStart(2, '0')}
+              </p>
+            ) : (
+              <p className="text-sm">0:00 / 0:00</p>
+            )}
           </div>
 
           <div className="flex flex-col space-y-2">

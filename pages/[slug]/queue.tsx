@@ -19,7 +19,7 @@ export type SongObject = {
   artistName: string;
   feeRate: number;
   playing: boolean;
-  myPick: boolean;
+  myPick?: boolean;
   upNext: boolean;
   bidders: User[];
 };
