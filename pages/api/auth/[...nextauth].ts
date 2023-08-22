@@ -80,6 +80,7 @@ export default NextAuth({
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET || '',
       authorization:
         'https://accounts.spotify.com/authorize?scope=user-read-playback-state,user-modify-playback-state,user-read-playback-position,streaming,user-read-email,user-read-private',
+      checks: ['pkce', 'state'],
     }),
   ],
   callbacks: {

@@ -151,7 +151,13 @@ export default function Queue() {
               )}
             </div>
           </div>
-          <p className="font-bold">{song.feeRate.toFixed(2)} sats / min</p>
+          {/* <p className="font-bold">{song.feeRate.toFixed(0)} sats / min</p> */}
+          <div>
+            <p className="font-normal text-6xl text-center">
+              {song.feeRate.toFixed(0)}
+            </p>
+            <p className="font-bold text-xs text-center"> sats / min</p>
+          </div>
         </div>
       </div>
     );
