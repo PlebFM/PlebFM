@@ -38,7 +38,10 @@ function PaymentScreen(props: {
         }),
       });
       const res = await response.json();
-      setBolt11(res);
+      setBolt11({
+        hash: res.payment_hash,
+        paymentRequest: res.payment_request,
+      });
     };
     getBolt11();
     // console.log(bolt11);
@@ -46,32 +49,17 @@ function PaymentScreen(props: {
 
   useEffect(() => {
     if (!startPolling || !bolt11.hash) return;
-    const submitBid = async () => {
-      const userProfile = getUserProfileFromLocal();
-      const response = await fetch(`/api/bid/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          hostName: 'atl', //TODO FIX
-          songId: props.song?.id,
-          bidAmount: props.bid,
-          rHash: bolt11.hash,
-          user: userProfile, // TODO FIX
-        }),
-      });
-      const res = await response.json();
-      return res;
-    };
 
     const getPaidStatus = async () => {
-      const response = await fetch(`/api/invoice?hash=${bolt11.hash}`);
+      const hostId = 'atl'; // TODO FIX
+      const user = getUserProfileFromLocal();
+      const url = `/api/invoice?hash=${bolt11.hash}&hostId=${hostId}&songId=${props.song?.id}&bidAmount=${props.totalBid}&userId=${user.userId}`;
+      const response = await fetch(url);
       const data = await response.json();
       if (data.settled === true) {
         console.log('PAID');
-        const bidres = await submitBid();
-        console.log('BID RESULT', bidres);
+        // const bidres = await submitBid();
+        // console.log('BID RESULT', bidres);
         props.setInvoicePaid(true);
         setStartPolling(false);
       }
@@ -136,6 +124,7 @@ function PaymentScreen(props: {
               value={bolt11.paymentRequest}
               width={'200px'}
               height={'200px'}
+              includeMargin={true}
             />
             <CopyToClipboard
               text={bolt11.paymentRequest}

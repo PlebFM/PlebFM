@@ -10,8 +10,66 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { User } from '../../models/User';
 import { Song } from '../../models/Song';
 import Layout from '../../components/Layout';
+import { Bid } from '../../models/Bid';
 
 // pleb.fm/bantam/queue
+// Used for frontend hydration
+export type SongObject = {
+  trackTitle: string;
+  artistName: string;
+  feeRate: number;
+  playing: boolean;
+  myPick: boolean;
+  upNext: boolean;
+  bidders: User[];
+};
+const fetchSong = async (songId: string, shortName: string): Promise<Song> => {
+  const queryString = new URLSearchParams({
+    id: songId,
+    shortName: shortName,
+  });
+  const res = await fetch(`/api/spotify/getSong?${queryString}`, {
+    headers: { 'Access-Control-Allow-Origin': '*' },
+  });
+  if (!res.ok) throw new Error('Failed to search song');
+  const result = await res.json();
+  // console.log('FETCH RES', result)
+  return result;
+};
+const cleanSong = (rawSong: { obj: any; song: any }, userProfile: User) => {
+  const { obj, song } = rawSong;
+  const bidders = obj.bids.map((x: any) => x.user);
+  console.log(bidders);
+  const totalBid = (obj.runningTotal * 1000.0 * 60) / song.duration_ms;
+  const myPick = bidders.some((x: User) => x.userId === userProfile.userId);
+  return {
+    trackTitle: song.name,
+    artistName: song.artists[0].name,
+    feeRate: totalBid,
+    playing: false,
+    myPick,
+    upNext: obj.status === 'next',
+    bidders,
+  };
+};
+const getQueue = async user => {
+  const url = `/api/leaderboard/queue?hostShortName=atl`;
+  const response = await fetch(url);
+  const res = await response.json();
+  if (!res?.queue) {
+    return [];
+  }
+  const promises = res.queue.map((x: any) => {
+    const res = fetchSong(x.songId, 'atl').then(song => {
+      return { obj: x, song: song };
+    });
+    return res;
+  });
+  const raw_songs = await Promise.all(promises);
+  const songs = raw_songs.map(x => cleanSong(x, user));
+  return songs;
+};
+
 export default function Queue() {
   const dummyData = [
     {
@@ -236,16 +294,6 @@ export default function Queue() {
       ],
     },
   ];
-  // Used for frontend hydration
-  type SongObject = {
-    trackTitle: string;
-    artistName: string;
-    feeRate: number;
-    playing: boolean;
-    myPick: boolean;
-    upNext: boolean;
-    bidders: User[];
-  };
 
   const getUserProfileFromLocal = () => {
     const userProfileJSON = localStorage.getItem('userProfile');
@@ -254,77 +302,73 @@ export default function Queue() {
     }
   };
   const [queueData, setQueueData] = useState<SongObject[]>([]);
-  const [userProfile, setUserProfile] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [bidders, setBidders] = useState<User[]>([]);
 
   useEffect(() => {
     setLoading(true);
     const userProfile = getUserProfileFromLocal();
-    setUserProfile(userProfile);
-    console.log('user', userProfile);
-
-    const fetchSong = async (
-      songId: string,
-      shortName: string,
-    ): Promise<Song> => {
-      const queryString = new URLSearchParams({
-        id: songId,
-        shortName: shortName,
-      });
-      const res = await fetch(`/api/spotify/getSong?${queryString}`, {
-        headers: { 'Access-Control-Allow-Origin': '*' },
-      });
-      if (!res.ok) throw new Error('Failed to search song');
-      const result = await res.json();
-      // console.log('FETCH RES', result)
-      return result;
-    };
-
-    const getQueue = async () => {
-      const queries = querystring.stringify({
-        shortName: 'atl',
-      });
-      const response = await fetch(`/api/leaderboard/queue?${queries}`);
-      const res = await response.json();
-      if (!res?.queue) {
-        setLoading(false);
-        return;
-      }
-      const promises = res.queue.map((x: any) => {
-        const res = fetchSong(x.songId, 'atl').then(song => {
-          return { obj: x, song: song };
-        });
-        return res;
-      });
-      const songs = await Promise.all(promises);
-      const fixed = songs.map(pair => {
-        const { obj, song } = pair;
-
-        const totalBid = obj.bids.reduce(
-          (x: any, y: any) => (x += y.bidAmount),
-          0,
-        );
-        const myPick =
-          obj.bids.filter((x: any) => x.userId === userProfile.userId).length >
-          0;
-        console.log(obj.bids);
-        return {
-          trackTitle: song.name,
-          artistName: song.artists[0].name,
-          feeRate: totalBid,
-          playing: false,
-          myPick: myPick,
-          upNext: obj.status === 'next',
-          bidders: obj?.bids?.map((x: any) => x.userId) ?? [],
-        };
-      });
-      console.log('fixed', fixed);
-      setQueueData(fixed);
+    getQueue(userProfile).then(res => {
+      if (res) setQueueData(res);
       setLoading(false);
-    };
-    getQueue();
+    });
   }, []);
+
+  const EmptyQueue = () => {
+    return (
+      <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+        <div className="p-6 border-b border-white/20 w-full">
+          <p>
+            {' '}
+            Queue is currently empty. Bid on a song to see it in the queue!{' '}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const Song = ({ song }: { song: SongObject }) => {
+    return (
+      <div className="p-6 border-b border-white/20 w-full">
+        <Tag song={song} />
+        <div className="w-full flex justify-between space-x-4 w-full">
+          <div className="flex flex-col space-y-2">
+            <div>
+              <p>{song.trackTitle}</p>
+              <p className="font-bold">{song.artistName}</p>
+            </div>
+            <div className="flex -space-x-1 items-center">
+              {/* TODO: Add fetching of user object for bids using SWR */}
+              {song.bidders.length == 0 ? (
+                <p></p>
+              ) : (
+                (song.bidders.length > 5
+                  ? song.bidders.slice(0, 5)
+                  : song.bidders
+                ).map((bidder, key) => (
+                  <div className="w-8" key={key}>
+                    <Avatar
+                      firstNym={bidder.firstNym}
+                      lastNym={bidder.lastNym}
+                      color={bidder.color}
+                      size="xs"
+                    />
+                  </div>
+                ))
+              )}
+              {song.bidders.length > 5 ? (
+                <div className="pl-4 font-semibold text-lg">
+                  +{song.bidders.length - 5}
+                </div>
+              ) : (
+                ``
+              )}
+            </div>
+          </div>
+          <p className="font-bold">{song.feeRate.toFixed(2)} sats / min</p>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Layout title="Queue">
@@ -339,80 +383,11 @@ export default function Queue() {
       {loading ? (
         <LoadingSpinner />
       ) : queueData.length === 0 ? (
-        <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
-          <div className="p-6 border-b border-white/20 w-full">
-            <p>
-              Queue is currently empty. Bid on a song to see it in the queue!
-            </p>
-          </div>
-        </div>
+        <EmptyQueue />
       ) : (
         <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
           {queueData.map((song, key) => (
-            <div className="p-6 border-b border-white/20 w-full" key={key}>
-              {song.playing || song.upNext || song.myPick ? (
-                <div className="mb-6">
-                  <Tag
-                    text={
-                      song.playing
-                        ? 'Now Playing'
-                        : song.upNext
-                        ? 'Up Next'
-                        : song.myPick
-                        ? 'My Pick'
-                        : ' '
-                    }
-                    color={
-                      song.playing
-                        ? 'orange'
-                        : song.upNext
-                        ? 'teal'
-                        : song.myPick
-                        ? 'purple'
-                        : ' '
-                    }
-                  />
-                </div>
-              ) : (
-                ``
-              )}
-              <div className="w-full flex justify-between space-x-4 w-full">
-                <div className="flex flex-col space-y-2">
-                  <div>
-                    <p>{song.trackTitle}</p>
-                    <p className="font-bold">{song.artistName}</p>
-                  </div>
-                  <div className="flex -space-x-1 items-center">
-                    {/* TODO: Add fetching of user object for bids using SWR */}
-                    {bidders.length == 0 ? (
-                      <p>user pics</p>
-                    ) : (
-                      (song.bidders.length > 5
-                        ? song.bidders.slice(0, 5)
-                        : song.bidders
-                      ).map((bidder, key) => (
-                        <div className="w-8" key={key}>
-                          <Avatar
-                            firstNym={bidder.firstNym}
-                            lastNym={bidder.lastNym}
-                            color={bidder.color}
-                            size="xs"
-                          />
-                        </div>
-                      ))
-                    )}
-                    {song.bidders.length > 5 ? (
-                      <div className="pl-4 font-semibold text-lg">
-                        +{song.bidders.length - 5}
-                      </div>
-                    ) : (
-                      ``
-                    )}
-                  </div>
-                </div>
-                <p className="font-bold">{song.feeRate} sats</p>
-              </div>
-            </div>
+            <Song song={song} key={key} />
           ))}
         </div>
       )}
