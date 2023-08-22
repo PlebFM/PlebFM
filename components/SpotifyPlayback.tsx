@@ -6,9 +6,10 @@ import {
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import { addTrackToSpotifyQueue, transferPlayback } from '../lib/spotify';
 
-const track = {
+const emptyTrack = {
   name: '',
   album: {
     images: [{ url: '' }],
@@ -21,11 +22,11 @@ interface WebPlaybackProps {
 }
 
 function WebPlayback(props: WebPlaybackProps) {
-  const [is_paused, setPaused] = useState(false);
-  const [is_active, setActive] = useState(false);
+  const [isPaused, setPaused] = useState(false);
+  const [isActive, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
-  const [device_id, setDeviceId] = useState('');
-  const [current_track, setTrack] = useState(track);
+  const [deciceId, setDeviceId] = useState('');
+  const [track, setTrack] = useState(emptyTrack);
   const [songProgress, setSongProgress] = useState(0);
 
   useEffect(() => {
@@ -94,15 +95,17 @@ function WebPlayback(props: WebPlaybackProps) {
     };
   }, []);
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
-    if (device_id) {
-      transferPlayback(device_id, props.token);
+    if (deciceId) {
+      transferPlayback(deciceId, props.token);
     }
-  }, [device_id]);
+  }, [deciceId]);
 
   const searchResultURI = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
 
-  if (!is_active) {
+  if (!isActive || !track) {
     return (
       <div className="text-3xl p-16 flex flex-col space-y-6 mb-8">
         Instance not active. Transfer your playback using your Spotify app, or
@@ -112,7 +115,7 @@ function WebPlayback(props: WebPlaybackProps) {
           <Button
             size={'small'}
             onClick={() => {
-              transferPlayback(device_id, props.token);
+              transferPlayback(deciceId, props.token);
               console.log('transferPlayback called');
             }}
           >
@@ -126,14 +129,14 @@ function WebPlayback(props: WebPlaybackProps) {
       <>
         <div className="text-3xl p-8 flex flex-col space-y-6 mb-32">
           <img
-            src={current_track.album.images[0].url}
+            src={track.album.images[0].url}
             className="w-64 h-64"
-            alt={current_track.name + ' album art'}
+            alt={track.name + ' album art'}
           />
 
-          <p>{current_track.name}</p>
+          <p>{track.name}</p>
 
-          <p className="font-bold">{current_track.artists[0].name}</p>
+          <p className="font-bold">{track.artists[0].name}</p>
 
           <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative">
             <div
@@ -166,13 +169,13 @@ function WebPlayback(props: WebPlaybackProps) {
             <Button
               className="btn-spotify"
               size="small"
-              icon={is_paused ? <PlayIcon /> : <PauseIcon />}
+              icon={isPaused ? <PlayIcon /> : <PauseIcon />}
               onClick={() => {
                 if (player) player.togglePlay();
               }}
               iconOnly={true}
             >
-              {is_paused ? 'Play' : 'Pause'}
+              {isPaused ? 'Play' : 'Pause'}
             </Button>
 
             <Button
@@ -199,7 +202,7 @@ function WebPlayback(props: WebPlaybackProps) {
               onClick={() => {
                 addTrackToSpotifyQueue(
                   searchResultURI,
-                  device_id,
+                  deciceId,
                   props.token,
                 ).then(res => {
                   if (res.status !== 202)

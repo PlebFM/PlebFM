@@ -8,13 +8,48 @@ import { feed, dummyData } from '../../../data/dummy.data1.js';
 import { getSession, useSession } from 'next-auth/react';
 import WebPlayback from '../../../components/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
+import { fetchSong } from '../../[slug]/queue';
 
+const getLeaderboardQueue = async () => {
+  let url = `/api/leaderboard/queue?hostShortName=atl`;
+  const response = await fetch(url);
+  const res = await response.json();
+  if (!res?.queue) {
+    return [];
+  }
+  const promises = res.queue.map((x: any) => {
+    const res = fetchSong(x.songId, 'atl').then(song => {
+      return { obj: x, song: song };
+    });
+    return res;
+  });
+  const raw_songs = await Promise.all(promises);
+  const songs = raw_songs.map(x => cleanSong(x));
+  return songs;
+};
+
+const cleanSong = (rawSong: { obj: any; song: any }) => {
+  const { obj, song } = rawSong;
+  const bidders = obj.bids.map((x: any) => x.user);
+  const totalBid = (obj.runningTotal * 1000.0 * 60) / song.duration_ms;
+  return {
+    trackTitle: song.name,
+    artistName: song.artists[0].name,
+    feeRate: totalBid,
+    playing: obj.status === 'playing',
+    upNext: obj.status === 'next',
+    bidders,
+    queued: obj.status === 'queued',
+    status: obj.status,
+  };
+};
 export default function Queue() {
   const { data: session } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [queueData, setQueueData] = useState(dummyData);
   const [songProgress, setSongProgress] = useState(0.1);
   const [paused, setPaused] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!session) return;
@@ -42,6 +77,13 @@ export default function Queue() {
   }, [songProgress, paused]);
 
   useEffect(() => {}, [songProgress]);
+
+  useEffect(() => {
+    getLeaderboardQueue().then(res => {
+      if (res) setQueueData(res);
+      setLoading(false);
+    });
+  }, []);
 
   return (
     <>
@@ -136,7 +178,9 @@ export default function Queue() {
                       />
                     </div>
                   ) : (
-                    <p className="font-bold">{song.feeRate} sats</p>
+                    <p className="font-bold">
+                      {song.feeRate.toFixed(2)} sats / min
+                    </p>
                   )}
                 </div>
               </div>
