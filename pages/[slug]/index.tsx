@@ -31,7 +31,6 @@ export default function Bidding() {
 
   useEffect(() => {
     if (!songChoice) return;
-    console.log('SONG', JSON.parse(songChoice));
   }, [songChoice]);
 
   const generateUser = async () => {

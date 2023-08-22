@@ -7,7 +7,7 @@ import Plays, { Play } from '../../../models/Play';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
-      const { hostShortName, _limit } = req.query;
+      const { hostShortName, _limit, userId } = req.query;
       const next = false;
       const limit = parseInt((_limit as string) ?? '10');
       if (!hostShortName) {
@@ -32,11 +32,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       // Query Plays: Get play objs where hostId = host.hostId & status = queued
       // sort by highest runningTotal and oldest queueTimestamp if ties occur
+      const filter = userId
+        ? { hostId: host.hostId, 'bids.user.userId': userId }
+        : { hostId: host.hostId, status: ['queued', 'next', 'playing'] };
       let sortedPlays: Array<Play> = await Plays.find(
-        {
-          hostId: host.hostId,
-          status: 'queued',
-        },
+        filter,
         {},
         { options: { limit: limit } },
       )

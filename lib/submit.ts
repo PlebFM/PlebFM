@@ -24,7 +24,7 @@ export const submitBid = async (
   if (!host) throw new Error('Submit Bid failed: Host not found!');
 
   const user = await Users.findOne({ userId: userId });
-  console.log(user);
+  // console.log(user);
   // if (!user) throw new Error('Submit Bid failed: User not found!');
 
   const existingPlay = await Plays.findOne({
@@ -48,7 +48,6 @@ export const submitBid = async (
       console.error(e);
       throw new MongoError(e);
     });
-    console.log('EXISTING PLAY', result);
     return result;
   } else {
     // Create new play
@@ -66,7 +65,6 @@ export const submitBid = async (
       console.error(e);
       throw new MongoError(e);
     });
-    console.log('NEW PLAY', result);
     return result;
   }
 };
