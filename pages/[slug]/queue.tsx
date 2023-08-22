@@ -19,7 +19,7 @@ export type SongObject = {
   artistName: string;
   feeRate: number;
   playing: boolean;
-  myPick: boolean;
+  myPick?: boolean;
   upNext: boolean;
   bidders: User[];
 };
@@ -60,7 +60,8 @@ export const cleanSong = (
   };
 };
 export const getQueue = async (user: User, isProfile: boolean = false) => {
-  let url = `/api/leaderboard/queue?hostShortName=atl`;
+  const host = 'atl'; // TODO FIX
+  let url = `/api/leaderboard/queue?hostShortName=${host}`;
   if (isProfile) {
     url += `&userId=${user.userId}`;
   }

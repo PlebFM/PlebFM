@@ -95,7 +95,10 @@ export default NextAuth({
           refreshToken: account.refresh_token,
           user,
         };
-      } else if (token.expires_at == null || now < token.expires_at) {
+      } else if (
+        token.accessTokenExpires == null ||
+        now < token.accessTokenExpires
+      ) {
         res = token;
       } else {
         res = await refreshAccessToken(token);

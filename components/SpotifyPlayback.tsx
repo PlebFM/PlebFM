@@ -6,9 +6,10 @@ import {
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import { addTrackToSpotifyQueue, transferPlayback } from '../lib/spotify';
 
-const track = {
+const emptyTrack = {
   name: '',
   album: {
     images: [{ url: '' }],
@@ -21,19 +22,33 @@ interface WebPlaybackProps {
 }
 
 function WebPlayback(props: WebPlaybackProps) {
-  const [is_paused, setPaused] = useState(false);
-  const [is_active, setActive] = useState(false);
+  const [isPaused, setPaused] = useState(false);
+  const [trackDuration, setDuration] = useState<number>();
+  const [trackPosition, setPosition] = useState<number>();
+  const [isActive, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
-  const [device_id, setDeviceId] = useState('');
-  const [current_track, setTrack] = useState(track);
-  const [songProgress, setSongProgress] = useState(0);
+  const [deciceId, setDeviceId] = useState('');
+  const [track, setTrack] = useState(emptyTrack);
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://sdk.scdn.co/spotify-player.js';
-    script.async = true;
+    const interval = setInterval(() => {
+      if (isPaused || !trackPosition) return;
+      setPosition(trackPosition + 1000);
+    }, 1000);
 
-    document.body.appendChild(script);
+    return () => clearInterval(interval);
+  }, [isPaused, trackPosition]);
+
+  useEffect(() => {
+    const existing_script = document.getElementById('spotify-player');
+    if (!existing_script) {
+      const script = document.createElement('script');
+      script.src = 'https://sdk.scdn.co/spotify-player.js';
+      script.id = 'spotify-player';
+      script.async = true;
+
+      document.body.appendChild(script);
+    }
 
     window.onSpotifyWebPlaybackSDKReady = () => {
       const player = new window.Spotify.Player({
@@ -43,8 +58,6 @@ function WebPlayback(props: WebPlaybackProps) {
         },
         volume: 0.5,
       });
-
-      console.log(player);
 
       setPlayer(player);
 
@@ -57,36 +70,29 @@ function WebPlayback(props: WebPlaybackProps) {
         console.log('Device ID has gone offline', device_id);
       });
 
-      let myTimer: any = null;
-      let progress: number = songProgress;
-
       player.addListener('player_state_changed', state => {
-        if (!state) {
-          return;
-        }
-
-        setTrack(state.track_window.current_track);
-        setPaused(state.paused);
-
-        if (state.paused) {
-          clearInterval(myTimer);
-          myTimer = null;
-
-          progress = state.position / state.duration;
-          setSongProgress(progress);
-        } else {
-          progress = state.position / state.duration;
-          setSongProgress(progress);
-          if (!myTimer) {
-            myTimer = setInterval(() => {
-              progress += 1000 / state.duration;
-              setSongProgress(progress + 1000 / state.duration);
-            }, 1000);
-          }
-        }
-
+        if (!state) return;
+        const {
+          paused,
+          position,
+          duration,
+          track_window: { current_track },
+        } = state;
+        console.log('Currently Playing', current_track);
+        console.log('Position in Song', position);
+        console.log('Duration of Song', duration);
+        setPosition(position);
+        setDuration(duration);
+        setPaused(paused);
+        setTrack(current_track);
         player.getCurrentState().then(state => {
           !state ? setActive(false) : setActive(true);
+          if (state) {
+            setActive(true);
+            setPosition(state.position);
+          } else {
+            setActive(false);
+          }
         });
       });
 
@@ -94,15 +100,17 @@ function WebPlayback(props: WebPlaybackProps) {
     };
   }, []);
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
-    if (device_id) {
-      transferPlayback(device_id, props.token);
+    if (deciceId) {
+      transferPlayback(deciceId, props.token);
     }
-  }, [device_id]);
+  }, [deciceId]);
 
   const searchResultURI = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
 
-  if (!is_active) {
+  if (!isActive || !track) {
     return (
       <div className="text-3xl p-16 flex flex-col space-y-6 mb-8">
         Instance not active. Transfer your playback using your Spotify app, or
@@ -112,7 +120,8 @@ function WebPlayback(props: WebPlaybackProps) {
           <Button
             size={'small'}
             onClick={() => {
-              transferPlayback(device_id, props.token);
+              player?.activateElement();
+              transferPlayback(deciceId, props.token);
               console.log('transferPlayback called');
             }}
           >
@@ -126,31 +135,35 @@ function WebPlayback(props: WebPlaybackProps) {
       <>
         <div className="text-3xl p-8 flex flex-col space-y-6 mb-32">
           <img
-            src={current_track.album.images[0].url}
+            src={track.album.images[0].url}
             className="w-64 h-64"
-            alt={current_track.name + ' album art'}
+            alt={track.name + ' album art'}
           />
 
-          <p>{current_track.name}</p>
+          <p>{track.name}</p>
 
-          <p className="font-bold">{current_track.artists[0].name}</p>
+          <p className="font-bold">{track.artists[0].name}</p>
 
           <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative">
             <div
               className="bg-pfm-orange-500 h-full rounded-full rounded-r-none"
               style={{
-                width: songProgress * 100 + '%',
+                width:
+                  ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 + '%',
               }}
             ></div>
             <div
               className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
               style={{
-                left: songProgress * 100 - 1.5 + '%',
+                left:
+                  ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 -
+                  1.5 +
+                  '%',
               }}
             ></div>
           </div>
 
-          <div className="flex flex-row space-x-2">
+          <div className="flex flex-row space-x-2 items-center">
             <Button
               className="btn-spotify"
               size="small"
@@ -166,13 +179,13 @@ function WebPlayback(props: WebPlaybackProps) {
             <Button
               className="btn-spotify"
               size="small"
-              icon={is_paused ? <PlayIcon /> : <PauseIcon />}
+              icon={isPaused ? <PlayIcon /> : <PauseIcon />}
               onClick={() => {
                 if (player) player.togglePlay();
               }}
               iconOnly={true}
             >
-              {is_paused ? 'Play' : 'Pause'}
+              {isPaused ? 'Play' : 'Pause'}
             </Button>
 
             <Button
@@ -181,11 +194,34 @@ function WebPlayback(props: WebPlaybackProps) {
               icon={<ForwardIcon />}
               iconOnly={true}
               onClick={() => {
-                if (player) player.nextTrack();
+                if (player) {
+                  player.nextTrack();
+                }
               }}
             >
               Next Song
             </Button>
+            {trackPosition && trackDuration ? (
+              <p className="text-sm pl-4">
+                {Math.floor(trackPosition / 1000 / 60)
+                  .toString()
+                  .padStart(2, '0')}{' '}
+                :{' '}
+                {(Math.floor(trackPosition / 1000) % 60)
+                  .toString()
+                  .padStart(2, '0')}{' '}
+                {'  /  '}
+                {Math.floor(trackDuration / 1000 / 60)
+                  .toString()
+                  .padStart(2, '0')}{' '}
+                :{' '}
+                {(Math.floor(trackDuration / 1000) % 60)
+                  .toString()
+                  .padStart(2, '0')}
+              </p>
+            ) : (
+              <p className="text-sm">0:00 / 0:00</p>
+            )}
           </div>
 
           <div className="flex flex-col space-y-2">
@@ -199,7 +235,7 @@ function WebPlayback(props: WebPlaybackProps) {
               onClick={() => {
                 addTrackToSpotifyQueue(
                   searchResultURI,
-                  device_id,
+                  deciceId,
                   props.token,
                 ).then(res => {
                   if (res.status !== 202)

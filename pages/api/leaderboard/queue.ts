@@ -55,7 +55,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
 
       // Use "next=true" query param to toggle updating the queue
-      if (next === 'true') {
+      // if (next === 'true') {
+      if (false) {
         // Grab first play obj in queue => play obj w/ highest runningTotal and oldest timestamp
         const winner = sortedPlays[0];
         // Query Plays: Get leading play object from db and update status to "next"

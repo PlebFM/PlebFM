@@ -1,6 +1,7 @@
 import Tag from './Tag';
 import Avatar from './Avatar';
 import React from 'react';
+import { SongObject } from '../pages/[slug]/queue';
 
 interface QueueSongProps {
   trackTitle: string;
@@ -34,18 +35,7 @@ export default function QueueSong(props: QueueSongProps) {
         (props.boosted ? ' animate-boost-glow-shudder' : '')
       }
     >
-      {props.playing || props.upNext ? (
-        <div className="mb-6">
-          <Tag
-            text={
-              props.playing ? 'Now Playing' : props.upNext ? 'Up Next' : ' '
-            }
-            color={props.playing ? 'orange' : props.upNext ? 'teal' : ' '}
-          />
-        </div>
-      ) : (
-        ``
-      )}
+      {props.playing || props.upNext ? <Tag song={props as SongObject} /> : ``}
       <div className="w-full flex justify-between space-x-4 w-full">
         <div className="flex flex-col space-y-2">
           <div>
