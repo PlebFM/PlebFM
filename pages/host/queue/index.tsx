@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
-import Tag from '../../../components/Tag';
-import Avatar from '../../../components/Avatar';
-import { getSession, useSession } from 'next-auth/react';
+import { getSession, signIn, useSession } from 'next-auth/react';
 import WebPlayback from '../../../components/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
 import { SongObject, fetchSong } from '../../[slug]/queue';
-import Layout from '../../../components/Layout';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { Song } from '../../../components/Leaderboard/Song';
 
 const getLeaderboardQueue = async () => {
   let url = `/api/leaderboard/queue?hostShortName=atl`;
@@ -18,14 +17,14 @@ const getLeaderboardQueue = async () => {
     return [];
   }
   const promises = res.queue.map((x: any) => {
-    const res = fetchSong(x.songId, 'atl').then(song => {
-      return { obj: x, song: song };
-    });
+    const res = fetchSong(x.songId, 'atl')
+      .then(song => {
+        return { obj: x, song: song };
+      })
+      .then(cleanSong);
     return res;
   });
-  const raw_songs = await Promise.all(promises);
-  const songs = raw_songs.map(x => cleanSong(x));
-  return songs;
+  return promises;
 };
 
 const cleanSong = (rawSong: { obj: any; song: any }) => {
@@ -43,17 +42,48 @@ const cleanSong = (rawSong: { obj: any; song: any }) => {
     status: obj.status,
   };
 };
+
+const findHost = async (spotifyId: string) => {
+  const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
+    method: 'GET',
+    mode: 'no-cors',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      Accept: 'application/json',
+    },
+  });
+  const resJson = await res.json();
+  return resJson?.hosts[0];
+};
+
 export default function Queue() {
   const { data: session, status } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [queueData, setQueueData] = useState<SongObject[]>([]);
+  const [queueData, setQueueData] = useState<Promise<SongObject>[]>([]);
   const [songProgress, setSongProgress] = useState(0.1);
   const [paused, setPaused] = useState(true);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    console.log('Session', session);
-    console.log('status', status);
+    if (!router) return;
+    if (status === 'unauthenticated') {
+      void signIn('spotify');
+    }
+    if (status === 'authenticated') {
+      //@ts-ignore
+      const spotifyId = session?.user?.id;
+      if (!spotifyId) return;
+      findHost(spotifyId).then(host => {
+        if (!host) {
+          console.error('HOST NOT FOUND');
+          router.push('/host?error=host_not_found');
+        }
+      });
+    }
+  }, [status, session, router]);
+
+  useEffect(() => {
     if (!session) return;
     const foo = async () => {
       //@ts-ignore
@@ -86,51 +116,6 @@ export default function Queue() {
       setLoading(false);
     });
   }, []);
-
-  const Song = ({ song }: { song: SongObject }) => {
-    return (
-      <div className="p-6 border-b border-white/20 w-full">
-        <div className="w-full flex justify-between space-x-4 w-full">
-          <div className="flex flex-col space-y-2">
-            <div>
-              <p>{song.trackTitle}</p>
-              <p className="font-bold">{song.artistName}</p>
-            </div>
-            <div className="flex -space-x-1 items-center">
-              {song.bidders.slice(0, 5).map((bidder, key) => (
-                <div className="w-8" key={key}>
-                  <Avatar
-                    firstNym={bidder.firstNym}
-                    lastNym={bidder.lastNym}
-                    color={bidder.color}
-                    size="xs"
-                  />
-                </div>
-              ))}
-              {song.bidders.length > 5 ? (
-                <div className="pl-4 font-semibold text-lg">
-                  +{song.bidders.length - 5}
-                </div>
-              ) : (
-                ``
-              )}
-            </div>
-          </div>
-          {song.upNext ? (
-            <Tag song={song} />
-          ) : (
-            // <p className="font-bold">{song.feeRate.toFixed(0)} sats / min</p>
-            <div>
-              <p className="font-normal text-6xl text-center">
-                {song.feeRate.toFixed(0)}
-              </p>
-              <p className="font-bold text-xs text-center"> sats / min</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -194,8 +179,8 @@ export default function Queue() {
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">
           <div className="text-white relative z-50 flex flex-col items-center min-h-screen font-thin bg-pfm-purple-300/50">
-            {queueData.map((song, key) => (
-              <Song song={song} key={key} />
+            {queueData.map((songPromise, key) => (
+              <Song songPromise={songPromise} key={key} />
             ))}
           </div>
         </div>

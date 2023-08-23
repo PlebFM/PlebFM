@@ -1,14 +1,10 @@
-import { Session } from 'next-auth';
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import Hosts, { Host } from '../models/Host';
+import { Host } from '../models/Host';
 import Button from './Button';
 
-const findHost = async (refreshToken: string) => {
-  console.log('FIND HOST', refreshToken);
-  const params = new URLSearchParams({ spotifyRefreshToken: refreshToken });
-  console.log('Findin the host', `/api/hosts?${params}`);
-  const res = await fetch(`/api/hosts?${params}`, {
+const findHost = async (spotifyId: string) => {
+  const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
     method: 'GET',
     mode: 'no-cors',
     headers: {
@@ -16,25 +12,8 @@ const findHost = async (refreshToken: string) => {
       Accept: 'application/json',
     },
   });
-  return await res.json();
-};
-const findOrCreateNewHost = async (
-  shortName: string,
-  hostName: string,
-  refreshToken: string,
-): Promise<Host> => {
-  const body = { shortName, hostName, refreshToken };
-  const res = await fetch(`/api/hosts`, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-  return await res.json();
+  const resJson = await res.json();
+  return resJson.hosts[0];
 };
 
 const SpotifyAuthButton = () => {
@@ -42,39 +21,24 @@ const SpotifyAuthButton = () => {
   const [host, setHost] = useState<Host | null>(null);
 
   useEffect(() => {
-    const getHost = async () => {
-      if (!session) return;
-      // @ts-ignore
-      const refreshToken = session.refreshToken;
-      if (!refreshToken) signOut();
-      const findRes = await findHost(refreshToken);
-      if (findRes) {
-        setHost(findRes);
-        return;
-      }
-      const res = await findOrCreateNewHost(
-        'jordan',
-        'jordanBravo',
-        refreshToken,
-      );
-      setHost(res);
-    };
-    getHost();
+    if (!session || !session.user) return;
+    // @ts-ignore
+    const spotifyId = session.user.id;
+    if (!spotifyId) signOut();
+    findHost(spotifyId).then(host => {
+      if (host) setHost(host);
+    });
   }, [session]);
 
   if (session) {
     return (
       <div className="flex flex-col space-y-8">
         <p>Signed in as {session?.user?.email ?? 'Spotify User'}</p>
-
         <Button onClick={() => signOut()}>Sign Out</Button>
-
-        <p>Host Obj:</p>
-
-        <code className="bg-pfm-purple-100 p-4">
-          {host ? JSON.stringify(host) : '...'}
+        <p>Host</p>
+        <code className="bg-pfm-purple-100 p-4 truncate">
+          {host ? host.shortName : '...'}
         </code>
-
         <Button href="/host/queue">Go to Leaderboard</Button>
       </div>
     );

@@ -9,6 +9,8 @@ interface AuthToken {
   user: User;
   accessToken: string;
   accessTokenExpires?: number;
+  exp?: number;
+  iat?: number;
   expires_at?: number;
   refreshToken: string;
   error?: string;
@@ -41,7 +43,7 @@ async function refreshAccessToken(token: AuthToken): Promise<AuthToken> {
       body: new URLSearchParams({
         grant_type: 'client_credentials',
         //@ts-ignore
-        refreshToken: response.body.refreshToken,
+        refreshToken: token.accessToken,
       }),
     });
 
@@ -87,7 +89,7 @@ export default NextAuth({
     //@ts-ignore
     async jwt({ token, user, account }: JwtInterface): Promise<AuthToken> {
       let res: AuthToken;
-      const now = Date.now();
+      const now = Math.floor(Date.now() / 1000);
 
       if (account && user) {
         res = {
@@ -96,13 +98,10 @@ export default NextAuth({
           refreshToken: account.refresh_token,
           user,
         };
-      } else if (
-        token.accessTokenExpires == null ||
-        now < token.accessTokenExpires
-      ) {
-        res = token;
-      } else {
+      } else if (token.error || !token.exp || now > token.exp) {
         res = await refreshAccessToken(token);
+      } else {
+        res = token;
       }
       return res;
     },
