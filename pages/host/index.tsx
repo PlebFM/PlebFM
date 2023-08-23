@@ -21,15 +21,19 @@ export default function Login() {
   }, [session]);
 
   return (
-    <div className="bg-pfm-purple-300 text-white w-fuill h-full p-8">
+    <div className="bg-pfm-purple-300 text-white w-screen h-screen p-8">
       <h1 className="text-2xl mb-8">Host Login</h1>
       <SpotifyAuthButton />
       <br />
       <p>accessToken:</p>
       <br />
-      <code style={{ backgroundColor: 'black', padding: '.5rem' }}>
-        {accessToken}
-      </code>
+      <div className="flex">
+        <code className="bg-pfm-purple-100 p-4 truncate">
+          {' '}
+          {/* style={{ backgroundColor: 'black', padding: '.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: "nowrap" }}> */}
+          {accessToken}
+        </code>
+      </div>
     </div>
   );
 }

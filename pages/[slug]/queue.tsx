@@ -1,16 +1,13 @@
-import Link from 'next/link';
 import Image from 'next/image';
 import bokeh3 from '../../public/pfm-bokeh-3.jpg';
 import { useEffect, useState } from 'react';
 import NavBar from '../../components/NavBar';
 import Avatar from '../../components/Avatar';
 import Tag from '../../components/Tag';
-import querystring from 'querystring';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { User } from '../../models/User';
 import { Song } from '../../models/Song';
 import Layout from '../../components/Layout';
-import { Bid } from '../../models/Bid';
 
 // pleb.fm/bantam/queue
 // Used for frontend hydration
@@ -36,7 +33,6 @@ export const fetchSong = async (
   });
   if (!res.ok) throw new Error('Failed to search song');
   const result = await res.json();
-  // console.log('FETCH RES', result)
   return result;
 };
 export const cleanSong = (
@@ -151,7 +147,6 @@ export default function Queue() {
               )}
             </div>
           </div>
-          {/* <p className="font-bold">{song.feeRate.toFixed(0)} sats / min</p> */}
           <div>
             <p className="font-normal text-6xl text-center">
               {song.feeRate.toFixed(0)}
