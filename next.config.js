@@ -44,13 +44,7 @@ const nextConfig = {
     ];
   },
   async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/atl',
-        permanent: false,
-      },
-    ];
+    return [];
   },
 };
 
