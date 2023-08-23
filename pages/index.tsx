@@ -55,13 +55,13 @@ const SignupForm = () => {
       <h3 className="text-xl font-bold">Sign Up</h3>
 
       <p>
-        Interested in starting your own Jukebox? Awesome, we'll be in touch to
-        help you out.
+        Interested in starting your own Jukebox? Awesome, we&rsquo;ll be in
+        touch to help you out.
       </p>
 
       <form
         name="plebfm-jukebox-signup"
-        netlify
+        data-netlify="true"
         className="flex flex-col gap-y-8 py-8"
       >
         <div>
