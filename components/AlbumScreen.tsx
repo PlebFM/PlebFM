@@ -27,7 +27,7 @@ export default function AlbumScreen(props: {
         />
       </div>
 
-      <div className=" px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
+      <div className="m-auto max-w-xl px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
         <div className="w-full">
           <p className="text-xl">{props?.track?.name}</p>
           <p className="text-lg font-bold">{props?.track?.artists[0]?.name}</p>
@@ -65,7 +65,7 @@ export default function AlbumScreen(props: {
           </Button>
         </div>
       </div>
-      <NavBar />
+      <NavBar activeBtn="search" />
     </>
   );
 }

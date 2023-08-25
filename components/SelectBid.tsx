@@ -81,8 +81,8 @@ export default function SelectBid(props: {
         {/* <Image src={albumPlaceholder} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" /> */}
       </div>
 
-      <div className=" px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
-        <div className="w-full">
+      <div className="px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
+        <div className="max-w-screen-sm">
           <p className="text-xl">{props.song?.name}</p>
           <p className="text-lg font-bold">{props.song?.artists[0]?.name}</p>
           <p className="text-base">{props.song?.album?.name}</p>
@@ -186,6 +186,7 @@ export default function SelectBid(props: {
           </>
         )}
       </div>
+      <NavBar activeBtn="search" />
     </>
   );
 }

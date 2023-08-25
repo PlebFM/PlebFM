@@ -69,7 +69,7 @@ export default function Search(props: SearchProps) {
         />
       </div>
 
-      <div className="py-12 pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+      <div className="max-w-screen-sm m-auto py-12 pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
         <div className="px-6 py-0 space-y-6 flex flex-col top-0 left-0 z-[99]">
           <Image
             src={plebFMLogo}

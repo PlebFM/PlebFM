@@ -150,7 +150,7 @@ function PaymentScreen(props: {
           ``
         )}
       </div>
-      <NavBar />
+      <NavBar activeBtn="search" />
     </>
   );
 }
