@@ -110,8 +110,8 @@ export default function UserProfile() {
             />
           </div>
 
-          <div className="w-full px-0 py-12 pb-0 text-white relative z-50 flex flex-col space-y-6 items-center font-thin">
-            <div className="w-2/3 mx-auto flex flex-col space-y-4 text-center">
+          <div className="max-w-screen-md m-auto px-0 py-12 pb-0 text-white relative z-50 flex flex-col space-y-6 items-center font-thin">
+            <div className="mx-auto flex flex-col space-y-4 text-center">
               <Avatar
                 firstNym={userProfile.firstNym}
                 lastNym={userProfile.lastNym}

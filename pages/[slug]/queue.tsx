@@ -132,7 +132,8 @@ export default function Queue() {
       ) : queueData.length === 0 ? (
         <EmptyQueue />
       ) : (
-        <div className="pb-[60px] text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+        // <div className="pb-[60px] text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+        <div className="pb-[60px] max-w-screen-sm m-auto pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
           {queueData.map((song, key) => (
             <QueueSong key={key} song={song} />
           ))}
