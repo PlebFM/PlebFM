@@ -8,16 +8,17 @@ import { SongObject, fetchSong } from '../../[slug]/queue';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Song } from '../../../components/Leaderboard/Song';
+import { usePathname } from 'next/navigation';
 
-const getLeaderboardQueue = async () => {
-  let url = `/api/leaderboard/queue?hostShortName=atl`;
+const getLeaderboardQueue = async (host: string) => {
+  let url = `/api/leaderboard/queue?hostShortName=${host}`;
   const response = await fetch(url);
   const res = await response.json();
   if (!res?.queue) {
     return [];
   }
   const promises = res.queue.map((x: any) => {
-    const res = fetchSong(x.songId, 'atl')
+    const res = fetchSong(x.songId, host)
       .then(song => {
         return { obj: x, song: song };
       })
@@ -64,6 +65,7 @@ export default function Queue() {
   const [paused, setPaused] = useState(true);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!router) return;
@@ -111,11 +113,12 @@ export default function Queue() {
   useEffect(() => {}, [songProgress]);
 
   useEffect(() => {
+    if (!pathname) return;
     getLeaderboardQueue().then(res => {
       if (res) setQueueData(res);
       setLoading(false);
     });
-  }, []);
+  }, [pathname]);
 
   return (
     <>

@@ -7,6 +7,7 @@ import Button from './Button';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import NavBar from './NavBar';
 import { Song } from '../models/Song';
+import { usePathname } from 'next/navigation';
 
 function PaymentScreen(props: {
   song: Song;
@@ -19,6 +20,7 @@ function PaymentScreen(props: {
   const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '' });
   const [loading, setLoading] = useState(false);
   const [startPolling, setStartPolling] = useState(false);
+  const pathname = usePathname();
 
   const getUserProfileFromLocal = () => {
     const userProfileJSON = localStorage.getItem('userProfile');
@@ -48,10 +50,10 @@ function PaymentScreen(props: {
   }, []);
 
   useEffect(() => {
-    if (!startPolling || !bolt11.hash) return;
+    if (!startPolling || !bolt11.hash || !pathname) return;
 
     const getPaidStatus = async () => {
-      const hostId = 'atl'; // TODO FIX
+      const hostId = pathname?.substring(1); // /atl -> atl
       const user = getUserProfileFromLocal();
       const url = `/api/invoice?hash=${bolt11.hash}&hostId=${hostId}&songId=${props.song?.id}&bidAmount=${props.totalBid}&userId=${user.userId}`;
       const response = await fetch(url);
@@ -73,7 +75,7 @@ function PaymentScreen(props: {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [startPolling, bolt11.hash]);
+  }, [startPolling, bolt11.hash, pathname]);
 
   return (
     <>
@@ -139,7 +141,7 @@ function PaymentScreen(props: {
           <Button
             className="w-full"
             icon={<QueueListIcon />}
-            href="/atl/queue"
+            href={`${pathname}/queue`}
             size="small"
           >
             Song Queue

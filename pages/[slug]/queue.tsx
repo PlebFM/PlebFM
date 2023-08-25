@@ -7,6 +7,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { User } from '../../models/User';
 import { Song } from '../../models/Song';
 import Layout from '../../components/Layout';
+import { usePathname } from 'next/navigation';
 
 // pleb.fm/bantam/queue
 // Used for frontend hydration
@@ -54,8 +55,11 @@ export const cleanSong = (
     status: obj.status,
   };
 };
-export const getQueue = async (user: User, isProfile: boolean = false) => {
-  const host = 'atl'; // TODO FIX
+export const getQueue = async (
+  host: string,
+  user: User,
+  isProfile: boolean = false,
+) => {
   let url = `/api/leaderboard/queue?hostShortName=${host}`;
   if (isProfile) {
     url += `&userId=${user.userId}`;
@@ -66,7 +70,7 @@ export const getQueue = async (user: User, isProfile: boolean = false) => {
     return [];
   }
   const promises = res.queue.map((x: any) => {
-    const res = fetchSong(x.songId, 'atl').then(song => {
+    const res = fetchSong(x.songId, host).then(song => {
       return { obj: x, song: song };
     });
     return res;
@@ -85,15 +89,20 @@ export default function Queue() {
   };
   const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    if (!pathname) return;
     setLoading(true);
     const userProfile = getUserProfileFromLocal();
-    getQueue(userProfile).then(res => {
+    const hostname = pathname.substring(1).split('/')[0];
+    console.log();
+    console.log('HERERE', pathname.substring(1));
+    getQueue(hostname, userProfile).then(res => {
       if (res) setQueueData(res);
       setLoading(false);
     });
-  }, []);
+  }, [pathname]);
 
   const EmptyQueue = () => {
     return (
