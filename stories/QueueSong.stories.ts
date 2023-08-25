@@ -7,17 +7,19 @@ const meta: Meta<typeof QueueSong> = {
   component: QueueSong,
   tags: ['autodocs'],
   argTypes: {
-    trackTitle: {
-      name: 'Text',
-      type: { name: 'string', required: true },
-      defaultValue: 'Track Title',
-      description: 'Title of track',
-      table: {
-        type: { summary: 'string' },
-        defaultValue: { summary: 'Track Title' },
-      },
-      control: {
-        type: 'text',
+    song: {
+      trackTitle: {
+        name: 'Text',
+        type: { name: 'string', required: true },
+        defaultValue: 'Track Title',
+        description: 'Title of track',
+        table: {
+          type: { summary: 'string' },
+          defaultValue: { summary: 'Track Title' },
+        },
+        control: {
+          type: 'text',
+        },
       },
     },
   },
@@ -29,84 +31,112 @@ type Story = StoryObj<typeof QueueSong>;
 const FluffyHoneyBadger = {
   firstNym: 'Fluffy',
   lastNym: 'Honeybadger',
-  color: 'teal',
+  avatar: 'teal',
+  userId: '1234567890',
 };
 
 const ZazzyFawkes = {
   firstNym: 'Zazzy',
   lastNym: 'Fawkes',
-  color: 'orange',
+  avatar: 'orange',
+  userId: '1234567890',
 };
 
 const BasedChaditha = {
   firstNym: 'Based',
   lastNym: 'Chaditha',
-  color: 'purpleLight',
+  avatar: 'purpleLight',
+  userId: '1234567890',
 };
 
 const WonderfulKitty = {
   firstNym: 'Wonderful',
   lastNym: 'Kitty',
-  color: 'purpleDark',
+  avatar: 'purpleDark',
+  userId: '1234567890',
 };
 
 const SquealingBankasaurus = {
   firstNym: 'Squealing',
   lastNym: 'Bankasaurus',
-  color: 'orangeDark',
+  avatar: 'orangeDark',
+  userId: '1234567890',
 };
 
 const SilentGoldbug = {
   firstNym: 'Silent',
   lastNym: 'Goldbug',
-  color: 'tealLight',
+  avatar: 'tealLight',
+  userId: '1234567890',
 };
+
+// export const Default: Story = {
+//   args: {
+//     trackTitle: 'The Devil Went Down to Georgia',
+//     artistName: 'Charlie Daniels Band',
+//     feeRate: 70,
+//     bidders: [BasedChaditha, WonderfulKitty],
+//   },
+// };
 
 export const Default: Story = {
   args: {
-    trackTitle: 'The Devil Went Down to Georgia',
-    artistName: 'Charlie Daniels Band',
-    feeRate: 70,
-    bidders: [BasedChaditha, WonderfulKitty],
+    song: {
+      trackTitle: 'The Devil Went Down to Georgia',
+      artistName: 'Charlie Daniels Band',
+      feeRate: 70,
+      bidders: [BasedChaditha, WonderfulKitty],
+      playing: false,
+      upNext: false,
+    },
   },
 };
 
 export const Boosted: Story = {
   args: {
-    trackTitle: 'ATLiens',
-    artistName: 'Outkast',
-    feeRate: 132,
+    song: {
+      trackTitle: 'ATLiens',
+      artistName: 'Outkast',
+      feeRate: 132,
+      bidders: [BasedChaditha, ZazzyFawkes, SilentGoldbug],
+      playing: false,
+      upNext: false,
+    },
     boosted: true,
-    bidders: [BasedChaditha, ZazzyFawkes, SilentGoldbug],
   },
 };
 
 export const NowPlaying: Story = {
   args: {
-    trackTitle: "Hips Don't Lie",
-    artistName: 'Shakira',
-    feeRate: 100,
-    playing: true,
-    upNext: false,
-    bidders: [FluffyHoneyBadger, ZazzyFawkes, BasedChaditha, WonderfulKitty],
+    song: {
+      trackTitle: "Hips Don't Lie",
+      artistName: 'Shakira',
+      feeRate: 100,
+      playing: true,
+      upNext: false,
+      bidders: [FluffyHoneyBadger, ZazzyFawkes, BasedChaditha, WonderfulKitty],
+    },
+    boosted: false,
   },
 };
 
 export const UpNext: Story = {
   args: {
-    trackTitle: 'March of the Pigs',
-    artistName: 'Nine Inch Nails',
-    feeRate: 80,
-    playing: false,
-    upNext: true,
-    bidders: [
-      FluffyHoneyBadger,
-      BasedChaditha,
-      WonderfulKitty,
-      SquealingBankasaurus,
-      ZazzyFawkes,
-      SilentGoldbug,
-    ],
+    song: {
+      trackTitle: 'March of the Pigs',
+      artistName: 'Nine Inch Nails',
+      feeRate: 80,
+      playing: false,
+      upNext: true,
+      bidders: [
+        FluffyHoneyBadger,
+        BasedChaditha,
+        WonderfulKitty,
+        SquealingBankasaurus,
+        ZazzyFawkes,
+        SilentGoldbug,
+      ],
+    },
   },
 };
 

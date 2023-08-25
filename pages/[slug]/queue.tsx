@@ -2,8 +2,7 @@ import Image from 'next/image';
 import bokeh3 from '../../public/pfm-bokeh-3.jpg';
 import { useEffect, useState } from 'react';
 import NavBar from '../../components/NavBar';
-import Avatar from '../../components/Avatar';
-import Tag from '../../components/Tag';
+import QueueSong from '../../components/QueueSong';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { User } from '../../models/User';
 import { Song } from '../../models/Song';
@@ -109,55 +108,6 @@ export default function Queue() {
     );
   };
 
-  const Song = ({ song }: { song: SongObject }) => {
-    return (
-      <div className="p-6 border-b border-white/20 w-full">
-        <Tag song={song} />
-        <div className="w-full flex justify-between space-x-4 w-full">
-          <div className="flex flex-col space-y-2">
-            <div>
-              <p>{song.trackTitle}</p>
-              <p className="font-bold">{song.artistName}</p>
-            </div>
-            <div className="flex -space-x-1 items-center">
-              {/* TODO: Add fetching of user object for bids using SWR */}
-              {song.bidders.length == 0 ? (
-                <p></p>
-              ) : (
-                (song.bidders.length > 5
-                  ? song.bidders.slice(0, 5)
-                  : song.bidders
-                ).map((bidder, key) => (
-                  <div className="w-8" key={key}>
-                    <Avatar
-                      firstNym={bidder.firstNym}
-                      lastNym={bidder.lastNym}
-                      color={bidder.color}
-                      size="xs"
-                    />
-                  </div>
-                ))
-              )}
-              {song.bidders.length > 5 ? (
-                <div className="pl-4 font-semibold text-lg">
-                  +{song.bidders.length - 5}
-                </div>
-              ) : (
-                ``
-              )}
-            </div>
-          </div>
-          <div>
-            <p className="font-normal text-6xl text-center">
-              {song.feeRate.toFixed(0)}
-            </p>
-            <p className="font-bold text-xs text-center"> sats / min</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <Layout title="Queue">
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
@@ -173,9 +123,9 @@ export default function Queue() {
       ) : queueData.length === 0 ? (
         <EmptyQueue />
       ) : (
-        <div className="pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+        <div className="pb-[60px] text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
           {queueData.map((song, key) => (
-            <Song song={song} key={key} />
+            <QueueSong key={key} song={song} />
           ))}
         </div>
       )}

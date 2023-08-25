@@ -37,7 +37,7 @@ export default function NavBar(props: NavBarProps) {
   ];
 
   return (
-    <nav className="w-full p-4 bg-pfm-purple-300 bg-gradient-to-b from-pfm-purple-300 to-pfm-purple-100 fixed bottom-0 left-0 text-pfm-neutral-800 z-[99]">
+    <nav className="font-normal text-sm w-full p-2 bg-pfm-purple-300 bg-gradient-to-b from-pfm-purple-300 to-pfm-purple-100 fixed bottom-0 left-0 text-pfm-neutral-800 z-[99]">
       <ul className="flex space-x-16 justify-center">
         {options.map((option, key) => (
           <li key={key}>
@@ -45,11 +45,11 @@ export default function NavBar(props: NavBarProps) {
               href={option.href}
               className={
                 props.activeBtn && props.activeBtn === option.slug
-                  ? 'drop-shadow-glow-white text-white font-medium'
+                  ? 'drop-shadow-glow-white text-white font-bold'
                   : ''
               }
             >
-              <span className="w-8 h-8 block mx-auto">{option.icon}</span>
+              <span className="w-6 h-6 block mx-auto">{option.icon}</span>
               <span className="tracking-wider">{option.text}</span>
             </a>
           </li>

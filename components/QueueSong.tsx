@@ -3,18 +3,11 @@ import Avatar from './Avatar';
 import React from 'react';
 import { SongObject } from '../pages/[slug]/queue';
 
+// TODO: Replace things like trackTitle with song.trackTitle
+
 interface QueueSongProps {
-  trackTitle: string;
-  artistName: string;
-  feeRate: number;
-  playing?: boolean;
-  upNext?: boolean;
+  song: SongObject;
   boosted?: boolean;
-  bidders: {
-    firstNym: string;
-    lastNym: string;
-    color: string;
-  }[];
 }
 
 export default function QueueSong(props: QueueSongProps) {
@@ -35,42 +28,52 @@ export default function QueueSong(props: QueueSongProps) {
         (props.boosted ? ' animate-boost-glow-shudder' : '')
       }
     >
-      {props.playing || props.upNext ? <Tag song={props as SongObject} /> : ``}
-      <div className="w-full flex justify-between space-x-4 w-full">
+      {props.song.playing || props.song.upNext || props.song.myPick ? (
+        <Tag song={props.song} />
+      ) : (
+        ``
+      )}
+      <div className="w-full flex justify-between space-x-4">
+        {/* {props.song ? <Tag song={props.song} /> : ``} */}
         <div className="flex flex-col space-y-2">
           <div>
-            <p>{props.trackTitle}</p>
-            <p className="font-bold">{props.artistName}</p>
+            <p className="font-normal">{props.song.trackTitle}</p>
+            <p className="font-bold">{props.song.artistName}</p>
           </div>
           <div className="flex -space-x-1 items-center">
             {/* TODO: Add fetching of user object for bids using SWR */}
-            {props.bidders.length == 0 ? (
+            {props.song.bidders.length == 0 ? (
               <p>user pics</p>
             ) : (
-              (props.bidders.length > 5
-                ? props.bidders.slice(0, 5)
-                : props.bidders
+              (props.song.bidders.length > 5
+                ? props.song.bidders.slice(0, 5)
+                : props.song.bidders
               ).map((bidder, key) => (
                 <div className="w-8" key={key}>
                   <Avatar
                     firstNym={bidder.firstNym}
                     lastNym={bidder.lastNym}
-                    color={bidder.color}
+                    color={bidder.color || bidder.avatar}
                     size="xs"
                   />
                 </div>
               ))
             )}
-            {props.bidders.length > 5 ? (
+            {props.song.bidders.length > 5 ? (
               <div className="pl-4 font-semibold text-lg">
-                +{props.bidders.length - 5}
+                +{props.song.bidders.length - 5}
               </div>
             ) : (
               ``
             )}
           </div>
         </div>
-        <p className="font-bold">{props.feeRate} sats</p>
+        <div>
+          <p className="font-extralight text-2xl text-center">
+            {props.song.feeRate.toFixed(0)}
+          </p>
+          <p className="font-bold text-xs text-center"> sats / min</p>
+        </div>
       </div>
       {props.boosted && !boostFXPlayed ? (
         <>
