@@ -9,6 +9,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Song } from '../../../components/Leaderboard/Song';
 import { usePathname } from 'next/navigation';
+import { Host } from '../../../models/Host';
 
 const getLeaderboardQueue = async (host: string) => {
   let url = `/api/leaderboard/queue?hostShortName=${host}`;
@@ -44,7 +45,7 @@ const cleanSong = (rawSong: { obj: any; song: any }) => {
   };
 };
 
-const findHost = async (spotifyId: string) => {
+const findHost = async (spotifyId: string): Promise<Host> => {
   const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
     method: 'GET',
     mode: 'no-cors',
@@ -64,6 +65,7 @@ export default function Queue() {
   const [songProgress, setSongProgress] = useState(0.1);
   const [paused, setPaused] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [host, setHost] = useState<string>();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -80,6 +82,8 @@ export default function Queue() {
         if (!host) {
           console.error('HOST NOT FOUND');
           router.push('/host?error=host_not_found');
+        } else {
+          setHost(host.shortName);
         }
       });
     }
@@ -113,12 +117,12 @@ export default function Queue() {
   useEffect(() => {}, [songProgress]);
 
   useEffect(() => {
-    if (!pathname) return;
-    getLeaderboardQueue().then(res => {
+    if (!host) return;
+    getLeaderboardQueue(host).then(res => {
       if (res) setQueueData(res);
       setLoading(false);
     });
-  }, [pathname]);
+  }, [host]);
 
   return (
     <>
