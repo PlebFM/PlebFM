@@ -2,7 +2,6 @@
 import Image from 'next/image';
 import Avatar from '../../../components/Avatar';
 import React, { useState, useEffect } from 'react';
-import Tag from '../../../components/Tag';
 import NavBar from '../../../components/NavBar';
 import Layout from '../../../components/Layout';
 import { SongObject, cleanSong, fetchSong, getQueue } from '../../[slug]/queue';

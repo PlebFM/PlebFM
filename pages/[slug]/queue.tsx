@@ -2,8 +2,6 @@ import Image from 'next/image';
 import bokeh3 from '../../public/pfm-bokeh-3.jpg';
 import { useEffect, useState } from 'react';
 import NavBar from '../../components/NavBar';
-import Avatar from '../../components/Avatar';
-import Tag from '../../components/Tag';
 import QueueSong from '../../components/QueueSong';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { User } from '../../models/User';
