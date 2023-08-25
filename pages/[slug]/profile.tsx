@@ -1,13 +1,14 @@
 // User profile
 import Image from 'next/image';
-import Avatar from '../../../components/Avatar';
+import Avatar from '../../components/Avatar';
 import React, { useState, useEffect } from 'react';
-import NavBar from '../../../components/NavBar';
-import Layout from '../../../components/Layout';
-import { SongObject, cleanSong, fetchSong, getQueue } from '../../[slug]/queue';
-import { User } from '../../../models/User';
-import LoadingSpinner from '../../../components/LoadingSpinner';
-import QueueSong from '../../../components/QueueSong';
+import Tag from '../../components/Tag';
+import NavBar from '../../components/NavBar';
+import Layout from '../../components/Layout';
+import { SongObject, cleanSong, fetchSong, getQueue } from '../[slug]/queue';
+import { User } from '../../models/User';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import { usePathname } from 'next/navigation';
 
 export default function UserProfile() {
   const [userProfile, setUserProfile] = useState({
@@ -15,6 +16,7 @@ export default function UserProfile() {
     lastNym: '',
     color: '',
   });
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
 
   const getUserProfileFromLocal = () => {
@@ -30,8 +32,9 @@ export default function UserProfile() {
   }, []);
 
   useEffect(() => {
-    if (!userProfile) return;
-    getQueue(userProfile as User, true)
+    if (!userProfile || !pathname) return;
+    const host = pathname.substring(1).split('/')[0];
+    getQueue(host, userProfile as User, true)
       .then(res => {
         if (res) {
           const queued = res.filter(x => x.queued);
@@ -45,10 +48,51 @@ export default function UserProfile() {
         console.error(e);
         setLoading(false);
       });
-  }, [userProfile]);
+  }, [userProfile, pathname]);
 
   const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [queueDataPlayed, setQueueDataPlayed] = useState<SongObject[]>([]);
+
+  const Song = ({ song }: { song: SongObject }) => {
+    return (
+      <div className="p-6 border-b border-white/20 w-full">
+        <Tag song={song} />
+        <div className="w-full flex justify-between space-x-4 w-full">
+          <div className="flex flex-col space-y-2">
+            <div>
+              <p>{song.trackTitle}</p>
+              <p className="font-bold">{song.artistName}</p>
+            </div>
+            <div className="flex -space-x-1 items-center">
+              {song.bidders.slice(0, 5).map((bidder, key) => (
+                <div className="w-8" key={key}>
+                  <Avatar
+                    firstNym={bidder.firstNym}
+                    lastNym={bidder.lastNym}
+                    color={bidder.color}
+                    size="xs"
+                  />
+                </div>
+              ))}
+              {song.bidders.length > 5 ? (
+                <div className="pl-4 font-semibold text-lg">
+                  +{song.bidders.length - 5}
+                </div>
+              ) : (
+                ``
+              )}
+            </div>
+          </div>
+          <div>
+            <p className="font-normal text-6xl text-center">
+              {song.feeRate.toFixed(0)}
+            </p>
+            <p className="font-bold text-xs text-center"> sats / min</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Layout title="Your Profile">
@@ -82,9 +126,9 @@ export default function UserProfile() {
             {queueData.length > 0 && (
               <h2 className="text-left font-bold w-full px-6">In Queue</h2>
             )}
-            <div className="w-full text-white relative z-50 flex flex-col items-center font-thin">
+            <div className="w-full pb-16 text-white relative z-50 flex flex-col items-center font-thin">
               {queueData.map((song, key) => (
-                <QueueSong song={song} key={key} />
+                <Song song={song} key={key} />
               ))}
             </div>
 
@@ -93,9 +137,9 @@ export default function UserProfile() {
                 <h2 className="text-left font-bold w-full px-6">
                   Already played
                 </h2>
-                <div className="w-full pb-[60px] text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+                <div className="w-full pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
                   {queueDataPlayed.map((song, key) => (
-                    <QueueSong song={song} key={key} />
+                    <Song song={song} key={key} />
                   ))}
                 </div>
               </>
