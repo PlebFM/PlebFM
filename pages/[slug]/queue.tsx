@@ -110,13 +110,14 @@ export default function Queue() {
   };
 
   const Song = ({ song }: { song: SongObject }) => {
+    console.log(song.bidders);
     return (
-      <div className="p-6 border-b border-white/20 w-full">
+      <div className="p-4 border-b border-white/20 w-full">
         <Tag song={song} />
         <div className="w-full flex justify-between space-x-4 w-full">
           <div className="flex flex-col space-y-2">
             <div>
-              <p>{song.trackTitle}</p>
+              <p className="font-normal">{song.trackTitle}</p>
               <p className="font-bold">{song.artistName}</p>
             </div>
             <div className="flex -space-x-1 items-center">
@@ -132,7 +133,7 @@ export default function Queue() {
                     <Avatar
                       firstNym={bidder.firstNym}
                       lastNym={bidder.lastNym}
-                      color={bidder.color}
+                      color={bidder.avatar}
                       size="xs"
                     />
                   </div>
@@ -148,7 +149,7 @@ export default function Queue() {
             </div>
           </div>
           <div>
-            <p className="font-normal text-6xl text-center">
+            <p className="font-extralight text-2xl text-center">
               {song.feeRate.toFixed(0)}
             </p>
             <p className="font-bold text-xs text-center"> sats / min</p>
