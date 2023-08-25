@@ -5,6 +5,8 @@ import {
   SearchIcon,
 } from '@bitcoin-design/bitcoin-icons-react/outline';
 import { QueueListIcon } from '@heroicons/react/24/outline';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface NavBarProps {
   activeBtn?: string;
@@ -14,25 +16,33 @@ export default function NavBar(props: NavBarProps) {
   const tempFunc = () => {
     alert('test');
   };
+  const pathname = usePathname();
+  const [host, setHost] = useState<string>();
+
+  useEffect(() => {
+    if (!pathname) return;
+    const _host = pathname.substring(1).split('/')[0];
+    setHost(_host);
+  }, [pathname]);
 
   const options = [
     {
       slug: 'profile',
       text: 'Profile',
       icon: <ContactsIcon />,
-      href: '/users/profile',
+      href: `/${host}/profile`,
     },
     {
       slug: 'queue',
       text: 'Queue',
       icon: <QueueListIcon />,
-      href: '/atl/queue',
+      href: `/${host}/queue`,
     },
     {
       slug: 'search',
       text: 'Search',
       icon: <SearchIcon />,
-      href: '/atl',
+      href: `/${host}`,
     },
   ];
 
