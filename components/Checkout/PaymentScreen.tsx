@@ -1,13 +1,15 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { CartIcon, CopyIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
-import bokeh2 from '../public/pfm-bokeh-2.jpg';
+import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import { MusicalNoteIcon, QueueListIcon } from '@heroicons/react/24/outline';
-import Button from './Button';
+import Button from '../Button';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import NavBar from './NavBar';
-import { Song } from '../models/Song';
+import NavBar from '../NavBar';
+import { Song } from '../../models/Song';
 import { usePathname } from 'next/navigation';
+import LoadingSpinner, { Spinner } from '../LoadingSpinner';
+import { CheckoutHeader } from './CheckoutHeader';
 
 function PaymentScreen(props: {
   song: Song;
@@ -18,7 +20,7 @@ function PaymentScreen(props: {
   bid: number;
 }) {
   const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '' });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [startPolling, setStartPolling] = useState(false);
   const pathname = usePathname();
 
@@ -44,6 +46,7 @@ function PaymentScreen(props: {
         hash: res.payment_hash,
         paymentRequest: res.payment_request,
       });
+      setLoading(false);
     };
     getBolt11();
     // console.log(bolt11);
@@ -91,65 +94,81 @@ function PaymentScreen(props: {
         />
       </div>
 
-      <div className=" px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
-        <div className="w-full">
-          <p className="text-xl">{props?.song?.name}</p>
-          <p className="text-lg font-bold">{props?.song?.artists[0]?.name}</p>
-          <p className="text-base">{props?.song?.album?.name}</p>
-        </div>
-
-        <div
-          className="bg-white/10 w-[348px] h-[348px] p-[32px] rounded-full flex flex-col space-y-4 justify-center text-center p-8 touch-none relative"
-          id="slider"
-        >
-          {props.readyToCheckout && !props.invoicePaid ? (
-            <>
-              <CartIcon className="w-24 h-24 mx-auto" />
-              <p className="text-xl text-center">
-                You’re ready to bid! Copy the invoice and pay from your favorite
-                bitcoin wallet.
-              </p>
-            </>
-          ) : props.readyToCheckout && props.invoicePaid ? (
-            <>
-              <MusicalNoteIcon className="w-24 h-24 mx-auto" />
-              <p className="text-xl text-center">All paid! Let’s jam.</p>
-            </>
-          ) : (
-            ``
-          )}
-        </div>
-
-        {props.readyToCheckout && !props.invoicePaid ? (
-          <>
-            <QRCodeSVG
-              value={bolt11.paymentRequest}
-              width={'200px'}
-              height={'200px'}
-              includeMargin={true}
-            />
-            <CopyToClipboard
-              text={bolt11.paymentRequest}
-              onCopy={() => setStartPolling(true)}
-            >
-              <Button className="w-full" icon={<CopyIcon />} size="small">
-                Copy Invoice
-              </Button>
-            </CopyToClipboard>
-          </>
-        ) : props.readyToCheckout && props.invoicePaid ? (
-          <Button
-            className="w-full"
-            icon={<QueueListIcon />}
-            href={`${pathname}/queue`}
-            size="small"
-          >
-            Song Queue
-          </Button>
+      <div className="fixed mx-auto inset-x-0 max-w-xl px-12 pt-12 pb-36 text-white z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
+        <CheckoutHeader song={props?.song} />
+        {loading ? (
+          <div className="w-full h-full flex justify-center items-center pt-20">
+            <Spinner />
+          </div>
         ) : (
-          ``
+          <>
+            <div
+              className="bg-white/10 w-[290px] h-[290px] p-[32px] rounded-full flex flex-col space-y-4 justify-center text-center p-8 touch-none relative"
+              id="slider"
+            >
+              {props.readyToCheckout && !props.invoicePaid ? (
+                <>
+                  <CartIcon className="w-24 h-24 mx-auto" />
+                  <p className="text-lg text-center">
+                    You’re ready to bid! Copy the invoice and pay from your
+                    favorite bitcoin wallet.
+                  </p>
+                </>
+              ) : props.readyToCheckout && props.invoicePaid ? (
+                <>
+                  <MusicalNoteIcon className="w-24 h-24 mx-auto" />
+                  <p className="text-xl text-center">All paid! Let’s jam.</p>
+                </>
+              ) : (
+                ``
+              )}
+            </div>
+
+            {props.readyToCheckout && !props.invoicePaid ? (
+              <div className="flex flex-col m-auto justify-items-center items-center gap-4">
+                {loading ? (
+                  <div className="w-full h-full flex justify-center items-center">
+                    <Spinner />
+                  </div>
+                ) : (
+                  <>
+                    <QRCodeSVG
+                      value={bolt11.paymentRequest}
+                      width={'200px'}
+                      height={'200px'}
+                      includeMargin={true}
+                    />
+                    <CopyToClipboard
+                      text={bolt11.paymentRequest}
+                      onCopy={() => setStartPolling(true)}
+                    >
+                      <Button
+                        className="w-full text-sm"
+                        icon={<CopyIcon />}
+                        size="small"
+                      >
+                        Copy Invoice
+                      </Button>
+                    </CopyToClipboard>
+                  </>
+                )}
+              </div>
+            ) : props.readyToCheckout && props.invoicePaid ? (
+              <Button
+                className="w-full"
+                icon={<QueueListIcon />}
+                href={`${pathname}/queue`}
+                size="small"
+              >
+                Song Queue
+              </Button>
+            ) : (
+              ``
+            )}
+          </>
         )}
       </div>
+
       <NavBar activeBtn="search" />
     </>
   );
