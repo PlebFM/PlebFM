@@ -8,6 +8,7 @@ import { User } from '../../models/User';
 import { Song } from '../../models/Song';
 import Layout from '../../components/Layout';
 import { usePathname } from 'next/navigation';
+import { Bid } from '../../models/Bid';
 
 // pleb.fm/bantam/queue
 // Used for frontend hydration
@@ -19,6 +20,8 @@ export type SongObject = {
   myPick?: boolean;
   upNext: boolean;
   bidders: User[];
+  queued?: boolean;
+  status?: string;
 };
 export const fetchSong = async (
   songId: string,
@@ -38,10 +41,14 @@ export const fetchSong = async (
 export const cleanSong = (
   rawSong: { obj: any; song: any },
   userProfile: User,
-) => {
+): SongObject => {
   const { obj, song } = rawSong;
   const bidders = obj.bids.map((x: any) => x.user);
-  const totalBid = (obj.runningTotal * 1000.0 * 60) / song.duration_ms;
+  const totalAmount = obj.bids.reduce(
+    (x: number, bid: Bid) => x + bid.bidAmount,
+    0,
+  );
+  const totalBid = (totalAmount * 1000.0 * 60) / song.duration_ms;
   const myPick = bidders.some((x: User) => x.userId === userProfile.userId);
   return {
     trackTitle: song.name,
@@ -77,6 +84,9 @@ export const getQueue = async (
   });
   const raw_songs = await Promise.all(promises);
   const songs = raw_songs.map(x => cleanSong(x, user));
+  songs.sort((a, b) => {
+    return b.feeRate - a.feeRate;
+  });
   return songs;
 };
 
@@ -96,8 +106,6 @@ export default function Queue() {
     setLoading(true);
     const userProfile = getUserProfileFromLocal();
     const hostname = pathname.substring(1).split('/')[0];
-    console.log();
-    console.log('HERERE', pathname.substring(1));
     getQueue(hostname, userProfile).then(res => {
       if (res) setQueueData(res);
       setLoading(false);

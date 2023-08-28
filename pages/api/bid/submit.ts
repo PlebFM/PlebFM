@@ -1,11 +1,51 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import cuid from 'cuid';
-import Hosts from '../../../models/Host';
-import Users from '../../../models/User';
+import Hosts, { Host } from '../../../models/Host';
+import Users, { User } from '../../../models/User';
 import Plays, { Play } from '../../../models/Play';
 import { Bid } from '../../../models/Bid';
 import connectDB from '../../../middleware/mongodb';
 import { MongoError } from 'mongodb';
+import { getTrack } from '../../../lib/spotify';
+import { Song } from '../../../models/Song';
+
+const handleExistingBid = async (bid: Bid, existingPlay: Play, user: User) => {
+  const totalAmount =
+    bid.bidAmount +
+    existingPlay.bids.reduce((x: number, bid: Bid) => x + bid.bidAmount, 0);
+  const updateObj = {
+    $push: { bids: bid },
+    runningTotal: (totalAmount * 1000.0 * 60) / existingPlay.songLength,
+  };
+  const result = await Plays.findOneAndUpdate(
+    { playId: existingPlay.playId },
+    updateObj,
+  );
+  console.log('FOUND AND UPDATED', result);
+  return result;
+};
+
+const handleNewBid = async (bid: Bid, track: Song, host: Host) => {
+  const newPlay: Play = {
+    playId: cuid(),
+    hostId: host.hostId,
+    songId: track.songId,
+    status: 'queued',
+    queueTimestamp: bid.timestamp,
+    playedTimestamp: undefined,
+    bids: new Array<Bid>(bid),
+    runningTotal: (bid.bidAmount * 1000.0 * 60) / track.duration_ms,
+    songLength: 1000 * track.duration_ms,
+    songArtist: track.artists[0].name,
+    songName: track.name,
+    albumUri: track.album.images[0]?.url,
+  };
+  const result = await Plays.create(newPlay).catch((e: string | undefined) => {
+    console.error(e);
+  });
+  console.log('CREATED', result);
+  return result;
+};
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -22,8 +62,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         success: false,
         message: 'Must pass playId if bid is not new!',
       });
-
-    const now: string = Date.now().toString();
 
     const host = await Hosts.findOne({ shortName: hostId });
     if (!host)
@@ -46,50 +84,62 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .status(400)
         .json({ success: false, error: 'Duplicate rHash found!' });
 
+    const existingPlay = await Plays.findOne({
+      hostId: host.hostId,
+      songId: songId,
+      status: 'queued',
+    });
+
+    const now = Date.now().toString();
     const newBid: Bid = {
-        bidId: cuid(),
-        user: user,
-        bidAmount: bidAmount,
-        timestamp: now,
-        rHash: rHash,
-      },
-      newPlay: Play = {
-        playId: cuid(),
-        hostId: host.hostId,
-        songId: songId,
-        status: 'queued',
-        queueTimestamp: now,
-        playedTimestamp: undefined,
-        bids: new Array<Bid>(newBid),
-        runningTotal: bidAmount,
-      };
+      bidId: cuid(),
+      user: user,
+      bidAmount: parseInt(bidAmount),
+      timestamp: now,
+      rHash: rHash,
+    };
 
-    let result: Play, errorMessage: string;
-
-    if (bidNotNew) {
-      result = await Plays.findOneAndUpdate(
-        { playId: playId },
-        { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } },
-      ).catch(e => {
-        console.error(e);
-        throw new MongoError(e);
-      });
-      errorMessage = 'Play not found!';
+    if (existingPlay) {
+      const result = await handleExistingBid(newBid, existingPlay, user);
+      return res.status(200).json({ success: true, message: result });
     } else {
-      result = await Plays.create(newPlay).catch((e: string | undefined) => {
-        console.error(e);
-        throw new Error(e);
-      });
-      errorMessage = 'Play not created!';
+      // New play
+      //@ts-ignore
+      const accessToken: string = req.headers.accessToken;
+      const track = await getTrack(songId, accessToken);
+      const result = await handleNewBid(newBid, track, host);
+      return res.status(200).json({ success: true, message: result });
     }
+    // let result: Play, errorMessage: string;
 
-    if (!result)
-      return res.status(404).json({
-        success: false,
-        error: errorMessage,
-      });
+    // find existing queued song
+    // add bid
+    // recalculate running total
 
-    return res.status(200).json({ success: true, message: result });
+    //   if (bidNotNew) {
+    //     result = await Plays.findOneAndUpdate(
+    //       { playId: playId },
+    //       { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } },
+    //     ).catch(e => {
+    //       console.error(e);
+    //       throw new MongoError(e);
+    //     });
+    //     errorMessage = 'Play not found!';
+    //   } else {
+    //     result = await Plays.create(newPlay).catch((e: string | undefined) => {
+    //       console.error(e);
+    //       throw new Error(e);
+    //     });
+    //     errorMessage = 'Play not created!';
+    //   }
+
+    //   if (!result)
+    //     return res.status(404).json({
+    //       success: false,
+    //       error: errorMessage,
+    //     });
+
+    //   return res.status(200).json({ success: true, message: result });
   } catch (error: any) {
     return res.status(400).json({ success: false, error: error.message });
   }

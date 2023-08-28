@@ -22,6 +22,10 @@ export type Play = {
   runningTotal: number | 0;
   queueTimestamp: string;
   playedTimestamp?: string;
+  songLength: number; // seconds
+  songName: string;
+  songArtist: string;
+  albumUri: string;
 };
 
 const PlaySchema = new Schema<Play>({
@@ -60,6 +64,22 @@ const PlaySchema = new Schema<Play>({
   },
   playedTimestamp: {
     type: String,
+  },
+  songName: {
+    type: String,
+    required: true,
+  },
+  songArtist: {
+    type: String,
+    required: true,
+  },
+  albumUri: {
+    type: String,
+    required: true,
+  },
+  songLength: {
+    type: Number,
+    required: true,
   },
 });
 

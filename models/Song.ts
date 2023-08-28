@@ -4,6 +4,7 @@ type Song = {
   name: string;
   artists: { name: string }[];
   id: string;
+  songId: string;
 };
 
 export type { Song };
