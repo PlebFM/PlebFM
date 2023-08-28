@@ -40,7 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         {},
         { options: { limit: limit } },
       )
-        .sort({ runningTotal: -1, queueTimestamp: 1 })
+        // .sort({ runningTotal: -1, queueTimestamp: 1 })
         .catch(e => {
           console.error(e);
           throw new Error(e);
@@ -53,6 +53,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           success: true,
           queue: [],
         });
+
+      sortedPlays.sort((a, b) => {
+        const suma = a.bids.reduce((x, bid) => x + bid.bidAmount, 0);
+        const sumb = b.bids.reduce((x, bid) => x + bid.bidAmount, 0);
+        return sumb - suma;
+      });
 
       // Use "next=true" query param to toggle updating the queue
       // if (next === 'true') {

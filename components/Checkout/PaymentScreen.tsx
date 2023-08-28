@@ -39,6 +39,7 @@ function PaymentScreen(props: {
         body: JSON.stringify({
           value: props.totalBid,
           memo: `PlebFM - ${props?.song?.name ?? 'Bid'}`,
+          shortName: 'atl',
         }),
       });
       const res = await response.json();
@@ -58,7 +59,7 @@ function PaymentScreen(props: {
     const getPaidStatus = async () => {
       const hostId = pathname?.substring(1); // /atl -> atl
       const user = getUserProfileFromLocal();
-      const url = `/api/invoice?hash=${bolt11.hash}&hostId=${hostId}&songId=${props.song?.id}&bidAmount=${props.totalBid}&userId=${user.userId}`;
+      const url = `/api/invoice?hash=${bolt11.hash}&hostId=${hostId}&songId=${props.song?.id}&bidAmount=${props.totalBid}&userId=${user.userId}&shortName=${hostId}`;
       const response = await fetch(url);
       const data = await response.json();
       if (data.settled === true) {

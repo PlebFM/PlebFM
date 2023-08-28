@@ -9,7 +9,7 @@ const withJukebox =
     if (req.method === 'GET') {
       shortName = req.query?.shortName ?? '';
     } else if (req.method === 'POST') {
-      shortName = req.body?.shortName ?? '';
+      shortName = JSON.parse(req.body)?.shortName ?? '';
     }
     if (!shortName)
       return res

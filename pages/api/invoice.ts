@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkLnbitsInvoice, getLnbitsInvoice } from '../../lib/lnbits';
 import { submitBid } from '../../lib/submit';
+import connectDB from '../../middleware/mongodb';
+import withJukebox from '../../middleware/withJukebox';
 
 const checkInvoice = async (hash: string) => {
   const data = (await checkLnbitsInvoice(hash)) as { paid: boolean };
@@ -22,6 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         throw new Error('Missing required params');
       const rHash = decodeURIComponent(hash as string);
       const data = await checkInvoice(rHash);
+      const accessToken: string = req.headers.accessToken as string;
       if (data.settled) {
         // @ts-ignore
         const submitResult = await submitBid(
@@ -30,6 +33,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           songId as string,
           parseInt((bidAmount as string) ?? '0'),
           userId as string,
+          accessToken,
         );
         return res.status(201).json({ settled: true, submit: submitResult });
       }
@@ -45,4 +49,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(500).json(e);
   }
 };
-export default handler;
+export default connectDB(withJukebox(handler));
