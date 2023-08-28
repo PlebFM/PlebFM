@@ -4,7 +4,7 @@ import javascript = webpack.javascript;
 import AlbumScreen from './AlbumScreen';
 import PaymentScreen from './PaymentScreen';
 import SelectBid from './SelectBid';
-import { Song } from '../models/Song';
+import { Song } from '../../models/Song';
 
 interface CheckoutProps {
   // songId: string,

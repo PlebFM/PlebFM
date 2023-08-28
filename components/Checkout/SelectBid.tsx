@@ -4,11 +4,12 @@ import {
   CopyIcon,
   CrossIcon,
 } from '@bitcoin-design/bitcoin-icons-react/filled';
-import bokeh2 from '../public/pfm-bokeh-2.jpg';
-import Button from './Button';
+import bokeh2 from '../../public/pfm-bokeh-2.jpg';
+import Button from '../Button';
 import { Dispatch, SetStateAction, useRef, useState } from 'react';
-import NavBar from './NavBar';
-import { Song } from '../models/Song';
+import NavBar from '../NavBar';
+import { Song } from '../../models/Song';
+import { CheckoutHeader } from './CheckoutHeader';
 
 export default function SelectBid(props: {
   song: Song;
@@ -81,13 +82,8 @@ export default function SelectBid(props: {
         {/* <Image src={albumPlaceholder} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" /> */}
       </div>
 
-      <div className="px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
-        <div className="max-w-screen-sm">
-          <p className="text-xl">{props.song?.name}</p>
-          <p className="text-lg font-bold">{props.song?.artists[0]?.name}</p>
-          <p className="text-base">{props.song?.album?.name}</p>
-        </div>
-
+      <div className="m-auto max-w-xl px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
+        <CheckoutHeader song={props?.song} />
         <div
           className="bg-white/10 w-[348px] h-[348px] p-[32px] rounded-full flex flex-col space-y-2 text-center p-8 touch-none relative"
           onPointerDown={handleMouseDown}
@@ -151,40 +147,42 @@ export default function SelectBid(props: {
           </svg>
         </div>
 
-        {feeRate < 1 ? (
-          <Button
-            className="w-full"
-            icon={<CrossIcon />}
-            iconPosition="left"
-            onClick={props.cancelSong}
-          >
-            Cancel
-          </Button>
-        ) : (
-          <>
-            <Button
-              className="w-full"
-              icon={<ArrowRightIcon />}
-              onClick={() => {
-                props.setTotalBid(feeTotal);
-                props.setBid(feeRate);
-                props.setReadyToCheckout(true);
-              }}
-            >
-              Checkout
-            </Button>
+        <div className="w-screen-sm">
+          {feeRate < 1 ? (
             <Button
               className="w-full"
               icon={<CrossIcon />}
               iconPosition="left"
               onClick={props.cancelSong}
-              style="free"
-              size="small"
             >
               Cancel
             </Button>
-          </>
-        )}
+          ) : (
+            <>
+              <Button
+                className="w-full"
+                icon={<ArrowRightIcon />}
+                onClick={() => {
+                  props.setTotalBid(feeTotal);
+                  props.setBid(feeRate);
+                  props.setReadyToCheckout(true);
+                }}
+              >
+                Checkout
+              </Button>
+              <Button
+                className="w-full"
+                icon={<CrossIcon />}
+                iconPosition="left"
+                onClick={props.cancelSong}
+                style="free"
+                size="small"
+              >
+                Cancel
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       <NavBar activeBtn="search" />
     </>
