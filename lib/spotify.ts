@@ -145,14 +145,16 @@ const skipSong = async (deviceId: string, accessToken: string) => {
 export const clearSpotifyQueue = async (
   deviceId: string,
   accessToken: string,
+  _spotifyQueue?: { queue: any[]; error: any; currently_playing: any },
 ) => {
-  const spotifyQueueRes = await getSpotifyQueue(accessToken);
-  const spotifyQueue = spotifyQueueRes.queue;
+  if (!_spotifyQueue) _spotifyQueue = await getSpotifyQueue(accessToken);
+  const spotifyQueue = _spotifyQueue?.queue;
   if (!spotifyQueue)
     throw new Error(
-      `No spotify queue found! ${JSON.stringify(spotifyQueueRes.error)}`,
+      `No spotify queue found! ${JSON.stringify(_spotifyQueue?.error)}`,
     );
-  // await skipSong(deviceId, accessToken);
+  const trackUri = `spotify:track:${_spotifyQueue?.currently_playing?.id}`;
+  await addTrackToSpotifyQueue(trackUri, deviceId, accessToken);
   for (let i = 0; i < spotifyQueue.length; i++) {
     await skipSong(deviceId, accessToken);
   }
@@ -163,7 +165,6 @@ export const addTrackToSpotifyQueue = async (
   deviceId: string,
   accessToken: string,
 ) => {
-  // console.log('addTrackToSpotifyQueue', trackUri, deviceId, accessToken)
   const queries = querystring.stringify({
     uri: trackUri,
     device_id: deviceId,

@@ -32,7 +32,6 @@ const updateQueue = async (
     accessToken: accessToken,
     deviceId: deviceId,
   });
-  console.log(body);
   const response = await fetch(url, {
     method: 'POST',
     body: body,
@@ -42,10 +41,7 @@ const updateQueue = async (
     },
   });
   const res = await response.json();
-  console.log('QUEUE', res);
-  if (!res?.queue) {
-    return [];
-  }
+  return res;
 };
 
 function WebPlayback(props: WebPlaybackProps) {
@@ -60,36 +56,20 @@ function WebPlayback(props: WebPlaybackProps) {
   // progress bar
   useEffect(() => {
     const interval = setInterval(() => {
-      if (isPaused || !trackPosition) return;
-      if (Math.floor(trackPosition / 1000) % 10 == 0) {
-        console.log('QUEUEING NEXT', trackPosition);
-        updateQueue(props.token, props.shortName, deviceId).then(queue => {
-          console.log('updated', queue);
+      if (!trackPosition) return;
+
+      updateQueue(props.token, props.shortName, deviceId).then(res => {
+        // console.log('RESSSS', res)
+        if (res?.data?.updated) {
+          console.log('refreshing');
           props.refreshQueue();
-        });
-      }
+        }
+      });
+      if (isPaused) return;
       setPosition(trackPosition + 1000);
     }, 1000);
-
     return () => clearInterval(interval);
   }, [isPaused, trackPosition, trackDuration, props, deviceId]);
-
-  // polls api to handle queue
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!deviceId || isPaused || !trackPosition) return;
-      if (trackDuration && trackPosition + 30_000 > trackDuration) {
-        console.log('second, QUEUEING NEXT');
-        updateQueue(props.token, props.shortName, deviceId).then(queue => {
-          console.log('updated', queue);
-          props.refreshQueue();
-        });
-      }
-      setPosition(trackPosition + 1000);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isPaused, trackPosition, trackDuration, deviceId, props]);
 
   useEffect(() => {
     const existing_script = document.getElementById('spotify-player');
@@ -98,7 +78,6 @@ function WebPlayback(props: WebPlaybackProps) {
       script.src = 'https://sdk.scdn.co/spotify-player.js';
       script.id = 'spotify-player';
       script.async = true;
-
       document.body.appendChild(script);
     }
 
@@ -138,7 +117,6 @@ function WebPlayback(props: WebPlaybackProps) {
         setPaused(paused);
         setTrack(current_track);
         player.getCurrentState().then(state => {
-          !state ? setActive(false) : setActive(true);
           if (state) {
             setActive(true);
             setPosition(state.position);
@@ -172,7 +150,7 @@ function WebPlayback(props: WebPlaybackProps) {
           <Button
             size={'small'}
             onClick={() => {
-              player?.activateElement();
+              // player?.activateElement();
               transferPlayback(deviceId, props.token);
               console.log('transferPlayback called');
             }}
