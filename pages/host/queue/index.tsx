@@ -10,6 +10,8 @@ import { useRouter } from 'next/router';
 import { Song } from '../../../components/Leaderboard/Song';
 import { usePathname } from 'next/navigation';
 import { Host } from '../../../models/Host';
+import { Play } from '../../../models/Play';
+import { Bid } from '../../../models/Bid';
 
 const getLeaderboardQueue = async (host: string) => {
   let url = `/api/leaderboard/queue?hostShortName=${host}`;
@@ -19,31 +21,49 @@ const getLeaderboardQueue = async (host: string) => {
     return [];
   }
   const promises = res.queue.map((x: any) => {
-    const res = fetchSong(x.songId, host)
-      .then(song => {
-        return { obj: x, song: song };
-      })
-      .then(cleanSong);
+    const res = cleanSong(x);
+    console.log('CLEAN', res);
+
+    // const res = fetchSong(x.songId, host)
+    // .then(song => {
+    //   return { obj: x, song: song };
+    // })
+    // .then(cleanSong);
     return res;
   });
   return promises;
 };
 
-const cleanSong = (rawSong: { obj: any; song: any }) => {
-  const { obj, song } = rawSong;
-  const bidders = obj.bids.map((x: any) => x.user);
-  const totalBid = (obj.runningTotal * 1000.0 * 60) / song.duration_ms;
+const cleanSong = (song: Play) => {
+  console.log(song);
+  const bidders = song.bids.map((x: Bid) => x.user);
+  const totalBid = song.runningTotal;
   return {
-    trackTitle: song.name,
-    artistName: song.artists[0].name,
+    trackTitle: song.songName,
+    artistName: song.songArtist,
     feeRate: totalBid,
-    playing: obj.status === 'playing',
-    upNext: obj.status === 'next',
+    playing: song.status === 'playing',
+    upNext: song.status === 'next',
     bidders,
-    queued: obj.status === 'queued',
-    status: obj.status,
+    queued: song.status === 'queued',
+    status: song.status,
   };
 };
+// const cleanSong = (rawSong: { obj: any; song: any }) => {
+//   const { obj, song } = rawSong;
+//   const bidders = obj.bids.map((x: any) => x.user);
+//   const totalBid = (obj.runningTotal * 1000.0 * 60) / song.duration_ms;
+//   return {
+//     trackTitle: song.name,
+//     artistName: song.artists[0].name,
+//     feeRate: totalBid,
+//     playing: obj.status === 'playing',
+//     upNext: obj.status === 'next',
+//     bidders,
+//     queued: obj.status === 'queued',
+//     status: obj.status,
+//   };
+// };
 
 const findHost = async (spotifyId: string): Promise<Host> => {
   const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
@@ -61,13 +81,12 @@ const findHost = async (spotifyId: string): Promise<Host> => {
 export default function Queue() {
   const { data: session, status } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [queueData, setQueueData] = useState<Promise<SongObject>[]>([]);
+  const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [songProgress, setSongProgress] = useState(0.1);
   const [paused, setPaused] = useState(true);
   const [loading, setLoading] = useState(true);
   const [host, setHost] = useState<string>();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (!router) return;
@@ -186,8 +205,8 @@ export default function Queue() {
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">
           <div className="text-white relative z-50 flex flex-col items-center min-h-screen font-thin bg-pfm-purple-300/50">
-            {queueData.map((songPromise, key) => (
-              <Song songPromise={songPromise} key={key} />
+            {queueData.map((song, key) => (
+              <Song song={song} key={key} />
             ))}
           </div>
         </div>
