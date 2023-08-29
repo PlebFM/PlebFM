@@ -17,7 +17,7 @@ export type Play = {
   playId: string;
   hostId: string;
   songId: string;
-  status: string;
+  status: string; // played, next, queued
   bids: Bid[];
   runningTotal: number | 0;
   queueTimestamp: string;

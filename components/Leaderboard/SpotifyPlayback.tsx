@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Button from './Button';
+import Button from '../Button';
 import {
   PlayIcon,
   PauseIcon,
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
-import Image from 'next/image';
-import { addTrackToSpotifyQueue, transferPlayback } from '../lib/spotify';
+import { addTrackToSpotifyQueue, transferPlayback } from '../../lib/spotify';
 
 const emptyTrack = {
   name: '',
@@ -19,7 +18,35 @@ const emptyTrack = {
 
 interface WebPlaybackProps {
   token: string;
+  shortName: string;
+  refreshQueue: () => void;
 }
+const updateQueue = async (
+  accessToken: string,
+  shortName: string,
+  deviceId: string,
+) => {
+  let url = `/api/leaderboard/queue`;
+  const body = JSON.stringify({
+    shortName: shortName,
+    accessToken: accessToken,
+    deviceId: deviceId,
+  });
+  console.log(body);
+  const response = await fetch(url, {
+    method: 'POST',
+    body: body,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+  });
+  const res = await response.json();
+  console.log('QUEUE', res);
+  if (!res?.queue) {
+    return [];
+  }
+};
 
 function WebPlayback(props: WebPlaybackProps) {
   const [isPaused, setPaused] = useState(false);
@@ -27,17 +54,42 @@ function WebPlayback(props: WebPlaybackProps) {
   const [trackPosition, setPosition] = useState<number>();
   const [isActive, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
-  const [deciceId, setDeviceId] = useState('');
+  const [deviceId, setDeviceId] = useState('');
   const [track, setTrack] = useState(emptyTrack);
 
+  // progress bar
   useEffect(() => {
     const interval = setInterval(() => {
       if (isPaused || !trackPosition) return;
+      if (Math.floor(trackPosition / 1000) % 10 == 0) {
+        console.log('QUEUEING NEXT', trackPosition);
+        updateQueue(props.token, props.shortName, deviceId).then(queue => {
+          console.log('updated', queue);
+          props.refreshQueue();
+        });
+      }
       setPosition(trackPosition + 1000);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPaused, trackPosition]);
+  }, [isPaused, trackPosition, trackDuration, props, deviceId]);
+
+  // polls api to handle queue
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!deviceId || isPaused || !trackPosition) return;
+      if (trackDuration && trackPosition + 30_000 > trackDuration) {
+        console.log('second, QUEUEING NEXT');
+        updateQueue(props.token, props.shortName, deviceId).then(queue => {
+          console.log('updated', queue);
+          props.refreshQueue();
+        });
+      }
+      setPosition(trackPosition + 1000);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isPaused, trackPosition, trackDuration, deviceId, props]);
 
   useEffect(() => {
     const existing_script = document.getElementById('spotify-player');
@@ -103,10 +155,10 @@ function WebPlayback(props: WebPlaybackProps) {
   useEffect(() => {}, []);
 
   useEffect(() => {
-    if (deciceId) {
-      transferPlayback(deciceId, props.token);
+    if (deviceId) {
+      transferPlayback(deviceId, props.token);
     }
-  }, [deciceId]);
+  }, [deviceId, props.token]);
 
   const searchResultURI = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
 
@@ -121,7 +173,7 @@ function WebPlayback(props: WebPlaybackProps) {
             size={'small'}
             onClick={() => {
               player?.activateElement();
-              transferPlayback(deciceId, props.token);
+              transferPlayback(deviceId, props.token);
               console.log('transferPlayback called');
             }}
           >
@@ -235,7 +287,7 @@ function WebPlayback(props: WebPlaybackProps) {
               onClick={() => {
                 addTrackToSpotifyQueue(
                   searchResultURI,
-                  deciceId,
+                  deviceId,
                   props.token,
                 ).then(res => {
                   if (res.status !== 202)

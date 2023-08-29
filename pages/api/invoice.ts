@@ -15,7 +15,7 @@ const checkInvoice = async (hash: string) => {
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
-      const { memo, value } = JSON.parse(req.body);
+      const { memo, value } = req.body;
       const data = await getLnbitsInvoice(memo, parseInt(value));
       return res.status(200).json(data);
     } else if (req.method === 'GET') {

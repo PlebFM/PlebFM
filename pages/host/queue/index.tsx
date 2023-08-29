@@ -2,40 +2,53 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
 import { getSession, signIn, useSession } from 'next-auth/react';
-import WebPlayback from '../../../components/SpotifyPlayback';
+import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
 import { SongObject, fetchSong } from '../../[slug]/queue';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Song } from '../../../components/Leaderboard/Song';
-import { usePathname } from 'next/navigation';
 import { Host } from '../../../models/Host';
 import { Play } from '../../../models/Play';
 import { Bid } from '../../../models/Bid';
 
 const getLeaderboardQueue = async (host: string) => {
-  let url = `/api/leaderboard/queue?hostShortName=${host}`;
+  let url = `/api/leaderboard/queue?shortName=${host}`;
   const response = await fetch(url);
   const res = await response.json();
+  console.log('QUEUE', res);
   if (!res?.queue) {
     return [];
   }
-  const promises = res.queue.map((x: any) => {
+  const songs = res.queue.map((x: any) => {
     const res = cleanSong(x);
-    console.log('CLEAN', res);
-
-    // const res = fetchSong(x.songId, host)
-    // .then(song => {
-    //   return { obj: x, song: song };
-    // })
-    // .then(cleanSong);
     return res;
   });
-  return promises;
+  return songs;
+};
+
+const addSongToQueue = async (host: string, songId: string) => {
+  let url = `/api/leaderboard/queue`;
+  const response = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({
+      host: host,
+      songId: songId,
+    }),
+  });
+  const res = await response.json();
+  console.log('QUEUE', res);
+  if (!res?.queue) {
+    return [];
+  }
+  const songs = res.queue.map((x: any) => {
+    const res = cleanSong(x);
+    return res;
+  });
+  return songs;
 };
 
 const cleanSong = (song: Play) => {
-  console.log(song);
   const bidders = song.bids.map((x: Bid) => x.user);
   const totalBid = song.runningTotal;
   return {
@@ -49,21 +62,6 @@ const cleanSong = (song: Play) => {
     status: song.status,
   };
 };
-// const cleanSong = (rawSong: { obj: any; song: any }) => {
-//   const { obj, song } = rawSong;
-//   const bidders = obj.bids.map((x: any) => x.user);
-//   const totalBid = (obj.runningTotal * 1000.0 * 60) / song.duration_ms;
-//   return {
-//     trackTitle: song.name,
-//     artistName: song.artists[0].name,
-//     feeRate: totalBid,
-//     playing: obj.status === 'playing',
-//     upNext: obj.status === 'next',
-//     bidders,
-//     queued: obj.status === 'queued',
-//     status: obj.status,
-//   };
-// };
 
 const findHost = async (spotifyId: string): Promise<Host> => {
   const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
@@ -82,8 +80,8 @@ export default function Queue() {
   const { data: session, status } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [queueData, setQueueData] = useState<SongObject[]>([]);
-  const [songProgress, setSongProgress] = useState(0.1);
-  const [paused, setPaused] = useState(true);
+  const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
+  const [prepareNext, setPrepareNext] = useState(false);
   const [loading, setLoading] = useState(true);
   const [host, setHost] = useState<string>();
   const router = useRouter();
@@ -120,28 +118,15 @@ export default function Queue() {
   }, [session]);
 
   useEffect(() => {
-    if (songProgress >= 1) {
-      setPaused(true);
-    }
-    if (paused) {
-      return;
-    }
-    const interval = setInterval(() => {
-      setSongProgress(songProgress + 0.01);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [songProgress, paused]);
-
-  useEffect(() => {}, [songProgress]);
-
-  useEffect(() => {
-    if (!host) return;
+    if (!host || !refreshQueue) return;
+    console.log('refreshing');
     getLeaderboardQueue(host).then(res => {
+      console.log('QUEUE', res);
       if (res) setQueueData(res);
       setLoading(false);
+      setRefreshQueue(false);
     });
-  }, [host]);
+  }, [host, refreshQueue]);
 
   return (
     <>
@@ -200,7 +185,13 @@ export default function Queue() {
           {/*  </div>*/}
           {/*</div>*/}
           <div className="text-3xl p-16 flex flex-col space-y-6">
-            {accessToken && <WebPlayback token={accessToken} />}
+            {accessToken && host && (
+              <WebPlayback
+                shortName={host}
+                refreshQueue={() => setRefreshQueue(true)}
+                token={accessToken}
+              />
+            )}
           </div>
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">

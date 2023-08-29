@@ -95,7 +95,6 @@ export const transferPlayback = async (
 ) => {
   const searchUrl = `https://api.spotify.com/v1/me/player`;
   const body = JSON.stringify({ device_ids: [deviceId], play: true });
-  console.log('body', body);
   const res = await fetch(searchUrl, {
     method: 'PUT',
     headers: {
@@ -105,9 +104,58 @@ export const transferPlayback = async (
     },
     body: body,
   });
-  console.log(res);
   if (res.status === 202) return { success: true };
   else return { success: false };
+};
+
+// Resets spotify queue by playing a song
+export const startSpotifyQueue = async (
+  trackUri: string,
+  deviceId: string,
+  accessToken: string,
+) => {
+  const url = `https://api.spotify.com/v1/me/player/play`;
+  const body = JSON.stringify({ uris: [trackUri], device_id: deviceId });
+  const result = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+    body,
+  });
+  return result;
+};
+
+const skipSong = async (deviceId: string, accessToken: string) => {
+  const url = `https://api.spotify.com/v1/me/player/next`;
+  const body = JSON.stringify({ device_id: deviceId });
+  const result = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+    body: body,
+  });
+  return result;
+};
+export const clearSpotifyQueue = async (
+  deviceId: string,
+  accessToken: string,
+) => {
+  const spotifyQueueRes = await getSpotifyQueue(accessToken);
+  const spotifyQueue = spotifyQueueRes.queue;
+  if (!spotifyQueue)
+    throw new Error(
+      `No spotify queue found! ${JSON.stringify(spotifyQueueRes.error)}`,
+    );
+  // await skipSong(deviceId, accessToken);
+  for (let i = 0; i < spotifyQueue.length; i++) {
+    await skipSong(deviceId, accessToken);
+  }
 };
 
 export const addTrackToSpotifyQueue = async (
@@ -115,12 +163,13 @@ export const addTrackToSpotifyQueue = async (
   deviceId: string,
   accessToken: string,
 ) => {
+  // console.log('addTrackToSpotifyQueue', trackUri, deviceId, accessToken)
   const queries = querystring.stringify({
     uri: trackUri,
     device_id: deviceId,
   });
-  const searchUrl = `https://api.spotify.com/v1/me/player/queue?${queries}`;
-  const result = await fetch(searchUrl, {
+  const url = `https://api.spotify.com/v1/me/player/queue?${queries}`;
+  const result = await fetch(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -131,10 +180,8 @@ export const addTrackToSpotifyQueue = async (
   return result;
 };
 
-const tempToken =
-  'BQAuRHI33rvZ464_0IYLNkDYd4LIpM67o8_3yZq0lp5b-hTDKR8wZyqkqFixmrnRt1Y9WtdsLlQNCe2m73C2ZlNt577lUx6I4W49UkVeTm67I-Qecbpef7JQuKFr3w-NaPFCl75MTI4VM_9qz7WmwlW1jtu2ecB-f7DVH5Ec8h5CxvfNx34_6TQeleCBhnBZYqIfmMILZvzJhiqS2jf0xRwKEkjVRlDHuQ';
 const spotifyQueueEndpoint = 'https://api.spotify.com/v1/me/player/queue';
-export const getSpotifyQueue = async (accessToken: string = tempToken) => {
+export const getSpotifyQueue = async (accessToken: string) => {
   const res = await fetch(spotifyQueueEndpoint, {
     method: 'GET',
     headers: {
@@ -144,52 +191,5 @@ export const getSpotifyQueue = async (accessToken: string = tempToken) => {
     },
   });
   const result = await res.json();
-  console.log('result: ', result);
   return result;
-};
-
-/* 
-    above function returns this object:
-    {
-        currently_playing: null,
-        queue: []
-    }
-*/
-
-const addItemToSpotifyQueue = async (songId: string, deviceId: string) => {
-  const response = await fetch(spotifyQueueEndpoint, {
-    method: 'POST',
-    // header: {
-    //     Authorization: '',
-    //     Content-Type: 'application/json'
-    // },
-    // body: {
-    //     songId: '',
-    //     deviceId: ''
-    // }
-  });
-};
-
-export const queueNextSongInSpotify = async (
-  accessToken: string,
-  customerId: string,
-) => {
-  const spotifyQueueResult: any = getSpotifyQueue();
-  const nextSpotifySong = spotifyQueueResult.queue[0].id;
-  // call route with customerId=customerId and next=true
-  const apiUrl = '/api/leaderboard/queue?customerId=customerId&next=true';
-  const dbResponse = await fetch(apiUrl);
-  const dbQueueResult = await dbResponse.json();
-  // returns list of objects (instances), element 0 will have status: next
-  const nextDbSong = dbQueueResult[0].songId;
-  if (nextDbSong !== nextSpotifySong) {
-    //    add nextDbSong to spotify queue
-  }
-  console.log('nextSpotifySong: ', nextSpotifySong);
-  // check spotify queue against database queue
-  // then reconcile spotify queue
-  // if (queue[0].songId !== nextSong.songId) {
-  //     // erase queue
-  //     queue.push(dbInstance[0]);
-  // }
 };

@@ -36,6 +36,9 @@ function PaymentScreen(props: {
       setLoading(true);
       const response = await fetch('/api/invoice', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           value: props.totalBid,
           memo: `PlebFM - ${props?.song?.name ?? 'Bid'}`,

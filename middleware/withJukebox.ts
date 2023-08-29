@@ -8,14 +8,18 @@ const withJukebox =
     let shortName;
     if (req.method === 'GET') {
       shortName = req.query?.shortName ?? '';
-    } else if (req.method === 'POST') {
-      shortName = JSON.parse(req.body)?.shortName ?? '';
+    } else if (
+      req.method === 'POST' ||
+      req.method === 'DELETE' ||
+      req.method === 'PUT'
+    ) {
+      shortName = req?.body?.shortName ?? req?.body?.host ?? '';
     }
-    if (!shortName)
+    if (!shortName) {
       return res
         .status(400)
         .json('withJukebox - Bad request: requires shortName in body or query');
-
+    }
     const customer: Host | null = await Hosts.findOne({
       filter: { shortName: shortName },
     });

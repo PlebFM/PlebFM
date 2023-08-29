@@ -40,6 +40,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return null;
     });
     return res.status(200).json({ success: true, host: result });
+  } else if (req.method === 'PATCH') {
+    const { shortName, refreshToken } = req.body;
+    const host = await Hosts.findOneAndUpdate(
+      { shortName },
+      { spotifyRefreshToken: refreshToken },
+      { new: true },
+    );
+    if (host) {
+      return res.status(200).json({ success: true, data: host });
+    } else {
+      return res.status(400).json({ success: false, error: `host not found` });
+    }
   }
 };
 
