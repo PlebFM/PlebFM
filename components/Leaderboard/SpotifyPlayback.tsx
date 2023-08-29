@@ -58,18 +58,19 @@ function WebPlayback(props: WebPlaybackProps) {
     const interval = setInterval(() => {
       if (!trackPosition) return;
 
-      updateQueue(props.token, props.shortName, deviceId).then(res => {
-        // console.log('RESSSS', res)
-        if (res?.data?.updated) {
-          console.log('refreshing');
-          props.refreshQueue();
-        }
-      });
+      if (Math.round(trackPosition / 1000) % 5 === 0) {
+        updateQueue(props.token, props.shortName, deviceId).then(res => {
+          if (res?.data?.updated) {
+            console.log('refreshing');
+            props.refreshQueue();
+          }
+        });
+      }
       if (isPaused) return;
       setPosition(trackPosition + 1000);
     }, 1000);
     return () => clearInterval(interval);
-  }, [isPaused, trackPosition, trackDuration, props, deviceId]);
+  }, [isPaused, props, deviceId, setPosition, trackPosition]);
 
   useEffect(() => {
     const existing_script = document.getElementById('spotify-player');
