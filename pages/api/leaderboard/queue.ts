@@ -56,7 +56,7 @@ const getQueue = async (
     const sumb = b.bids.reduce((x, bid) => x + bid.bidAmount, 0);
     if (a.status === 'next') return -1;
     if (b.status === 'next') return 1;
-    return sumb - suma;
+    return b.runningTotal - a.runningTotal;
   });
   return sortedPlays;
 };
@@ -75,14 +75,18 @@ const updateQueuedSongs = async (nextPlay: Play) => {
 // add top song to spotify queue
 const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
   const { shortName, accessToken, deviceId } = req.body;
+  let updated = false;
   const host = await Hosts.findOne({ shortName: shortName });
-  console.log('host', host.shortName);
   const spotifyQueue = await getSpotifyQueue(accessToken);
   const jukeboxQueue = await getQueue(shortName, undefined, undefined, false);
-  if (spotifyQueue.error || !spotifyQueue?.queue?.length) {
+  if (spotifyQueue.error) {
     throw new Error(
       `Get Spotify Queue Failed! error: ${JSON.stringify(spotifyQueue.error)}`,
     );
+  }
+  if (spotifyQueue.queue.length > 1) {
+    console.log('clearing spotify queue');
+    await clearSpotifyQueue(deviceId, accessToken, spotifyQueue);
   }
   const spotifyNext = spotifyQueue?.queue[0];
   const spotifyCurrent = spotifyQueue?.currently_playing;
@@ -95,8 +99,6 @@ const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
     throw new Error(e);
   });
 
-  // if (!jukeboxTop) throw new Error('No next song found in jukebox queue!');
-
   // if no next song in jukebox queue, set top song to "next"
   if (!jukeboxNext && jukeboxTop) {
     jukeboxNext = await Plays.findOneAndUpdate(
@@ -104,14 +106,8 @@ const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
       { status: 'next' },
       { new: true },
     );
+    updated = true;
   }
-
-  console.log(
-    'jukebox next:',
-    jukeboxNext?.songName,
-    ', jukebox top:',
-    jukeboxTop?.songName,
-  );
 
   // reset
   //   clear spotify queue
@@ -120,11 +116,16 @@ const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
   //   play new "next"
 
   // add song to spotify queue
-  console.log('spotify:', spotifyNext.name, 'jukebox:', jukeboxTop?.songName);
+  console.log(
+    'spotifyNext:',
+    spotifyNext?.name,
+    'jukeboxNext:',
+    jukeboxNext?.songName,
+  );
   console.log(
     'currentSpotify:',
     spotifyCurrent.name,
-    'jukebox:',
+    'jukeboxTop:',
     jukeboxTop?.songName,
   );
 
@@ -138,7 +139,7 @@ const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
     // update status of playing song to "played"
     const playedSong = await Plays.findOneAndUpdate(
       { playId: jukeboxNext.playId },
-      { status: 'played' },
+      { status: 'played', playedTimestamp: Date.now().toString() },
       { new: true },
     );
 
@@ -151,6 +152,7 @@ const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
       { status: 'next' },
       { new: true },
     );
+    updated = true;
     console.log({
       message: 'Queue updated',
       playingSong: playedSong?.songName,
@@ -164,8 +166,7 @@ const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
 
-  if (spotifyNext && spotifyNext.id !== jukeboxNext?.songId) {
-    console.log('ADDING SONG', jukeboxNext?.songName);
+  if (!spotifyNext || spotifyNext.id !== jukeboxNext?.songId) {
     const addResult = await addTrackToSpotifyQueue(
       `spotify:track:${jukeboxNext?.songId}`,
       deviceId,
@@ -173,8 +174,8 @@ const addNextSong = async (req: NextApiRequest, res: NextApiResponse) => {
     );
 
     console.log('added song', addResult.statusText, jukeboxTop?.songName);
-    return { message: 'Queue updated', addResult, spotifyNext, jukeboxTop };
   }
+  return { success: true, updated };
 };
 const startQueue = async (req: NextApiRequest, res: NextApiResponse) => {
   const { accessToken, deviceId, shortName } = req.body;
@@ -219,61 +220,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         _limit as string,
         userId as string,
       );
-      return res.status(200).json({ success: true, queue: sortedPlays });
+      return res.status(200).json({ success: true, data: sortedPlays });
     } else if (req.method === 'POST') {
       // will poll during playback
       const result = await addNextSong(req, res);
-      return res.status(200).json({ success: true, queue: result });
+      return res.status(200).json({ success: true, data: result });
     } else if (req.method === 'PUT') {
       // hits on page load to start queue
       const result = await startQueue(req, res);
-      return res.status(200).json({ success: true, queue: result });
+      return res.status(200).json({ success: true, data: result });
     } else if (req.method === 'DELETE') {
       const result = await deleteQueue(req, res);
-      return res.status(200).json({ success: true, queue: result });
+      return res.status(200).json({ success: true, data: result });
     }
-
-    // Use "next=true" query param to toggle updating the queue
-    // if (next === 'true') {
-    // if (false) {
-    //   // Grab first play obj in queue => play obj w/ highest runningTotal and oldest timestamp
-    //   const winner = sortedPlays[0];
-    //   // Query Plays: Get leading play object from db and update status to "next"
-    //   // Since playId is a globally unique cuid, should return 1 play obj
-    //   const play: Play = await Plays.findOneAndUpdate(
-    //     { playId: winner.playId },
-    //     { $set: { status: 'next' } },
-    //   ).catch(e => {
-    //     console.error(e);
-    //     throw new MongoError(e);
-    //   });
-
-    //   // If nothing returned, then nothing was updated and thus nothing was found, return error
-    //   if (!play)
-    //     return res.status(404).json({
-    //       success: false,
-    //       message: `No Play found for host with that playId!`,
-    //     });
-
-    //   // Query Plays: Get all Play objects where hostId = host.hostId
-    //   // Include all statuses, sort by highest runningTotal and oldest queueTimestamp if ties occur
-    //   sortedPlays = await Plays.find(
-    //     { hostId: host.hostId },
-    //     {},
-    //     { options: { limit: limit } },
-    //   )
-    //     .sort({ runningTotal: -1, queueTimestamp: 1 })
-    //     .catch(e => {
-    //       console.error(e);
-    //       throw new MongoError(e);
-    //     });
-    //   // If no Plays exist with that hostId, somethings wrong, return error
-    //   if (sortedPlays.length === 0)
-    //     return res.status(404).json({
-    //       success: false,
-    //       message: `No Plays found for host!`,
-    //     });
-    // }
   } catch (error: any) {
     console.error(error.message);
     return res.status(500).json({ success: false, message: error.message });

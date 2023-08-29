@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { SongObject } from '../../pages/[slug]/queue';
 import Avatar from '../Avatar';
 import Tag from '../Tag';
+import { User } from '../../models/User';
 
+const cleanBidders = (bidders: User[]): User[] => {
+  const seen = new Map<string, User>();
+  bidders.forEach(bid =>
+    bid.userId in seen ? null : seen.set(bid.userId, bid),
+  );
+  return Array.from(seen.values());
+};
 export const Song = ({ song }: { song: SongObject }) => {
-  // const [song, setSong] = useState<SongObject | null>(null);
-  useEffect(() => {
-    console.log(song);
-  }, [song]);
   return (
     <div className="p-6 border-b border-white/20 w-full">
       <div className="w-full flex justify-between space-x-4 w-full">
@@ -21,17 +25,19 @@ export const Song = ({ song }: { song: SongObject }) => {
                 <p className="font-bold">{song.artistName}</p>
               </div>
               <div className="flex -space-x-1 items-center">
-                {song.bidders.slice(0, 5).map((bidder, key) => (
-                  <div className="w-8" key={key}>
-                    <Avatar
-                      firstNym={bidder.firstNym}
-                      lastNym={bidder.lastNym}
-                      color={bidder.color}
-                      size="xs"
-                    />
-                  </div>
-                ))}
-                {song.bidders.length > 5 ? (
+                {cleanBidders(song.bidders)
+                  .slice(0, 5)
+                  .map((bidder, key) => (
+                    <div className="w-8" key={key}>
+                      <Avatar
+                        firstNym={bidder.firstNym}
+                        lastNym={bidder.lastNym}
+                        color={bidder.color}
+                        size="xs"
+                      />
+                    </div>
+                  ))}
+                {cleanBidders(song.bidders).length > 5 ? (
                   <div className="pl-4 font-semibold text-lg">
                     +{song.bidders.length - 5}
                   </div>

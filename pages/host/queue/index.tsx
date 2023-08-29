@@ -16,7 +16,6 @@ const getLeaderboardQueue = async (host: string) => {
   let url = `/api/leaderboard/queue?shortName=${host}`;
   const response = await fetch(url);
   const res = await response.json();
-  console.log('QUEUE', res);
   if (!res?.queue) {
     return [];
   }
@@ -37,7 +36,6 @@ const addSongToQueue = async (host: string, songId: string) => {
     }),
   });
   const res = await response.json();
-  console.log('QUEUE', res);
   if (!res?.queue) {
     return [];
   }
@@ -121,9 +119,7 @@ export default function Queue() {
     if (!host || !refreshQueue) return;
     console.log('refreshing');
     getLeaderboardQueue(host).then(res => {
-      console.log('QUEUE', res);
       if (res) setQueueData(res);
-      setLoading(false);
       setRefreshQueue(false);
     });
   }, [host, refreshQueue]);
