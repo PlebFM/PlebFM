@@ -3,14 +3,11 @@ import { SongObject } from '../../pages/[slug]/queue';
 import Avatar from '../Avatar';
 import Tag from '../Tag';
 
-export const Song = ({ songPromise }: { songPromise: Promise<SongObject> }) => {
-  const [song, setSong] = useState<SongObject | null>(null);
+export const Song = ({ song }: { song: SongObject }) => {
+  // const [song, setSong] = useState<SongObject | null>(null);
   useEffect(() => {
-    if (!songPromise) return;
-    songPromise.then((song: SongObject) => {
-      setSong(song);
-    });
-  }, [songPromise]);
+    console.log(song);
+  }, [song]);
   return (
     <div className="p-6 border-b border-white/20 w-full">
       <div className="w-full flex justify-between space-x-4 w-full">

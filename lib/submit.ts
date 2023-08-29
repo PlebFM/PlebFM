@@ -3,7 +3,6 @@ import Hosts, { Host } from '../models/Host';
 import Users, { User } from '../models/User';
 import Plays, { Play } from '../models/Play';
 import { Bid } from '../models/Bid';
-import { MongoError } from 'mongodb';
 import { Song } from '../models/Song';
 import { getTrack } from './spotify';
 
