@@ -5,7 +5,6 @@ import Users, { User } from '../../../models/User';
 import Plays, { Play } from '../../../models/Play';
 import { Bid } from '../../../models/Bid';
 import connectDB from '../../../middleware/mongodb';
-import { MongoError } from 'mongodb';
 import { getTrack } from '../../../lib/spotify';
 import { Song } from '../../../models/Song';
 
@@ -66,12 +65,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const host = await Hosts.findOne({ shortName: hostId });
     if (!host)
       return res.status(404).json({ success: false, error: 'Host not found!' });
-    console.error(host);
 
     const user = await Users.findOne({ userId: userId });
     if (!user)
       return res.status(404).json({ success: false, error: 'User not found!' });
-    console.error(user);
 
     const rHashDuplicated = await Plays.findOne({
       'bids.rHash': { $eq: rHash },
@@ -110,36 +107,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const result = await handleNewBid(newBid, track, host);
       return res.status(200).json({ success: true, message: result });
     }
-    // let result: Play, errorMessage: string;
-
-    // find existing queued song
-    // add bid
-    // recalculate running total
-
-    //   if (bidNotNew) {
-    //     result = await Plays.findOneAndUpdate(
-    //       { playId: playId },
-    //       { $push: { bids: newBid }, $inc: { runningTotal: bidAmount } },
-    //     ).catch(e => {
-    //       console.error(e);
-    //       throw new MongoError(e);
-    //     });
-    //     errorMessage = 'Play not found!';
-    //   } else {
-    //     result = await Plays.create(newPlay).catch((e: string | undefined) => {
-    //       console.error(e);
-    //       throw new Error(e);
-    //     });
-    //     errorMessage = 'Play not created!';
-    //   }
-
-    //   if (!result)
-    //     return res.status(404).json({
-    //       success: false,
-    //       error: errorMessage,
-    //     });
-
-    //   return res.status(200).json({ success: true, message: result });
   } catch (error: any) {
     return res.status(400).json({ success: false, error: error.message });
   }
