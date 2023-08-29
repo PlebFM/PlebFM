@@ -67,7 +67,7 @@ export const getQueue = async (
   user: User,
   isProfile: boolean = false,
 ) => {
-  let url = `/api/leaderboard/queue?hostShortName=${host}`;
+  let url = `/api/leaderboard/queue?shortName=${host}`;
   if (isProfile) {
     url += `&userId=${user.userId}`;
   }

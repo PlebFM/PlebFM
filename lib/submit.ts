@@ -13,7 +13,7 @@ const Anon: User = {
   avatar: 'anon',
   // color: 'grey'
 };
-const handleExistingBid = async (bid: Bid, existingPlay: Play, user: User) => {
+const handleExistingBid = async (bid: Bid, existingPlay: Play) => {
   const totalAmount =
     bid.bidAmount +
     existingPlay.bids.reduce((x: number, bid: Bid) => x + bid.bidAmount, 0);
@@ -77,7 +77,7 @@ export const submitBid = async (
     rHash: rHash,
   };
   if (existingPlay) {
-    const result = await handleExistingBid(bid, existingPlay, user);
+    const result = await handleExistingBid(bid, existingPlay);
     return result;
   } else {
     // Create new play

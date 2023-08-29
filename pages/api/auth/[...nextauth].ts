@@ -43,7 +43,8 @@ async function refreshAccessToken(token: AuthToken): Promise<AuthToken> {
       body: new URLSearchParams({
         grant_type: 'client_credentials',
         //@ts-ignore
-        refreshToken: token.accessToken,
+        // refreshToken: token.accessToken,
+        refreshToken: token.refreshToken,
       }),
     });
 
