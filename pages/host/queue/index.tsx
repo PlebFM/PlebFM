@@ -58,8 +58,6 @@ export default function Queue() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
-  const [prepareNext, setPrepareNext] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [host, setHost] = useState<string>();
   const router = useRouter();
 
@@ -98,7 +96,6 @@ export default function Queue() {
     if (!host || !refreshQueue) return;
     console.log('refreshing');
     getLeaderboardQueue(host).then(res => {
-      console.log('REESSSS', res);
       if (res) setQueueData(res);
       setRefreshQueue(false);
     });

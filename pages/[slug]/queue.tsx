@@ -9,6 +9,7 @@ import { Song } from '../../models/Song';
 import Layout from '../../components/Layout';
 import { usePathname } from 'next/navigation';
 import { Bid } from '../../models/Bid';
+import { Play } from '../../models/Play';
 
 // pleb.fm/bantam/queue
 // Used for frontend hydration
@@ -38,30 +39,23 @@ export const fetchSong = async (
   const result = await res.json();
   return result;
 };
-export const cleanSong = (
-  rawSong: { obj: any; song: any },
-  userProfile: User,
-): SongObject => {
-  const { obj, song } = rawSong;
-  const bidders = obj.bids.map((x: any) => x.user);
-  const totalAmount = obj.bids.reduce(
-    (x: number, bid: Bid) => x + bid.bidAmount,
-    0,
-  );
-  const totalBid = (totalAmount * 1000.0 * 60) / song.duration_ms;
-  const myPick = bidders.some((x: User) => x.userId === userProfile.userId);
+export const cleanSong = (song: Play, user: User) => {
+  const bidders = song.bids.map((x: Bid) => x.user);
+  const totalBid = song.runningTotal;
+  const myPick = bidders.some((x: User) => x.userId === user.userId);
   return {
-    trackTitle: song.name,
-    artistName: song.artists[0].name,
+    trackTitle: song.songName,
+    artistName: song.songArtist,
     feeRate: totalBid,
-    playing: obj.status === 'playing',
+    playing: song.status === 'playing',
     myPick,
-    upNext: obj.status === 'next',
+    upNext: song.status === 'next',
     bidders,
-    queued: obj.status === 'queued',
-    status: obj.status,
+    queued: song.status === 'queued',
+    status: song.status,
   };
 };
+
 export const getQueue = async (
   host: string,
   user: User,
@@ -76,17 +70,7 @@ export const getQueue = async (
   if (!res?.data) {
     return [];
   }
-  const promises = res.data.map((x: any) => {
-    const res = fetchSong(x.songId, host).then(song => {
-      return { obj: x, song: song };
-    });
-    return res;
-  });
-  const raw_songs = await Promise.all(promises);
-  const songs = raw_songs.map(x => cleanSong(x, user));
-  songs.sort((a, b) => {
-    return b.feeRate - a.feeRate;
-  });
+  const songs = res.data.map(cleanSong);
   return songs;
 };
 
