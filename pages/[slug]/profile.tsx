@@ -7,7 +7,7 @@ import NavBar from '../../components/NavBar';
 import Layout from '../../components/Layout';
 import { SongObject, cleanSong, fetchSong, getQueue } from '../[slug]/queue';
 import { User } from '../../models/User';
-import LoadingSpinner, { Spinner } from '../../components/LoadingSpinner';
+import { Spinner } from '../../components/LoadingSpinner';
 import { usePathname } from 'next/navigation';
 
 export default function UserProfile() {
