@@ -73,10 +73,10 @@ export const getQueue = async (
   }
   const response = await fetch(url);
   const res = await response.json();
-  if (!res?.queue) {
+  if (!res?.data) {
     return [];
   }
-  const promises = res.queue.map((x: any) => {
+  const promises = res.data.map((x: any) => {
     const res = fetchSong(x.songId, host).then(song => {
       return { obj: x, song: song };
     });

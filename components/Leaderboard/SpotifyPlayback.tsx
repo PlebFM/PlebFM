@@ -6,7 +6,7 @@ import {
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
-import { addTrackToSpotifyQueue, transferPlayback } from '../../lib/spotify';
+import { transferPlayback } from '../../lib/spotify';
 
 const emptyTrack = {
   name: '',
@@ -57,7 +57,6 @@ function WebPlayback(props: WebPlaybackProps) {
   useEffect(() => {
     const interval = setInterval(() => {
       if (!trackPosition) return;
-
       if (Math.round(trackPosition / 1000) % 5 === 0) {
         updateQueue(props.token, props.shortName, deviceId).then(res => {
           if (res?.data?.updated) {
@@ -66,11 +65,11 @@ function WebPlayback(props: WebPlaybackProps) {
           }
         });
       }
-      if (isPaused) return;
+      if (isPaused || !trackDuration || trackPosition >= trackDuration) return;
       setPosition(trackPosition + 1000);
     }, 1000);
     return () => clearInterval(interval);
-  }, [isPaused, props, deviceId, setPosition, trackPosition]);
+  }, [isPaused, props, deviceId, setPosition, trackPosition, trackDuration]);
 
   useEffect(() => {
     const existing_script = document.getElementById('spotify-player');
@@ -139,19 +138,17 @@ function WebPlayback(props: WebPlaybackProps) {
     }
   }, [deviceId, props.token]);
 
-  const searchResultURI = 'spotify:track:2rBHnIxbhkMGLpqmsNX91M';
-
   if (!isActive || !track) {
     return (
-      <div className="text-3xl p-16 flex flex-col space-y-6 mb-8">
+      <div className="text-3xl p-8 flex flex-col space-y-6 mb-8">
         Instance not active. Transfer your playback using your Spotify app, or
         click the button below.
-        <div className="flex flex-col space-y-2 mt-3">
+        <div className="flex flex-col space-y-2 mt-6">
           {/* Transfer playback to PlebFM  */}
           <Button
             size={'small'}
             onClick={() => {
-              // player?.activateElement();
+              player?.activateElement();
               transferPlayback(deviceId, props.token);
               console.log('transferPlayback called');
             }}
@@ -164,7 +161,7 @@ function WebPlayback(props: WebPlaybackProps) {
   } else {
     return (
       <>
-        <div className="text-3xl p-8 flex flex-col space-y-6 mb-32">
+        <div className="text-3xl mx-10 p-5 flex flex-col space-y-6">
           <img
             src={track.album.images[0].url}
             className="w-64 h-64"
@@ -253,29 +250,6 @@ function WebPlayback(props: WebPlaybackProps) {
             ) : (
               <p className="text-sm">0:00 / 0:00</p>
             )}
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            {/* Add song to spotify queue */}
-            <p className="text-xs">
-              Search result: Bombtrack by Rage Against The Machine
-            </p>
-            <p className="text-xs">Search result URI: {searchResultURI}</p>
-            <Button
-              size={'small'}
-              onClick={() => {
-                addTrackToSpotifyQueue(
-                  searchResultURI,
-                  deviceId,
-                  props.token,
-                ).then(res => {
-                  if (res.status !== 202)
-                    alert('failed adding to spotify queue');
-                });
-              }}
-            >
-              Add track
-            </Button>
           </div>
         </div>
       </>

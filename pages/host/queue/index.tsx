@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import plebFMLogo from '../../../public/plebfm-logo.svg';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
@@ -11,38 +12,16 @@ import { Song } from '../../../components/Leaderboard/Song';
 import { Host } from '../../../models/Host';
 import { Play } from '../../../models/Play';
 import { Bid } from '../../../models/Bid';
+import { QR } from '../../../components/Leaderboard/Qr';
 
 const getLeaderboardQueue = async (host: string) => {
   let url = `/api/leaderboard/queue?shortName=${host}`;
   const response = await fetch(url);
   const res = await response.json();
-  if (!res?.queue) {
+  if (!res?.data) {
     return [];
   }
-  const songs = res.queue.map((x: any) => {
-    const res = cleanSong(x);
-    return res;
-  });
-  return songs;
-};
-
-const addSongToQueue = async (host: string, songId: string) => {
-  let url = `/api/leaderboard/queue`;
-  const response = await fetch(url, {
-    method: 'POST',
-    body: JSON.stringify({
-      host: host,
-      songId: songId,
-    }),
-  });
-  const res = await response.json();
-  if (!res?.queue) {
-    return [];
-  }
-  const songs = res.queue.map((x: any) => {
-    const res = cleanSong(x);
-    return res;
-  });
+  const songs = res.data.map(cleanSong);
   return songs;
 };
 
@@ -119,6 +98,7 @@ export default function Queue() {
     if (!host || !refreshQueue) return;
     console.log('refreshing');
     getLeaderboardQueue(host).then(res => {
+      console.log('REESSSS', res);
       if (res) setQueueData(res);
       setRefreshQueue(false);
     });
@@ -180,7 +160,14 @@ export default function Queue() {
           {/*    ))}*/}
           {/*  </div>*/}
           {/*</div>*/}
-          <div className="text-3xl p-16 flex flex-col space-y-6">
+          <div className="text-3xl p-8 flex flex-col space-y-6">
+            <div className="w-2/3 m-auto">
+              <Image
+                src={plebFMLogo}
+                alt="PlebFM"
+                className="w-auto mx-auto lg:w-full"
+              />
+            </div>
             {accessToken && host && (
               <WebPlayback
                 shortName={host}
@@ -188,6 +175,32 @@ export default function Queue() {
                 token={accessToken}
               />
             )}
+            <div className="flex flex-col space-y-2 m-auto justify-center">
+              <p className="text-base m-auto">
+                Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
+              </p>
+              <QR shortName={host ?? 'atl'} />
+              <p className="text-lg m-auto font-bold">
+                <u>pleb.fm/{host}</u>
+              </p>
+              {/* Add song to spotify queue */}
+              {/* <p className="text-xs">Search result URI: {searchResultURI}</p>
+            <Button
+              size={'small'}
+              onClick={() => {
+                addTrackToSpotifyQueue(
+                  searchResultURI,
+                  deviceId,
+                  props.token,
+                ).then(res => {
+                  if (res.status !== 202)
+                    alert('failed adding to spotify queue');
+                });
+              }}
+            >
+              Add track
+            </Button> */}
+            </div>
           </div>
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">
@@ -195,6 +208,11 @@ export default function Queue() {
             {queueData.map((song, key) => (
               <Song song={song} key={key} />
             ))}
+            {queueData.length === 0 && (
+              <p className="m-10">
+                Queue is Empty! Place a bid on a song at <b>pleb.fm/{host}</b>
+              </p>
+            )}
           </div>
         </div>
       </div>

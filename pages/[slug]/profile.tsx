@@ -7,7 +7,7 @@ import NavBar from '../../components/NavBar';
 import Layout from '../../components/Layout';
 import { SongObject, cleanSong, fetchSong, getQueue } from '../[slug]/queue';
 import { User } from '../../models/User';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import LoadingSpinner, { Spinner } from '../../components/LoadingSpinner';
 import { usePathname } from 'next/navigation';
 
 export default function UserProfile() {
@@ -96,59 +96,59 @@ export default function UserProfile() {
 
   return (
     <Layout title="Your Profile">
-      {loading ? (
-        <LoadingSpinner />
-      ) : (
-        <>
-          <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
-            <Image
-              src={`/Avatar/${userProfile.lastNym}.png`}
-              alt={`${userProfile.firstNym} ${userProfile.lastNym}`}
-              width="100"
-              height="100"
-              className="object-cover w-full h-full blur-2xl opacity-75"
+      <>
+        <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
+          <Image
+            src={`/Avatar/${userProfile.lastNym}.png`}
+            alt={`${userProfile.firstNym} ${userProfile.lastNym}`}
+            width="100"
+            height="100"
+            className="object-cover w-full h-full blur-2xl opacity-75"
+          />
+        </div>
+
+        <div className="max-w-screen-md m-auto px-0 py-12 pb-0 text-white relative z-50 flex flex-col space-y-6 items-center font-thin">
+          <div className="mx-auto flex flex-col space-y-4 text-center">
+            <Avatar
+              firstNym={userProfile.firstNym}
+              lastNym={userProfile.lastNym}
+              color={userProfile.color}
             />
+            <p className="text-2xl">
+              {userProfile.firstNym
+                ? userProfile.firstNym + ' ' + userProfile.lastNym
+                : '- - -'}
+            </p>
+          </div>
+          {queueData.length > 0 && (
+            <h2 className="text-left font-bold w-full px-6">In Queue</h2>
+          )}
+          <div className="w-full pb-16 text-white relative z-50 flex flex-col items-center font-thin">
+            {queueData.map((song, key) => (
+              <Song song={song} key={key} />
+            ))}
           </div>
 
-          <div className="max-w-screen-md m-auto px-0 py-12 pb-0 text-white relative z-50 flex flex-col space-y-6 items-center font-thin">
-            <div className="mx-auto flex flex-col space-y-4 text-center">
-              <Avatar
-                firstNym={userProfile.firstNym}
-                lastNym={userProfile.lastNym}
-                color={userProfile.color}
-              />
-              <p className="text-2xl">
-                {userProfile.firstNym
-                  ? userProfile.firstNym + ' ' + userProfile.lastNym
-                  : '- - -'}
-              </p>
+          {loading ? (
+            <div className="w-full h-full flex justify-center items-center">
+              <Spinner />
             </div>
-            {queueData.length > 0 && (
-              <h2 className="text-left font-bold w-full px-6">In Queue</h2>
-            )}
-            <div className="w-full pb-16 text-white relative z-50 flex flex-col items-center font-thin">
-              {queueData.map((song, key) => (
-                <Song song={song} key={key} />
-              ))}
-            </div>
-
-            {queueDataPlayed.length ? (
-              <>
-                <h2 className="text-left font-bold w-full px-6">
-                  Already played
-                </h2>
-                <div className="w-full pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
-                  {queueDataPlayed.map((song, key) => (
-                    <Song song={song} key={key} />
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="h-5" />
-            )}
-          </div>
-        </>
-      )}
+          ) : queueDataPlayed.length ? (
+            <>
+              <h2 className="text-left font-bold w-full px-6">
+                Already played
+              </h2>
+              <div className="w-full pb-36 text-white relative z-50 flex flex-col items-center min-h-screen font-thin">
+                {queueDataPlayed.map((song, key) => (
+                  <Song song={song} key={key} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="h-5" />
+          )}
+        </div>
+      </>
       <NavBar activeBtn="profile" />
     </Layout>
   );
