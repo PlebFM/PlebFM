@@ -98,7 +98,7 @@ function PaymentScreen(props: {
         />
       </div>
 
-      <div className="fixed mx-auto inset-x-0 max-w-xl px-12 pt-12 pb-36 text-white z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
+      <div className="relative mx-auto inset-x-0 max-w-xl px-12 pt-12 pb-36 text-white z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
         <CheckoutHeader song={props?.song} />
         {loading ? (
           <div className="w-full h-full flex justify-center items-center pt-20">
