@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import bokeh1 from 'public/pfm-bokeh-1.jpg';
-import Avatar from './Avatar';
-import Button from './Button';
+import Avatar from '../Utils/Avatar';
+import Button from '../Utils/Button';
 import { SearchIcon } from '@bitcoin-design/bitcoin-icons-react/outline';
 import React from 'react';
 import { webpack } from 'next/dist/compiled/webpack/webpack';

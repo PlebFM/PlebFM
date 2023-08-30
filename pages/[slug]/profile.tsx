@@ -1,13 +1,13 @@
 // User profile
 import Image from 'next/image';
-import Avatar from '../../components/Avatar';
+import Avatar from '../../components/Utils/Avatar';
 import React, { useState, useEffect } from 'react';
-import Tag from '../../components/Tag';
-import NavBar from '../../components/NavBar';
-import Layout from '../../components/Layout';
+import Tag from '../../components/Utils/Tag';
+import NavBar from '../../components/Utils/NavBar';
+import Layout from '../../components/Utils/Layout';
 import { SongObject, cleanSong, fetchSong, getQueue } from '../[slug]/queue';
 import { User } from '../../models/User';
-import { Spinner } from '../../components/LoadingSpinner';
+import { Spinner } from '../../components/Utils/LoadingSpinner';
 import { usePathname } from 'next/navigation';
 
 export default function UserProfile() {

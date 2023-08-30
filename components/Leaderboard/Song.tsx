@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { SongObject } from '../../pages/[slug]/queue';
-import Avatar from '../Avatar';
-import Tag from '../Tag';
+import Avatar from '../Utils/Avatar';
+import Tag from '../Utils/Tag';
 import { User } from '../../models/User';
 
 const cleanBidders = (bidders: User[]): User[] => {

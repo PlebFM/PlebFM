@@ -1,7 +1,7 @@
 import { useSession, signIn, signOut, getSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { Host } from '../models/Host';
-import Button from './Button';
+import { Host } from '../../models/Host';
+import Button from '../Utils/Button';
 
 const findHost = async (spotifyId: string) => {
   const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {

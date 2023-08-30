@@ -1,12 +1,12 @@
 import Image from 'next/image';
 import bokeh3 from '../../public/pfm-bokeh-3.jpg';
 import { useEffect, useState } from 'react';
-import NavBar from '../../components/NavBar';
+import NavBar from '../../components/Utils/NavBar';
 import QueueSong from '../../components/QueueSong';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import LoadingSpinner from '../../components/Utils/LoadingSpinner';
 import { User } from '../../models/User';
 import { Song } from '../../models/Song';
-import Layout from '../../components/Layout';
+import Layout from '../../components/Utils/Layout';
 import { usePathname } from 'next/navigation';
 import { Bid } from '../../models/Bid';
 import { Play } from '../../models/Play';
@@ -39,7 +39,7 @@ export const fetchSong = async (
   const result = await res.json();
   return result;
 };
-export const cleanSong = (song: Play, user: User) => {
+export const cleanSong = (song: Play, user: User): SongObject => {
   const bidders = song.bids.map((x: Bid) => x.user);
   const totalBid = song.runningTotal;
   const myPick = bidders.some((x: User) => x.userId === user.userId);
@@ -60,7 +60,7 @@ export const getQueue = async (
   host: string,
   user: User,
   isProfile: boolean = false,
-) => {
+): Promise<SongObject[]> => {
   let url = `/api/leaderboard/queue?shortName=${host}`;
   if (isProfile) {
     url += `&userId=${user.userId}`;

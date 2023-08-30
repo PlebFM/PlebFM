@@ -1,7 +1,7 @@
 'use client';
-import { getSession, signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import SpotifyAuthButton from '../../components/SpotifyAuthButton';
+import SpotifyAuthButton from '../../components/Leaderboard/SpotifyAuthButton';
 
 export default function Login() {
   const { data: session } = useSession();

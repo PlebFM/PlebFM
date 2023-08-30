@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import Button from '../components/Button';
+import Button from '../components/Utils/Button';
 import {
   ArrowRightIcon,
   CheckIcon,

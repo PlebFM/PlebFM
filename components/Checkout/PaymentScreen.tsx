@@ -3,12 +3,12 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { CartIcon, CopyIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
 import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import { MusicalNoteIcon, QueueListIcon } from '@heroicons/react/24/outline';
-import Button from '../Button';
+import Button from '../Utils/Button';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import NavBar from '../NavBar';
+import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
 import { usePathname } from 'next/navigation';
-import LoadingSpinner, { Spinner } from '../LoadingSpinner';
+import { Spinner } from '../Utils/LoadingSpinner';
 import { CheckoutHeader } from './CheckoutHeader';
 
 function PaymentScreen(props: {
@@ -82,7 +82,7 @@ function PaymentScreen(props: {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [startPolling, bolt11.hash, pathname]);
+  }, [startPolling, bolt11.hash, pathname, props]);
 
   return (
     <>

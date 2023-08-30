@@ -1,13 +1,13 @@
 import Image from 'next/image';
 import bokeh1 from 'public/pfm-bokeh-1.jpg';
-import Avatar from './Avatar';
-import Button from './Button';
+import Avatar from '../Utils/Avatar';
+import Button from '../Utils/Button';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   CrossIcon,
 } from '@bitcoin-design/bitcoin-icons-react/outline';
-import Boop from './Boop';
+import Boop from '../Utils/Boop';
 import React from 'react';
 import OnboardingAnimation from './OnboardingAnimation';
 import { webpack } from 'next/dist/compiled/webpack/webpack';
