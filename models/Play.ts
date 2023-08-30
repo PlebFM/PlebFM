@@ -40,7 +40,6 @@ const PlaySchema = new Schema<Play>({
   },
   songId: {
     type: String,
-    unique: true,
     required: true,
   },
   status: {
@@ -49,17 +48,14 @@ const PlaySchema = new Schema<Play>({
   },
   bids: {
     type: new Array<Bid>(),
-    index: -1,
     required: true,
   },
   runningTotal: {
     type: Number,
-    index: -1,
     required: true,
   },
   queueTimestamp: {
     type: String,
-    index: 1,
     required: true,
   },
   playedTimestamp: {

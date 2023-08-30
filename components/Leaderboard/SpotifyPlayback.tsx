@@ -7,6 +7,7 @@ import {
   BackwardIcon,
 } from '@heroicons/react/24/outline';
 import { transferPlayback } from '../../lib/spotify';
+import { signIn } from 'next-auth/react';
 
 const emptyTrack = {
   name: '',
@@ -56,7 +57,7 @@ function WebPlayback(props: WebPlaybackProps) {
   // progress bar
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!trackPosition) return;
+      if (!trackPosition || props.token) return;
       if (Math.round(trackPosition / 1000) % 5 === 0) {
         updateQueue(props.token, props.shortName, deviceId).then(res => {
           if (res?.data?.updated) {
@@ -72,6 +73,7 @@ function WebPlayback(props: WebPlaybackProps) {
   }, [isPaused, props, deviceId, setPosition, trackPosition, trackDuration]);
 
   useEffect(() => {
+    if (!props.token) return;
     const existing_script = document.getElementById('spotify-player');
     if (!existing_script) {
       const script = document.createElement('script');
@@ -99,6 +101,12 @@ function WebPlayback(props: WebPlaybackProps) {
 
       player.addListener('not_ready', ({ device_id }) => {
         console.log('Device ID has gone offline', device_id);
+        setDeviceId('');
+      });
+
+      player.on('authentication_error', event => {
+        console.error('Failed to authenticate', event.message);
+        signIn('spotify', { callbackUrl: '/host/queue' });
       });
 
       player.addListener('player_state_changed', state => {
@@ -128,15 +136,13 @@ function WebPlayback(props: WebPlaybackProps) {
 
       player.connect();
     };
-  }, []);
-
-  useEffect(() => {}, []);
+  }, [props]);
 
   useEffect(() => {
-    if (deviceId) {
+    if (deviceId && props.token) {
       transferPlayback(deviceId, props.token);
     }
-  }, [deviceId, props.token]);
+  }, [deviceId, props]);
 
   if (!isActive || !track) {
     return (
@@ -162,6 +168,7 @@ function WebPlayback(props: WebPlaybackProps) {
     return (
       <>
         <div className="text-3xl mx-10 p-5 flex flex-col space-y-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={track.album.images[0].url}
             className="w-64 h-64"
