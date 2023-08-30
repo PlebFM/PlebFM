@@ -1,24 +1,11 @@
-import NextAuth, { Session, User } from 'next-auth';
-import { JWT as NextAuthJWT } from 'next-auth/jwt';
+import NextAuth, { Session } from 'next-auth';
+import { JWT } from 'next-auth/jwt/types';
 
 import SpotifyProvider from 'next-auth/providers/spotify';
 
 type GenericObject<T = unknown> = T & {
   [key: string]: any;
 };
-interface JWT extends NextAuthJWT {
-  accessToken?: string;
-  refreshToken?: string;
-  accessTokenExpires?: number;
-  error?: string;
-  user?: Session['user'];
-}
-
-interface JwtInterface {
-  token: JWT;
-  user: User;
-  account: GenericObject;
-}
 /**
  * Takes a token, and returns a new token with updated
  * `accessToken` and `accessTokenExpires`. If an error occurs,

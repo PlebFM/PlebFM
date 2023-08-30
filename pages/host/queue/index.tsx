@@ -55,7 +55,6 @@ const findHost = async (spotifyId: string): Promise<Host> => {
 
 export default function Queue() {
   const { data: session, status } = useSession();
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
   const [host, setHost] = useState<string>();
@@ -82,14 +81,17 @@ export default function Queue() {
   }, [status, session, router]);
 
   useEffect(() => {
-    if (!session) return;
-    const foo = async () => {
-      //@ts-ignore
-      const accessToken = session.accessToken ?? '';
-      if (!accessToken) console.warn('ACCESS TOKEN MISSING FOR SPOTIFY');
-      setAccessToken(accessToken);
-    };
-    foo();
+    console.log('Session', session);
+    if (session?.error === 'RefreshAccessTokenError') {
+      signIn('spotify');
+    }
+    // const foo = async () => {
+    //   console.log(session)
+    //   //@ts-ignore
+    //   const accessToken = session.accessToken ?? '';
+    //   if (!accessToken) console.warn('ACCESS TOKEN MISSING FOR SPOTIFY');
+    // };
+    // foo();
   }, [session]);
 
   useEffect(() => {
@@ -165,11 +167,11 @@ export default function Queue() {
                 className="w-auto mx-auto lg:w-full"
               />
             </div>
-            {accessToken && host && (
+            {session?.accessToken && host && (
               <WebPlayback
                 shortName={host}
                 refreshQueue={() => setRefreshQueue(true)}
-                token={accessToken}
+                token={session.accessToken}
               />
             )}
             <div className="flex flex-col space-y-2 m-auto justify-center">
