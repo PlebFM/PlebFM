@@ -2,13 +2,29 @@
 
 # Pleb.FM
 
-Only the plebbest beats. 🎵
+Only the plebbest beats. 🎵 
 
-## Corporate mumbo-jumbo
+It's an ongoing auction for the next song to be played.
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Featuring... Connection to Spotify, anon-friendly user profiles, song boosting, and a sick UI.
+
+Host View
+<img width="1000" alt="host queue" src="https://github.com/PlebFM/PlebFM/assets/43247027/018212ad-8e93-4e02-bfb9-0872095f35bd">
+
+---
+User Song Selection
+
+<img width="393" alt="select song" src="https://github.com/PlebFM/PlebFM/assets/43247027/b03c2f3b-1a6d-42c8-bb85-5ec13bc9f8ab">
+<img width="389" alt="select bid" src="https://github.com/PlebFM/PlebFM/assets/43247027/4bebc96d-7dc7-4031-91e0-fb45a6a3b3e5">
 
 ## Getting Started
+
+Clone and install dependencies
+```bash
+git clone git@github.com:PlebFM/PlebFM.git
+cd PlebFM
+npm i
+```
 
 First, run the development server:
 
@@ -19,9 +35,3 @@ yarn dev
 ```
 
 Open [https://localhost:3000](https://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
