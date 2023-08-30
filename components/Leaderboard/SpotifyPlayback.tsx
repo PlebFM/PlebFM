@@ -57,7 +57,7 @@ function WebPlayback(props: WebPlaybackProps) {
   // progress bar
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!trackPosition || props.token) return;
+      if (!trackPosition || !props.token) return;
       if (Math.round(trackPosition / 1000) % 5 === 0) {
         updateQueue(props.token, props.shortName, deviceId).then(res => {
           if (res?.data?.updated) {
