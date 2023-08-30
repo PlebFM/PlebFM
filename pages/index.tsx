@@ -4,7 +4,7 @@ import Image from 'next/image';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import Link from 'next/link';
 import { useState } from 'react';
-import Button from '../components/Button';
+import Button from '../components/Utils/Button';
 import {
   CaretDownIcon,
   CaretUpIcon,

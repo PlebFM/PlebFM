@@ -5,9 +5,9 @@ import {
   CrossIcon,
 } from '@bitcoin-design/bitcoin-icons-react/filled';
 import bokeh2 from '../../public/pfm-bokeh-2.jpg';
-import Button from '../Button';
+import Button from '../Utils/Button';
 import { Dispatch, SetStateAction, useRef, useState } from 'react';
-import NavBar from '../NavBar';
+import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
 import { CheckoutHeader } from './CheckoutHeader';
 

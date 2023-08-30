@@ -3,21 +3,14 @@
 // import { Host } from "../models/Host";
 import { notFound, usePathname } from 'next/navigation';
 import React, { useEffect } from 'react';
-import Onboarding from '../../components/Onboarding';
-import OnboardingIdentity from '../../components/OnboardingIdentity';
+import Onboarding from '../../components/Onboarding/Onboarding';
+import OnboardingIdentity from '../../components/Onboarding/OnboardingIdentity';
 import Search from '../../components/Checkout/Search';
 import { getHost, getHosts } from '../../lib/hosts';
 import Checkout from '../../components/Checkout/Checkout';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import LoadingSpinner from '../../components/Utils/LoadingSpinner';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import Layout from '../../components/Layout';
-
-type Props = {
-  params: {
-    slug: string;
-  };
-  searchParams: {};
-};
+import Layout from '../../components/Utils/Layout';
 
 export default function Bidding() {
   const pathName = usePathname()?.replaceAll('/', '');

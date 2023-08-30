@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import NavBar from '../NavBar';
+import NavBar from '../Utils/NavBar';
 import plebFMLogo from '../../public/plebfm-logo.svg';
 import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import Image from 'next/image';
 import { webpack } from 'next/dist/compiled/webpack/webpack';
 import javascript = webpack.javascript;
 import { usePathname } from 'next/navigation';
-import { Spinner } from '../LoadingSpinner';
+import { Spinner } from '../Utils/LoadingSpinner';
 
 const fetchSong = async (
   query: string,

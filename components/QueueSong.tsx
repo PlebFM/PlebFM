@@ -1,5 +1,5 @@
-import Tag from './Tag';
-import Avatar from './Avatar';
+import Tag from './Utils/Tag';
+import Avatar from './Utils/Avatar';
 import React from 'react';
 import { SongObject } from '../pages/[slug]/queue';
 
