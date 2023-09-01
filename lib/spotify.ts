@@ -145,18 +145,24 @@ const skipSong = async (deviceId: string, accessToken: string) => {
 export const clearSpotifyQueue = async (
   deviceId: string,
   accessToken: string,
-  _spotifyQueue?: { queue: any[]; error: any; currently_playing: any },
+  // _spotifyQueue?: { queue: any[]; error: any; currently_playing: any },
 ) => {
-  if (!_spotifyQueue) _spotifyQueue = await getSpotifyQueue(accessToken);
+  const _spotifyQueue = await getSpotifyQueue(accessToken);
   const spotifyQueue = _spotifyQueue?.queue;
+  console.log('oldqueue', spotifyQueue);
+  const current = _spotifyQueue?.currently_playing;
+  console.log('current', current.name);
   if (!spotifyQueue)
     throw new Error(
       `No spotify queue found! ${JSON.stringify(_spotifyQueue?.error)}`,
     );
   const trackUri = `spotify:track:${_spotifyQueue?.currently_playing?.id}`;
-  await addTrackToSpotifyQueue(trackUri, deviceId, accessToken);
+  // await addTrackToSpotifyQueue(trackUri, deviceId, accessToken);
+  // const newSpotifyQueue = await getSpotifyQueue(accessToken);
+  // console.log('new queue', newSpotifyQueue.queue)
   for (let i = 0; i < spotifyQueue.length; i++) {
-    await skipSong(deviceId, accessToken);
+    // const result = await skipSong(deviceId, accessToken);
+    // console.log('skip result', result.statusText)
   }
 };
 
@@ -184,6 +190,27 @@ export const addTrackToSpotifyQueue = async (
 const spotifyQueueEndpoint = 'https://api.spotify.com/v1/me/player/queue';
 export const getSpotifyQueue = async (accessToken: string) => {
   const res = await fetch(spotifyQueueEndpoint, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+  });
+  if (!res.ok) {
+    console.error('Spotify error', res.statusText);
+  }
+  const result = await res.json();
+  return result;
+};
+
+const spotifyRecentlyPlayedEndpoint =
+  'https://api.spotify.com/v1/me/player/recently-played';
+export const getSpotifyRecentlyPlayed = async (
+  accessToken: string,
+  limit: number = 10,
+) => {
+  const res = await fetch(`${spotifyRecentlyPlayedEndpoint}?limit=${limit}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${accessToken}`,

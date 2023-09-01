@@ -124,9 +124,11 @@ export default function Search(props: SearchProps) {
                     data-song={JSON.stringify(track)}
                     data-song-id="aaaa-bbbb-cccc-ddd"
                   >
-                    <p className="pointer-events-none">{track.name}</p>
+                    <p className="pointer-events-none">
+                      {track?.name ?? 'Track Name'}
+                    </p>
                     <p className="font-bold text-[12px] pointer-events-none">
-                      {track.artists[0].name}
+                      {track?.artists[0]?.name ?? 'Artist Name'}
                     </p>
                   </div>
                 ))

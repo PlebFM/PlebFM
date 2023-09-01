@@ -40,9 +40,9 @@ const handleNewBid = async (bid: Bid, track: Song, host: Host) => {
     bids: new Array<Bid>(bid),
     runningTotal: (bid.bidAmount * 60 * 1000) / track.duration_ms,
     songLength: track.duration_ms / 1000.0,
-    songArtist: track.artists[0].name,
+    songArtist: track?.artists?.[0]?.name ?? 'Unknown Artist',
     songName: track.name,
-    albumUri: track.album.images[0]?.url,
+    albumUri: track?.album?.images?.[0]?.url,
   };
   const result = await Plays.create(newPlay).catch((e: string | undefined) => {
     console.error(e);

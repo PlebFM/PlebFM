@@ -99,8 +99,8 @@ export default function Queue() {
     console.log('refreshing');
     getLeaderboardQueue(host).then(res => {
       if (res) setQueueData(res);
-      setRefreshQueue(false);
     });
+    setRefreshQueue(false);
   }, [host, refreshQueue]);
 
   return (
