@@ -13,6 +13,7 @@ import { Host } from '../../../models/Host';
 import { Play } from '../../../models/Play';
 import { Bid } from '../../../models/Bid';
 import { QR } from '../../../components/Leaderboard/Qr';
+import { Notifications } from '../../../components/Leaderboard/Notifications';
 
 const getLeaderboardQueue = async (host: string) => {
   let url = `/api/leaderboard/queue?shortName=${host}`;
@@ -207,6 +208,7 @@ export default function Queue() {
             {queueData.map((song, key) => (
               <Song song={song} key={key} />
             ))}
+            <Notifications />
             {queueData.length === 0 && (
               <p className="m-10">
                 Queue is Empty! Place a bid on a song at <b>pleb.fm/{host}</b>

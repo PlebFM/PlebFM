@@ -217,25 +217,6 @@ const startQueue = async (req: NextApiRequest, res: NextApiResponse) => {
   } else {
     console.log('already playing', playingSong.songName);
   }
-  // Old logic for handling next song
-  // const nextSong = await Plays.findOne(
-  //   { hostId: host.hostId, status: 'next' },
-  //   {},
-  //   { new: true },
-  // );
-  // if (nextSong) {
-  //   await clearSpotifyQueue(deviceId, accessToken);
-  //   const result = await startSpotifyQueue(
-  //     `spotify:track:${nextSong?.songId}`,
-  //     deviceId,
-  //     accessToken,
-  //   );
-  //   await Plays.findOneAndUpdate(
-  //     { playId: nextSong.playId },
-  //     { status: 'playing' },
-  //     { new: true },
-  //   );
-  // }
 };
 
 const deleteQueue = async (req: NextApiRequest, res: NextApiResponse) => {

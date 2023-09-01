@@ -5,6 +5,7 @@ import Plays, { Play } from '../models/Play';
 import { Bid } from '../models/Bid';
 import { Song } from '../models/Song';
 import { getTrack } from './spotify';
+import { triggerBid } from './pusher';
 
 const Anon: User = {
   userId: 'anon',
@@ -78,11 +79,13 @@ export const submitBid = async (
   };
   if (existingPlay) {
     const result = await handleExistingBid(bid, existingPlay);
+    await triggerBid(user ?? Anon, result, bid, false);
     return result;
   } else {
     // Create new play
     const track = await getTrack(songId, accessToken);
     const result = await handleNewBid(bid, track, host);
+    await triggerBid(user ?? Anon, result, bid, true);
     return result;
   }
 };
