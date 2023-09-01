@@ -70,7 +70,8 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
         if (!res?.data) {
           console.error('failed to sync jukebox', res);
         }
-        if (res.data?.updated) refreshQueue();
+        // if (res.data?.updated) refreshQueue();
+        refreshQueue();
       });
     }, 5000);
     return () => clearInterval(interval);

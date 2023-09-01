@@ -172,10 +172,10 @@ const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
   // 4. if spotify next is not "next"
   //   add "next" to spotify queue (what if queue isn't empty???? maybe check length?)
   else if (jukeboxNext && !spotifyQueueIds.has(jukeboxNext.songId)) {
-    if (spotifyQueue?.length >= 20) {
-      console.log('queue full.. not adding', jukeboxNext?.songName);
-      return { success: true, updated: false };
-    }
+    // if (spotifyQueue?.length >= 20) {
+    //   console.log('queue full.. not adding', jukeboxNext?.songName);
+    //   return { success: true, updated: false };
+    // }
     const addResult = await addTrackToSpotifyQueue(
       `spotify:track:${jukeboxNext.songId}`,
       deviceId,
