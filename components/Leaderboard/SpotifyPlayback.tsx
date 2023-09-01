@@ -22,7 +22,7 @@ interface WebPlaybackProps {
   shortName: string;
   refreshQueue: () => void;
 }
-const updateQueue = async (
+const syncJukebox = async (
   accessToken: string,
   shortName: string,
   deviceId: string,
@@ -45,7 +45,7 @@ const updateQueue = async (
   return res;
 };
 
-function WebPlayback(props: WebPlaybackProps) {
+function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
   const [isPaused, setPaused] = useState(false);
   const [trackDuration, setDuration] = useState<number>();
   const [trackPosition, setPosition] = useState<number>();
@@ -57,23 +57,27 @@ function WebPlayback(props: WebPlaybackProps) {
   // progress bar
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!trackPosition || !props.token) return;
-      if (Math.round(trackPosition / 1000) % 5 === 0) {
-        updateQueue(props.token, props.shortName, deviceId).then(res => {
-          if (res?.data?.updated) {
-            console.log('refreshing');
-            props.refreshQueue();
-          }
-        });
-      }
+      if (!trackPosition) return;
       if (isPaused || !trackDuration || trackPosition >= trackDuration) return;
       setPosition(trackPosition + 1000);
     }, 1000);
     return () => clearInterval(interval);
-  }, [isPaused, props, deviceId, setPosition, trackPosition, trackDuration]);
+  }, [isPaused, deviceId, setPosition, trackPosition, trackDuration]);
 
   useEffect(() => {
-    if (!props.token) return;
+    const interval = setInterval(() => {
+      syncJukebox(token, shortName, deviceId).then(res => {
+        if (!res?.data) {
+          console.error('failed to sync jukebox', res);
+        }
+        if (res.data?.updated) refreshQueue();
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [deviceId, shortName, token, refreshQueue]);
+
+  useEffect(() => {
+    if (!token) return;
     const existing_script = document.getElementById('spotify-player');
     if (!existing_script) {
       const script = document.createElement('script');
@@ -87,7 +91,7 @@ function WebPlayback(props: WebPlaybackProps) {
       const player = new window.Spotify.Player({
         name: 'PlebFM',
         getOAuthToken: cb => {
-          cb(props.token);
+          cb(token);
         },
         volume: 0.5,
       });
@@ -136,13 +140,13 @@ function WebPlayback(props: WebPlaybackProps) {
 
       player.connect();
     };
-  }, [props]);
+  }, []);
 
   useEffect(() => {
-    if (deviceId && props.token) {
-      transferPlayback(deviceId, props.token);
+    if (deviceId && token) {
+      transferPlayback(deviceId, token);
     }
-  }, [deviceId, props]);
+  }, [deviceId]);
 
   if (!isActive || !track) {
     return (
@@ -155,7 +159,7 @@ function WebPlayback(props: WebPlaybackProps) {
             size={'small'}
             onClick={() => {
               player?.activateElement();
-              transferPlayback(deviceId, props.token);
+              transferPlayback(deviceId, token);
               console.log('transferPlayback called');
             }}
           >
