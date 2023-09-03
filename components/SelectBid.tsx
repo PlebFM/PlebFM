@@ -32,6 +32,7 @@ export default function SelectBid(props: {
   const [sliderMouseDown, setSliderMouseDown] = useState(false);
   const ref = useRef(null);
   let slider = document.getElementById('slider');
+
   const handleMouseDown = () => {
     setSliderMouseDown(true);
   };
@@ -53,19 +54,19 @@ export default function SelectBid(props: {
   const handleMouseMove = (e: { clientX: number }) => {
     if (!slider) return;
     if (sliderMouseDown) {
+      let rect = slider.getBoundingClientRect();
       // @ts-ignore
       let posInRange =
-        e.clientX < slider.offsetLeft + 40
-          ? 0
-          : e.clientX > slider.offsetWidth + slider.offsetLeft - 40
-          ? slider.offsetWidth - 40
-          : e.clientX - slider.offsetLeft - 40;
+        e.clientX < rect.left + 40 // IF mouse is to the left of the slider curve
+          ? 0 // Hug 0
+          : e.clientX > rect.width + rect.left - 40 // IF mouse is to the right of the slider curve
+          ? rect.width - 40 - 40 // Hug [width of slider curve]
+          : e.clientX - rect.left - 40; // ELSE hug the mouse position
       // @ts-ignore
-      updateFees(
-        Math.floor((posInRange / (slider.offsetWidth - 40 - 40)) * maxSats),
-      );
+      updateFees(Math.floor((posInRange / (rect.width - 40 - 40)) * maxSats));
     }
   };
+
   return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
@@ -111,30 +112,41 @@ export default function SelectBid(props: {
           </div>
 
           <svg
-            width="241"
-            height="97"
-            viewBox="0 0 241 97"
+            width="348"
+            height="348"
+            viewBox="0 0 348 348"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="overflow absolute bottom-[40px] left-0 w-full"
+            className="overflow absolute top-0 left-0 w-full"
           >
-            <path
-              d="M16.8713 16.8016C26.6091 35.913 41.4422 51.9594 59.7308 63.1666C78.0193 74.3738 99.0508 80.3053 120.5 80.3053C141.949 80.3053 162.981 74.3738 181.269 63.1666C199.558 51.9594 214.391 35.913 224.129 16.8016"
+            <ellipse
+              cx="174"
+              cy="174"
+              rx="114"
+              ry="114"
               stroke="white"
               strokeOpacity="0.2"
-              strokeWidth="32"
+              strokeWidth="36"
               strokeLinecap="round"
               strokeLinejoin="round"
+              strokeDasharray="255 1000"
+              strokeDashoffset="0"
+              transform="rotate(24 174 174)"
+              id="smile"
             />
-            <path
-              d="M16.8713 16.8016C26.6091 35.913 41.4422 51.9594 59.7308 63.1666C78.0193 74.3738 99.0508 80.3053 120.5 80.3053C141.949 80.3053 162.981 74.3738 181.269 63.1666C199.558 51.9594 214.391 35.913 224.129 16.8016"
+            <ellipse
+              cx="174"
+              cy="174"
+              rx="114"
+              ry="114"
               stroke="white"
               strokeOpacity="0.5"
-              strokeWidth="34"
+              strokeWidth="36"
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeDasharray="1,260"
-              strokeDashoffset={260 - 260 * (feeRate / 100)}
+              strokeDasharray="1,999"
+              strokeDashoffset="698"
+              transform={'rotate(' + (feeRate / maxSats) * -128 + ' 174 174)'}
             />
           </svg>
         </div>
