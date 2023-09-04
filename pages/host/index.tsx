@@ -2,6 +2,7 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import SpotifyAuthButton from '../../components/Leaderboard/SpotifyAuthButton';
+import Head from 'next/head';
 
 export default function Login() {
   const { data: session } = useSession();
@@ -21,19 +22,26 @@ export default function Login() {
   }, [session]);
 
   return (
-    <div className="bg-pfm-purple-300 text-white w-screen h-screen p-8">
-      <h1 className="text-2xl mb-8">Host Login</h1>
-      <SpotifyAuthButton />
-      <br />
-      <p>accessToken:</p>
-      <br />
-      <div className="flex">
-        <code className="bg-pfm-purple-100 p-4 truncate">
-          {' '}
-          {/* style={{ backgroundColor: 'black', padding: '.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: "nowrap" }}> */}
-          {accessToken}
-        </code>
+    <>
+      <Head>
+        <title>PlebFM</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/pleb-fm-favicon.svg" />
+      </Head>
+      <div className="bg-pfm-purple-300 text-white w-screen h-screen p-8">
+        <h1 className="text-2xl mb-8">Host Login</h1>
+        <SpotifyAuthButton />
+        <br />
+        <p>accessToken:</p>
+        <br />
+        <div className="flex">
+          <code className="bg-pfm-purple-100 p-4 truncate">
+            {' '}
+            {/* style={{ backgroundColor: 'black', padding: '.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: "nowrap" }}> */}
+            {accessToken}
+          </code>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
