@@ -80,7 +80,7 @@ const usePusher = (refreshQueue: () => void) => {
     channel.bind('bid', (data: any) => {
       console.log('BID RECEIVED', data);
       // setNotifications(prev => [...prev.filter(notification => parseInt(notification?.bid?.timestamp) + 5_000 < Date.now()), data]);
-      setNotifications(prev => [data, ...prev]);
+      setNotifications(prev => [...prev, data]);
       refreshQueue();
     });
 
@@ -133,21 +133,22 @@ export const Notifications = ({
             >
               <div className="w-12">
                 <Avatar
-                  firstNym={update.user.firstNym}
-                  lastNym={update.user.lastNym}
-                  color={update.user.color}
+                  firstNym={update?.user?.firstNym}
+                  lastNym={update?.user?.lastNym}
+                  color={update?.user?.color}
                   size="xs"
                 />
               </div>
               <p className="w-[300%]">
                 <strong>
-                  {update.user.firstNym} {update.user.lastNym}
+                  {update?.user?.firstNym} {update?.user?.lastNym}
                 </strong>{' '}
-                {update.isBoost ? 'boosted' : 'bid on'}{' '}
-                {(update.song.songName + ' by ' + update.song.songArtist).slice(
-                  0,
-                  12,
-                ) + '...'}
+                {update?.isBoost ? 'boosted' : 'bid on'}{' '}
+                {(
+                  update?.song?.songName +
+                  ' by ' +
+                  update?.song?.songArtist
+                ).slice(0, 12) + '...'}
               </p>
             </div>
           ))}
