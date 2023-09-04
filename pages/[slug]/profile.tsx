@@ -9,6 +9,7 @@ import { SongObject, cleanSong, fetchSong, getQueue } from '../[slug]/queue';
 import { User } from '../../models/User';
 import { Spinner } from '../../components/Utils/LoadingSpinner';
 import { usePathname } from 'next/navigation';
+import { usePusher } from '../../components/hooks/usePusher';
 
 export default function UserProfile() {
   const [userProfile, setUserProfile] = useState({
@@ -16,8 +17,11 @@ export default function UserProfile() {
     lastNym: '',
     color: '',
   });
+  const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
+
+  usePusher(() => setRefreshQueue(true));
 
   const getUserProfileFromLocal = () => {
     const userProfileJSON = localStorage.getItem('userProfile');
@@ -32,7 +36,7 @@ export default function UserProfile() {
   }, []);
 
   useEffect(() => {
-    if (!userProfile || !pathname) return;
+    if (!userProfile || !pathname || !refreshQueue) return;
     const host = pathname.substring(1).split('/')[0];
     getQueue(host, userProfile as User, true)
       .then(res => {
@@ -48,7 +52,8 @@ export default function UserProfile() {
         console.error(e);
         setLoading(false);
       });
-  }, [userProfile, pathname]);
+    setRefreshQueue(false);
+  }, [userProfile, pathname, refreshQueue]);
 
   const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [queueDataPlayed, setQueueDataPlayed] = useState<SongObject[]>([]);
