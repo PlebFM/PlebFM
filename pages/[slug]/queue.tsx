@@ -59,12 +59,12 @@ export const cleanSong = (song: Play, user: User): SongObject => {
 
 export const getQueue = async (
   host: string,
-  user: User,
+  user?: User,
   isProfile: boolean = false,
 ): Promise<SongObject[]> => {
   let url = `/api/leaderboard/queue?playing=${true}&shortName=${host}`;
   if (isProfile) {
-    url += `&userId=${user.userId}`;
+    url += `&userId=${user?.userId}`;
   }
   const response = await fetch(url);
   const res = await response.json();

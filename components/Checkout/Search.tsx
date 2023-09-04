@@ -6,12 +6,16 @@ import Image from 'next/image';
 import { webpack } from 'next/dist/compiled/webpack/webpack';
 import javascript = webpack.javascript;
 import { usePathname } from 'next/navigation';
+import { Play } from '../../models/Play';
 import { Spinner } from '../Utils/LoadingSpinner';
+import Tag from '../Utils/Tag';
+import { SongObject, cleanSong } from '../../pages/[slug]/queue';
+import { User } from '../../models/User';
 
 const fetchSong = async (
   query: string,
   shortName: string,
-): Promise<{ name: string; artists: { name: string }[] }[]> => {
+): Promise<{ name: string; artists: { name: string }[]; id: string }[]> => {
   if (query === '') return [];
   const queryString = new URLSearchParams({
     query: query,
@@ -28,14 +32,49 @@ const fetchSong = async (
 interface SearchProps {
   setSong: javascript;
 }
+const getQueue = async (
+  host: string,
+  user: User,
+): Promise<Map<string, SongObject>> => {
+  let url = `/api/leaderboard/queue?playing=${true}&shortName=${host}`;
+  const response = await fetch(url);
+  const res = await response.json();
+  if (!res?.data) {
+    return new Map();
+  }
+  const songs: Array<[string, SongObject]> = res.data.map((song: Play) => [
+    song.songId,
+    cleanSong(song, user),
+  ]);
+  console.log(songs);
+  return new Map(songs);
+};
 
 export default function Search(props: SearchProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [searchResult, setSearchResult] = useState<
-    { name: string; artists: { name: string }[] }[]
+    { name: string; artists: { name: string }[]; id: string }[]
   >([]);
+  const [queue, setQueue] = useState<Map<string, SongObject>>();
   const [loading, setLoading] = useState(true);
   const name = usePathname()?.replaceAll('/', '') || '';
+
+  const getUserProfileFromLocal = () => {
+    const userProfileJSON = localStorage.getItem('userProfile');
+    if (userProfileJSON) {
+      return JSON.parse(userProfileJSON);
+    }
+  };
+
+  useEffect(() => {
+    const userProfile = getUserProfileFromLocal();
+    const fetchQueue = async () => {
+      const queue = await getQueue(name, userProfile).then(res => {
+        if (res) setQueue(res);
+      });
+    };
+    fetchQueue();
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -118,18 +157,23 @@ export default function Search(props: SearchProps) {
               {searchResult.length > 0 ? (
                 searchResult.map((track, key) => (
                   <div
-                    className="px-7 py-4 border-b border-b-1 border-white/20"
                     key={key}
-                    onClick={selectSong}
-                    data-song={JSON.stringify(track)}
-                    data-song-id="aaaa-bbbb-cccc-ddd"
+                    className="flex flex-row items-center justify-between px-7 py-4 border-b border-b-1 border-white/20"
                   >
-                    <p className="pointer-events-none">
-                      {track?.name ?? 'Track Name'}
-                    </p>
-                    <p className="font-bold text-[12px] pointer-events-none">
-                      {track?.artists[0]?.name ?? 'Artist Name'}
-                    </p>
+                    <div
+                      className=""
+                      onClick={selectSong}
+                      data-song={JSON.stringify(track)}
+                      data-song-id="aaaa-bbbb-cccc-ddd"
+                    >
+                      <p className="pointer-events-none">
+                        {track?.name ?? 'Track Name'}
+                      </p>
+                      <p className="font-bold text-[12px] pointer-events-none">
+                        {track?.artists[0]?.name ?? 'Artist Name'}
+                      </p>
+                    </div>
+                    <Tag song={queue?.get(track?.id)} showQueued={true} />
                   </div>
                 ))
               ) : loading ? (

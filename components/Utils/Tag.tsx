@@ -1,13 +1,19 @@
 import { SongObject } from '../../pages/[slug]/queue';
 
 interface TagProps {
-  song: SongObject;
+  song?: SongObject;
   profile?: boolean;
+  showQueued?: boolean;
 }
 export default function Tag(props: TagProps) {
   if (
     !props?.song ||
-    !(props.song.playing || props.song.upNext || props.song.myPick)
+    !(
+      props.song.playing ||
+      props.song.upNext ||
+      props.song.myPick ||
+      props.showQueued
+    )
   )
     return <></>;
 
@@ -22,10 +28,13 @@ export default function Tag(props: TagProps) {
   } else if (props.song.myPick) {
     color = 'bg-pfm-purple-800';
     text = 'My Pick';
+  } else if (props.song.queued) {
+    color = 'bg-pfm-teal-700';
+    text = 'In Queue';
   }
 
   return (
-    <div className="mb-6">
+    <div>
       <span className={'px-2 py-1 text-black font-semibold rounded ' + color}>
         {text}
       </span>
