@@ -46,7 +46,6 @@ const getQueue = async (
     song.songId,
     cleanSong(song, user),
   ]);
-  console.log(songs);
   return new Map(songs);
 };
 
