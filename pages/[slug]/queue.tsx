@@ -61,7 +61,7 @@ export const getQueue = async (
   user: User,
   isProfile: boolean = false,
 ): Promise<SongObject[]> => {
-  let url = `/api/leaderboard/queue?shortName=${host}`;
+  let url = `/api/leaderboard/queue?playing=${true}&shortName=${host}`;
   if (isProfile) {
     url += `&userId=${user.userId}`;
   }
