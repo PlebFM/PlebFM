@@ -122,44 +122,7 @@ export default function Queue() {
 
       <div className="flex flex-row w-full h-screen justify-between relative z-[99] overflow-hidden">
         <div className="w-1/2 h-full text-white flex flex-col justify-between">
-          {/*<div className="flex flex-row justify-between p-16 pt-0 pr-0">*/}
-          {/*  <div className="bg-[#e4f1fb] p-4 mt-16 w-[200px] h-[200px] inline mix-blend-multiply rounded-2xl">*/}
-          {/*    <Image*/}
-          {/*      src={qr}*/}
-          {/*      alt="https://pleb.fm/atl"*/}
-          {/*      width="200"*/}
-          {/*      height="200"*/}
-          {/*      className="w-full"*/}
-          {/*    />*/}
-          {/*  </div>*/}
-          {/*  <div className="w-3/5 flex flex-col space-y-2 pr-4 pt-4">*/}
-          {/*    {feed.map((update, key) => (*/}
-          {/*      <div*/}
-          {/*        key={key}*/}
-          {/*        className={*/}
-          {/*          'flex space-x-4 justify-start items-center overflow-hidden bg-pfm-purple-400/50 h-12 rounded p-4 animate-fade-out'*/}
-          {/*        }*/}
-          {/*      >*/}
-          {/*        <div className="w-12">*/}
-          {/*          <Avatar*/}
-          {/*            firstNym={update.user.firstNym}*/}
-          {/*            lastNym={update.user.lastNym}*/}
-          {/*            color={update.user.color}*/}
-          {/*            size="xs"*/}
-          {/*          />*/}
-          {/*        </div>*/}
-          {/*        <p className="w-[300%]">*/}
-          {/*          <strong>*/}
-          {/*            {update.user.firstNym} {update.user.lastNym}*/}
-          {/*          </strong>{' '}*/}
-          {/*          {update.action}{' '}*/}
-          {/*          {(update.song + ' by ' + update.artist).slice(0, 12) +*/}
-          {/*            '...'}*/}
-          {/*        </p>*/}
-          {/*      </div>*/}
-          {/*    ))}*/}
-          {/*  </div>*/}
-          {/*</div>*/}
+          <Notifications refreshQueue={() => setRefreshQueue(true)} />
           <div className="text-3xl p-8 flex flex-col space-y-6">
             <div className="w-2/3 m-auto">
               <Image
@@ -208,7 +171,6 @@ export default function Queue() {
             {queueData.map((song, key) => (
               <Song song={song} key={key} />
             ))}
-            <Notifications />
             {queueData.length === 0 && (
               <p className="m-10">
                 Queue is Empty! Place a bid on a song at <b>pleb.fm/{host}</b>

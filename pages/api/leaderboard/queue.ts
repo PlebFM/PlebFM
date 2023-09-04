@@ -127,11 +127,15 @@ const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
   });
   const spotifyRecent = await getSpotifyRecentlyPlayed(accessToken, 1);
   const spotifyLastPlayed = spotifyRecent?.items?.[0];
+  const jukeboxPlayingStatus = await Plays.find({
+    hostId: host.hostId,
+    status: 'playing',
+  });
 
-  // 1. if last played on spotify is "playing" in jukebox...
+  // 1. if last played on spotify is "playing" in jukebox... (if "playing" and not in spotify, change to "played")
   //   change "playing" to "played"
-
   const spotifyLastPlayedInJuke = await Plays.findOne({
+    hostId: host.hostId,
     songId: spotifyLastPlayed?.id,
     status: 'playing',
   });
@@ -144,7 +148,20 @@ const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
       { status: 'played' },
       { new: true },
     );
+    return { success: true, updated: true };
+  }
 
+  // 1.5 (if "playing" and not in spotify, change to "played")
+  else if (jukeboxPlayingStatus.length > 1) {
+    for (const play of jukeboxPlayingStatus) {
+      if (play.songId === spotifyCurrent?.id) continue;
+      console.log(`updating ${play.songName} to played`);
+      await Plays.findOneAndUpdate(
+        { playId: play.playId },
+        { status: 'played' },
+        { new: true },
+      );
+    }
     return { success: true, updated: true };
   }
 
@@ -185,6 +202,10 @@ const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
     console.log('queue length', spotifyQueue?.length);
     return { success: true, updated: true };
   }
+  const playingSongs = await Plays.find({
+    hostId: host.hostId,
+    status: 'playing',
+  });
 
   return { success: true, updated: false };
 };
