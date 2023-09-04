@@ -10,6 +10,7 @@ import Layout from '../../components/Utils/Layout';
 import { usePathname } from 'next/navigation';
 import { Bid } from '../../models/Bid';
 import { Play } from '../../models/Play';
+import { usePusher } from '../../components/hooks/usePusher';
 
 // pleb.fm/bantam/queue
 // Used for frontend hydration
@@ -82,11 +83,14 @@ export default function Queue() {
     }
   };
   const [queueData, setQueueData] = useState<SongObject[]>([]);
+  const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
   const pathname = usePathname();
 
+  usePusher(() => setRefreshQueue(true));
+
   useEffect(() => {
-    if (!pathname) return;
+    if (!pathname || !refreshQueue) return;
     setLoading(true);
     const userProfile = getUserProfileFromLocal();
     const hostname = pathname.substring(1).split('/')[0];
@@ -94,7 +98,8 @@ export default function Queue() {
       if (res) setQueueData(res);
       setLoading(false);
     });
-  }, [pathname]);
+    setRefreshQueue(false);
+  }, [pathname, refreshQueue]);
 
   const EmptyQueue = () => {
     return (
