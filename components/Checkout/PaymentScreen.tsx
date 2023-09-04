@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { Spinner } from '../Utils/LoadingSpinner';
 import { CheckoutHeader } from './CheckoutHeader';
 
@@ -23,6 +24,8 @@ function PaymentScreen(props: {
   const [loading, setLoading] = useState(true);
   const [startPolling, setStartPolling] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { slug } = router.query;
 
   const getUserProfileFromLocal = () => {
     const userProfileJSON = localStorage.getItem('userProfile');
@@ -42,7 +45,7 @@ function PaymentScreen(props: {
         body: JSON.stringify({
           value: props.totalBid,
           memo: `PlebFM - ${props?.song?.name ?? 'Bid'}`,
-          shortName: 'atl',
+          shortName: slug,
         }),
       });
       const res = await response.json();
@@ -60,7 +63,8 @@ function PaymentScreen(props: {
     if (!startPolling || !bolt11.hash || !pathname) return;
 
     const getPaidStatus = async () => {
-      const hostId = pathname?.substring(1); // /atl -> atl
+      const hostId = slug;
+      console.log(slug);
       const user = getUserProfileFromLocal();
       const url = `/api/invoice?hash=${bolt11.hash}&hostId=${hostId}&songId=${props.song?.id}&bidAmount=${props.totalBid}&userId=${user.userId}&shortName=${hostId}`;
       const response = await fetch(url);

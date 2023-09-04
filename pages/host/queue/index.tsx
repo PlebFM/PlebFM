@@ -75,6 +75,7 @@ export default function Queue() {
           router.push('/host?error=host_not_found');
         } else {
           setHost(host.shortName);
+          console.log('host', host);
         }
       });
     }

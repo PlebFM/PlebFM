@@ -156,6 +156,11 @@ export default function Index() {
               </Link>
             </li>
             <li>
+              <Link href="/atlbitlab" className="underline text-pfm-orange-800">
+                ATL BitLab
+              </Link>
+            </li>
+            <li>
               <span
                 className="underline cursor-pointer flex flex-row gap-2 items-center"
                 onClick={() => setShowForm(!showForm)}
