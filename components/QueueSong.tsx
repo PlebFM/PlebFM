@@ -68,12 +68,16 @@ export default function QueueSong(props: QueueSongProps) {
             )}
           </div>
         </div>
-        <div>
-          <p className="font-extralight text-2xl text-center">
-            {props.song.feeRate.toFixed(0)}
-          </p>
-          <p className="font-bold text-xs text-center"> sats / min</p>
-        </div>
+        {!(props.song.playing || props.song.upNext || props.song.myPick) ? (
+          <div>
+            <p className="font-extralight text-2xl text-center">
+              {props.song.feeRate.toFixed(0)}
+            </p>
+            <p className="font-bold text-xs text-center"> sats / min</p>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
       {props.boosted && !boostFXPlayed ? (
         <>

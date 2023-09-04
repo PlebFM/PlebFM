@@ -34,6 +34,7 @@ function PaymentScreen(props: {
   useEffect(() => {
     const getBolt11 = async () => {
       setLoading(true);
+      const hostId = pathname?.substring(1) ?? 'atl'; // /atl -> atl
       const response = await fetch('/api/invoice', {
         method: 'POST',
         headers: {
@@ -42,7 +43,7 @@ function PaymentScreen(props: {
         body: JSON.stringify({
           value: props.totalBid,
           memo: `PlebFM - ${props?.song?.name ?? 'Bid'}`,
-          shortName: 'atl',
+          shortName: hostId,
         }),
       });
       const res = await response.json();
@@ -54,7 +55,7 @@ function PaymentScreen(props: {
     };
     getBolt11();
     // console.log(bolt11);
-  }, []);
+  }, [pathname, props?.song?.name, props.totalBid]);
 
   useEffect(() => {
     if (!startPolling || !bolt11.hash || !pathname) return;
