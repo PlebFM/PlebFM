@@ -26,7 +26,13 @@ cd PlebFM
 npm i
 ```
 
-First, run the development server:
+Copy `.env.sample` to `.env.local` and fill in real values
+
+```bash
+cp .env.sample .env.local
+```
+
+Run the development server
 
 ```bash
 npm run dev
