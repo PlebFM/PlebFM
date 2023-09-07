@@ -146,23 +146,6 @@ export default function Queue() {
               <p className="text-lg m-auto font-bold">
                 <u>pleb.fm/{host}</u>
               </p>
-              {/* Add song to spotify queue */}
-              {/* <p className="text-xs">Search result URI: {searchResultURI}</p>
-            <Button
-              size={'small'}
-              onClick={() => {
-                addTrackToSpotifyQueue(
-                  searchResultURI,
-                  deviceId,
-                  props.token,
-                ).then(res => {
-                  if (res.status !== 202)
-                    alert('failed adding to spotify queue');
-                });
-              }}
-            >
-              Add track
-            </Button> */}
             </div>
           </div>
         </div>
