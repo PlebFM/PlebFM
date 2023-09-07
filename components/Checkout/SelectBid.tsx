@@ -18,7 +18,7 @@ export default function SelectBid(props: {
   setTotalBid: Dispatch<SetStateAction<number>>;
   setBid: Dispatch<SetStateAction<number>>;
 }) {
-  const maxSats = 100;
+  const maxSats = 5_000;
   const [feeRate, setFeeRate] = useState(0);
   const [feeTotal, setFeeTotal] = useState(0);
   const [feeBracket, setFeeBracket] = useState(0);
@@ -46,9 +46,9 @@ export default function SelectBid(props: {
     setFeeRate(fee);
     setFeeTotal(Math.floor((fee * props.song.duration_ms) / 60_000));
     if (fee === 0) setFeeBracket(0);
-    else if (fee > 0 && fee <= 25) setFeeBracket(1);
-    else if (fee > 25 && fee <= 50) setFeeBracket(2);
-    else if (fee > 50 && fee <= 75) setFeeBracket(3);
+    else if (fee > 0 && fee <= 0.25 * maxSats) setFeeBracket(1);
+    else if (fee > 0.25 * maxSats && fee <= 0.5 * maxSats) setFeeBracket(2);
+    else if (fee > 0.5 * maxSats && fee <= 0.75 * maxSats) setFeeBracket(3);
     else setFeeBracket(4);
   };
 

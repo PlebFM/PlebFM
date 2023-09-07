@@ -11,12 +11,12 @@ export const QR = ({ shortName }: { shortName: string }) => {
           height={'120px'}
           includeMargin={true}
           level={'H'}
-          imageSettings={{
-            src: '/pleb-fm-favicon.svg',
-            height: 50,
-            width: 50,
-            excavate: false,
-          }}
+          // imageSettings={{
+          //   src: '/pleb-fm-favicon.svg',
+          //   height: 50,
+          //   width: 50,
+          //   excavate: false,
+          // }}
         />
       )}
     </div>
