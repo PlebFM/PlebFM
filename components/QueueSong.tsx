@@ -29,7 +29,9 @@ export default function QueueSong(props: QueueSongProps) {
       }
     >
       {props.song.playing || props.song.upNext || props.song.myPick ? (
-        <Tag song={props.song} />
+        <div className="mb-2">
+          <Tag song={props.song} />
+        </div>
       ) : (
         ``
       )}

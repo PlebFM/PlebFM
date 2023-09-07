@@ -151,7 +151,7 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
 
   if (!isActive || !track) {
     return (
-      <div className="text-3xl p-8 flex flex-col space-y-6 mb-8">
+      <div className="text-3xl p-8 flex flex-col space-y-6 mb-8 h-screen">
         Instance not active. Transfer your playback using your Spotify app, or
         click the button below.
         <div className="flex flex-col space-y-2 mt-6">
@@ -172,96 +172,113 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
   } else {
     return (
       <>
-        <div className="text-3xl mx-10 p-5 flex flex-col space-y-6">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={track.album.images[0].url}
-            className="w-64 h-64"
-            alt={track.name + ' album art'}
-          />
+        <div className="text-3xl h-full flex flex-col space-y-6 justify-end">
+          {/* Album Art */}
+          <div className="text-left p-6 pb-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={track.album.images[0].url}
+              className="absolute top-0 left-0 w-full h-full object-cover blur-xl scale-125"
+              alt={track.name + ' album art'}
+            />
 
-          <p>{track.name}</p>
-
-          <p className="font-bold">{track.artists[0].name}</p>
-
-          <div className="w-full bg-white/20 h-4 rounded-full drop-shadow relative">
-            <div
-              className="bg-pfm-orange-500 h-full rounded-full rounded-r-none"
-              style={{
-                width:
-                  ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 + '%',
-              }}
-            ></div>
-            <div
-              className="w-6 h-6 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
-              style={{
-                left:
-                  ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 -
-                  1.5 +
-                  '%',
-              }}
-            ></div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={track.album.images[0].url}
+              className="w-[230px] h-auto relative z-50"
+              alt={track.name + ' album art'}
+            />
           </div>
 
-          <div className="flex flex-row space-x-2 items-center">
-            <Button
-              className="btn-spotify"
-              size="small"
-              icon={<BackwardIcon />}
-              iconOnly={true}
-              onClick={() => {
-                if (player) player.previousTrack();
-              }}
-            >
-              Previous Song
-            </Button>
+          {/* Wrapper */}
+          <div className="flex flex-col space-y-6 p-6 relative z-50 bg-gradient-to-b from-black/0 to-black/50">
+            {/* Track Info */}
+            <div>
+              <p className="mb-0">{track.name}</p>
+              <p className="font-bold mb-">{track.artists[0].name}</p>
+            </div>
 
-            <Button
-              className="btn-spotify"
-              size="small"
-              icon={isPaused ? <PlayIcon /> : <PauseIcon />}
-              onClick={() => {
-                if (player) player.togglePlay();
-              }}
-              iconOnly={true}
-            >
-              {isPaused ? 'Play' : 'Pause'}
-            </Button>
+            {/* Progress Bar */}
+            <div className="w-full bg-white/20 h-2 rounded-full drop-shadow relative">
+              <div
+                className="bg-pfm-orange-500 h-full rounded-full rounded-r-none"
+                style={{
+                  width:
+                    ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 + '%',
+                }}
+              ></div>
+              <div
+                className="w-4 h-4 bg-pfm-orange-800 rounded-full absolute -top-1 drop-shadow"
+                style={{
+                  left:
+                    ((trackPosition ?? 0) / (trackDuration ?? 1)) * 100 -
+                    1.5 +
+                    '%',
+                }}
+              ></div>
+            </div>
 
-            <Button
-              className="btn-spotify"
-              size="small"
-              icon={<ForwardIcon />}
-              iconOnly={true}
-              onClick={() => {
-                if (player) {
-                  player.nextTrack();
-                }
-              }}
-            >
-              Next Song
-            </Button>
-            {trackPosition && trackDuration ? (
-              <p className="text-sm pl-4">
-                {Math.floor(trackPosition / 1000 / 60)
-                  .toString()
-                  .padStart(2, '0')}{' '}
-                :{' '}
-                {(Math.floor(trackPosition / 1000) % 60)
-                  .toString()
-                  .padStart(2, '0')}{' '}
-                {'  /  '}
-                {Math.floor(trackDuration / 1000 / 60)
-                  .toString()
-                  .padStart(2, '0')}{' '}
-                :{' '}
-                {(Math.floor(trackDuration / 1000) % 60)
-                  .toString()
-                  .padStart(2, '0')}
-              </p>
-            ) : (
-              <p className="text-sm">0:00 / 0:00</p>
-            )}
+            {/* Playback Controls */}
+            <div className="flex flex-row space-x-2 items-center">
+              <Button
+                className="btn-spotify"
+                size="small"
+                icon={<BackwardIcon />}
+                iconOnly={true}
+                onClick={() => {
+                  if (player) player.previousTrack();
+                }}
+              >
+                Previous Song
+              </Button>
+
+              <Button
+                className="btn-spotify"
+                size="small"
+                icon={isPaused ? <PlayIcon /> : <PauseIcon />}
+                onClick={() => {
+                  if (player) player.togglePlay();
+                }}
+                iconOnly={true}
+              >
+                {isPaused ? 'Play' : 'Pause'}
+              </Button>
+
+              <Button
+                className="btn-spotify"
+                size="small"
+                icon={<ForwardIcon />}
+                iconOnly={true}
+                onClick={() => {
+                  if (player) {
+                    player.nextTrack();
+                  }
+                }}
+              >
+                Next Song
+              </Button>
+              {trackPosition && trackDuration ? (
+                <p className="text-sm pl-4">
+                  {Math.floor(trackPosition / 1000 / 60)
+                    .toString()
+                    .padStart(2, '0')}{' '}
+                  :{' '}
+                  {(Math.floor(trackPosition / 1000) % 60)
+                    .toString()
+                    .padStart(2, '0')}{' '}
+                  {'  /  '}
+                  {Math.floor(trackDuration / 1000 / 60)
+                    .toString()
+                    .padStart(2, '0')}{' '}
+                  :{' '}
+                  {(Math.floor(trackDuration / 1000) % 60)
+                    .toString()
+                    .padStart(2, '0')}
+                </p>
+              ) : (
+                <p className="text-sm">0:00 / 0:00</p>
+              )}
+            </div>
           </div>
         </div>
       </>
