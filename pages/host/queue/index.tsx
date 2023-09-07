@@ -134,7 +134,7 @@ export default function Queue() {
                   Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
                 </p>
                 <QR shortName={host ?? 'atl'} />
-                <p className="text-sm m-auto font-bold">pleb.fm/{host}</p>
+                <p className="text-sm m-auto font-bold">pleb.fm/{host ?? ''}</p>
               </div>
             </div>
 

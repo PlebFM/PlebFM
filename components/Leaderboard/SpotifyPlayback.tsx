@@ -177,16 +177,16 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
           <div className="text-left p-6 pb-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={track.album.images[0].url}
+              src={track?.album?.images?.[0]?.url}
               className="absolute top-0 left-0 w-full h-full object-cover blur-xl scale-125"
-              alt={track.name + ' album art'}
+              alt={track?.name + ' album art'}
             />
 
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={track.album.images[0].url}
-              className="w-[230px] h-auto relative z-50"
-              alt={track.name + ' album art'}
+              src={track?.album?.images?.[0]?.url}
+              className="w-[230px] h-auto relative z-50 drop-shadow-2xl"
+              alt={track?.name + ' album art'}
             />
           </div>
 
@@ -194,8 +194,8 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
           <div className="flex flex-col space-y-6 p-6 relative z-50 bg-gradient-to-b from-black/0 to-black/50">
             {/* Track Info */}
             <div>
-              <p className="mb-0">{track.name}</p>
-              <p className="font-bold mb-">{track.artists[0].name}</p>
+              <p className="mb-0">{track?.name}</p>
+              <p className="font-bold mb-">{track?.artists?.[0]?.name}</p>
             </div>
 
             {/* Progress Bar */}
