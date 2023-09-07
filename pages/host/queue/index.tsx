@@ -122,15 +122,26 @@ export default function Queue() {
 
       <div className="flex flex-row w-full h-screen justify-between relative z-[99] overflow-hidden">
         <div className="w-1/2 h-full text-white flex flex-col justify-between">
-          <Notifications refreshQueue={() => setRefreshQueue(true)} />
-          <div className="text-3xl p-8 flex flex-col space-y-6">
-            <div className="w-2/3 m-auto">
+          <div className="text-3xl flex flex-col space-y-4 h-screen">
+            <div className="w-full flex flex-row p-6 justify-between relative z-50 bg-gradient-to-b from-black/75 to-black/0">
               <Image
                 src={plebFMLogo}
                 alt="PlebFM"
-                className="w-auto mx-auto lg:w-full"
+                className="m-0 w-full max-w-sm basis-2/3"
               />
+              <div className="flex flex-col justify-end items-end">
+                <p className="text-sm m-auto w-full text-center my-0">
+                  Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
+                </p>
+                <QR shortName={host ?? 'atl'} />
+                <p className="text-sm m-auto font-bold">pleb.fm/{host ?? ''}</p>
+              </div>
             </div>
+
+            <div className="relative z-50">
+              <Notifications refreshQueue={() => setRefreshQueue(true)} />
+            </div>
+
             {session?.accessToken && host && (
               <WebPlayback
                 shortName={host}
@@ -138,32 +149,6 @@ export default function Queue() {
                 token={session.accessToken}
               />
             )}
-            <div className="flex flex-col space-y-2 m-auto justify-center">
-              <p className="text-base m-auto">
-                Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
-              </p>
-              <QR shortName={host ?? 'atl'} />
-              <p className="text-lg m-auto font-bold">
-                <u>pleb.fm/{host}</u>
-              </p>
-              {/* Add song to spotify queue */}
-              {/* <p className="text-xs">Search result URI: {searchResultURI}</p>
-            <Button
-              size={'small'}
-              onClick={() => {
-                addTrackToSpotifyQueue(
-                  searchResultURI,
-                  deviceId,
-                  props.token,
-                ).then(res => {
-                  if (res.status !== 202)
-                    alert('failed adding to spotify queue');
-                });
-              }}
-            >
-              Add track
-            </Button> */}
-            </div>
           </div>
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">

@@ -85,7 +85,7 @@ export const Notifications = ({
           className="w-full"
         /> */}
         {/* </div> */}
-        <div className="w-full flex flex-col space-y-2 pr-4 pt-4">
+        <div className="w-full flex flex-col-reverse gap-y-2 pr-4">
           {notifications.map((update, key) => (
             <div
               key={key}
