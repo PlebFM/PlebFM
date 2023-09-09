@@ -17,8 +17,17 @@ export const usePusher = (refreshQueue: () => void) => {
     channel.bind('bid', (data: any) => {
       console.log('BID RECEIVED', data);
       // setNotifications(prev => [...prev.filter(notification => parseInt(notification?.bid?.timestamp) + 5_000 < Date.now()), data]);
-      setNotifications(prev => [...prev, data]);
-      refreshQueue();
+      if (typeof data === 'string') {
+        setNotifications(prev => [...prev, data]);
+        refreshQueue();
+      } else {
+        const message = ` ${data?.isBoost ? ' boosted ' : ' bid on '} ${
+          data?.song?.songName
+        } by ${data?.song?.songArtist}`;
+        data.message = message;
+        setNotifications(prev => [...prev, data]);
+        refreshQueue();
+      }
     });
 
     channel.bind('pusher:cache_miss', (data: any) => {

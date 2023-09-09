@@ -123,7 +123,7 @@ export default function Queue() {
       <div className="flex flex-row w-full h-screen justify-between relative z-[99] overflow-hidden">
         <div className="w-1/2 h-full text-white flex flex-col justify-between">
           <div className="text-3xl flex flex-col space-y-4 h-screen">
-            <div className="w-full flex flex-row p-6 justify-between relative z-50 bg-gradient-to-b from-black/75 to-black/0">
+            <div className="w-full flex flex-row p-6 justify-between relative z-20 bg-gradient-to-b from-black/75 to-black/0">
               <Image
                 src={plebFMLogo}
                 alt="PlebFM"
@@ -138,7 +138,7 @@ export default function Queue() {
               </div>
             </div>
 
-            <div className="relative z-50">
+            <div className="relative z-20">
               <Notifications refreshQueue={() => setRefreshQueue(true)} />
             </div>
 
@@ -152,7 +152,7 @@ export default function Queue() {
           </div>
         </div>
         <div className="w-1/2 h-full overflow-y-scroll">
-          <div className="text-white relative z-50 flex flex-col items-center min-h-screen font-thin bg-pfm-purple-300/50">
+          <div className="text-white relative z-1 flex flex-col items-center min-h-screen font-thin bg-pfm-purple-300/50">
             {queueData.map((song, key) => (
               <Song song={song} key={key} />
             ))}
