@@ -9,7 +9,8 @@ It's an ongoing auction for the next song to be played.
 Featuring... Connection to Spotify, anon-friendly user profiles, song boosting, and a sick UI.
 
 Host View
-<img width="1000" alt="host queue" src="https://github.com/PlebFM/PlebFM/assets/43247027/018212ad-8e93-4e02-bfb9-0872095f35bd">
+<img width="1679" alt="image" src="https://github.com/PlebFM/PlebFM/assets/43247027/d4c9bccb-e99e-493e-96a5-7e429e90cdd6">
+
 
 ---
 User Song Selection
