@@ -18,7 +18,7 @@ export default function SelectBid(props: {
   setTotalBid: Dispatch<SetStateAction<number>>;
   setBid: Dispatch<SetStateAction<number>>;
 }) {
-  const maxSats = 5_000;
+  const maxSats = parseInt(process.env.NEXT_PUBLIC_MAX_BID ?? '100');
   const [feeRate, setFeeRate] = useState(0);
   const [feeTotal, setFeeTotal] = useState(0);
   const [feeBracket, setFeeBracket] = useState(0);
