@@ -130,11 +130,13 @@ export default function Queue() {
                 className="m-0 w-full max-w-sm basis-2/3"
               />
               <div className="flex flex-col justify-end items-end">
-                <p className="text-sm m-auto w-full text-center my-0">
+                <p className="text-base m-auto w-full text-center my-0">
                   Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
                 </p>
                 <QR shortName={host ?? 'atl'} />
-                <p className="text-sm m-auto font-bold">pleb.fm/{host ?? ''}</p>
+                <p className="text-base m-auto font-bold">
+                  pleb.fm/{host ?? ''}
+                </p>
               </div>
             </div>
 

@@ -7,8 +7,8 @@ export const QR = ({ shortName }: { shortName: string }) => {
           value={`https://pleb.fm/${shortName}`}
           bgColor={'#ffffff00'}
           fgColor={'#ffffff'}
-          width={'120px'}
-          height={'120px'}
+          width={'240px'}
+          height={'240px'}
           includeMargin={true}
           level={'H'}
           // imageSettings={{
