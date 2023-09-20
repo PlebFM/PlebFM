@@ -150,17 +150,17 @@ export default function Index() {
           <h2 className="text-3xl font-light">Join an Active Jukebox</h2>
 
           <ul className="text-2xl list-disc">
-            <li>
+            <li className="p-4">
               <Link href="/atl" className="underline text-pfm-orange-800">
                 Atlanta BitDevs
               </Link>
             </li>
-            <li>
+            <li className="p-4">
               <Link href="/atlbitlab" className="underline text-pfm-orange-800">
                 ATL BitLab
               </Link>
             </li>
-            <li>
+            <li className="p-4">
               <span
                 className="underline cursor-pointer flex flex-row gap-2 items-center"
                 onClick={() => setShowForm(!showForm)}
