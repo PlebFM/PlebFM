@@ -1,7 +1,4 @@
-import { useEffect, useState } from 'react';
 import { SongObject } from '../../pages/[slug]/queue';
-import Avatar from '../Utils/Avatar';
-import Tag from '../Utils/Tag';
 import { User } from '../../models/User';
 import QueueSong from '../QueueSong';
 
@@ -12,10 +9,16 @@ const cleanBidders = (bidders: User[]): User[] => {
   );
   return Array.from(seen.values());
 };
+
+const cleanSong = (song: SongObject): SongObject => {
+  song.bidders = cleanBidders(song.bidders);
+  return song;
+};
+
 export const Song = ({ song }: { song: SongObject }) => {
   return (
     <>
-      <QueueSong song={song} />
+      <QueueSong song={cleanSong(song)} />
     </>
   );
 };
