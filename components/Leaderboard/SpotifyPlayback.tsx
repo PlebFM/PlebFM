@@ -122,6 +122,12 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
           duration,
           track_window: { current_track },
         } = state;
+        if (!current_track) {
+          console.log('no current track');
+          const existing_script = document.getElementById('spotify-player');
+          existing_script?.remove();
+          setActive(false);
+        }
         console.log('Currently Playing', current_track);
         console.log('Position in Song', position);
         console.log('Duration of Song', duration);
@@ -130,11 +136,11 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
         setPaused(paused);
         setTrack(current_track);
         player.getCurrentState().then(state => {
+          console.log('state', state);
           if (state) {
             setActive(true);
             setPosition(state.position);
           } else {
-            setActive(false);
           }
         });
       });
