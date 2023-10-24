@@ -9,10 +9,10 @@ interface InputProps {
 }
 
 export const Input = ({
-  value = '',
   type = 'text',
   placeholder = '...',
   required = false,
+  value,
   name,
   id,
   onChange,
