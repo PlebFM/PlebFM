@@ -3,7 +3,7 @@ import plebFMLogo from '../public/plebfm-logo.svg';
 import Image from 'next/image';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import Link from 'next/link';
-import { useState } from 'react';
+import { Dispatch, FormEvent, SetStateAction, useState } from 'react';
 import Button from '../components/Utils/Button';
 import {
   CaretDownIcon,
@@ -42,9 +42,33 @@ const Input = ({
     />
   );
 };
+type FormData = {
+  name: string;
+  email: string;
+  nostr: string;
+};
+const handleSubmit = (
+  event: FormEvent,
+  formData: FormData,
+  setFormData: Dispatch<SetStateAction<FormData>>,
+) => {
+  event.preventDefault();
+
+  fetch('/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      'form-name': 'plebfm-jukebox-signup',
+      ...formData,
+    }).toString(),
+  })
+    .then(() => alert('Form successfully submitted'))
+    .then(() => setFormData({ name: '', email: '', nostr: '' }))
+    .catch(error => alert(error));
+};
 
 const SignupForm = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     nostr: '',
@@ -63,7 +87,9 @@ const SignupForm = () => {
         name="plebfm-jukebox-signup"
         data-netlify="true"
         className="flex flex-col gap-y-8 py-8"
+        onSubmit={e => handleSubmit(e, formData, setFormData)}
       >
+        <input type="hidden" name="form-name" value="plebfm-jukebox-signup" />
         <div>
           <label htmlFor="name">Name / Nym</label>
           <Input
@@ -103,7 +129,7 @@ const SignupForm = () => {
           />
         </div>
 
-        <Button>Submit</Button>
+        <Button submit>Submit</Button>
       </form>
     </div>
   );

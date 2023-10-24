@@ -13,6 +13,7 @@ interface ButtonProps {
   icon?: ReactNode;
   onClick?: () => void;
   iconOnly?: boolean;
+  submit?: boolean;
 }
 
 export default function Button(props: ButtonProps) {
@@ -83,6 +84,7 @@ export default function Button(props: ButtonProps) {
         className={className}
         disabled={props.disabled}
         onClick={props.onClick}
+        type={props.submit ? 'submit' : 'button'}
       >
         <span className={props.iconOnly ? 'sr-only' : ''}>
           {props.children}

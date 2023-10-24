@@ -52,6 +52,7 @@ function PaymentScreen(props: {
         paymentRequest: res.payment_request,
       });
       setLoading(false);
+      setStartPolling(true);
     };
     getBolt11();
     // console.log(bolt11);
@@ -68,8 +69,6 @@ function PaymentScreen(props: {
       const data = await response.json();
       if (data.settled === true) {
         console.log('PAID');
-        // const bidres = await submitBid();
-        // console.log('BID RESULT', bidres);
         props.setInvoicePaid(true);
         setStartPolling(false);
       }
@@ -143,10 +142,7 @@ function PaymentScreen(props: {
                       height={'200px'}
                       includeMargin={true}
                     />
-                    <CopyToClipboard
-                      text={bolt11.paymentRequest}
-                      onCopy={() => setStartPolling(true)}
-                    >
+                    <CopyToClipboard text={bolt11.paymentRequest}>
                       <Button
                         className="w-full text-sm"
                         icon={<CopyIcon />}
