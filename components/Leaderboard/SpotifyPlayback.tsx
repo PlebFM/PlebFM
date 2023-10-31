@@ -6,16 +6,8 @@ import {
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
-import { getPlaybackState, transferPlayback } from '../../lib/spotify';
-import { signIn } from 'next-auth/react';
-
-const emptyTrack = {
-  name: '',
-  album: {
-    images: [{ url: '' }],
-  },
-  artists: [{ name: '' }],
-};
+import { transferPlayback } from '../../lib/spotify';
+import { useSpotifyPlayback } from '../hooks/useSpotifyPlayback';
 
 interface WebPlaybackProps {
   token: string;
@@ -23,139 +15,17 @@ interface WebPlaybackProps {
   refreshQueue: () => void;
 }
 
-const syncJukebox = async (
-  accessToken: string,
-  shortName: string,
-  deviceId: string,
-) => {
-  let url = `/api/leaderboard/queue`;
-  const body = JSON.stringify({
-    shortName: shortName,
-    accessToken: accessToken,
-    deviceId: deviceId,
-  });
-  const response = await fetch(url, {
-    method: 'POST',
-    body: body,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-  });
-  const res = await response.json();
-  return res;
-};
-
 function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
-  const [isPaused, setPaused] = useState(false);
-  const [trackDuration, setDuration] = useState<number>();
-  const [trackPosition, setPosition] = useState<number>();
-  const [isActive, setActive] = useState(false);
-  const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
-  const [deviceId, setDeviceId] = useState('');
-  const [browserDeviceId, setBrowserDeviceId] = useState('');
-  const [track, setTrack] = useState(emptyTrack);
-
-  // progress bar
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!trackPosition) return;
-      if (isPaused || !trackDuration || trackPosition >= trackDuration) return;
-      setPosition(trackPosition + 1000);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isPaused, deviceId, setPosition, trackPosition, trackDuration]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getPlaybackState(token).then(x => {
-        console.log('GET PLAYBACK STATE', x);
-        if (x?.item) setTrack(x.item);
-        if (x?.progress_ms) setPosition(x.progress_ms);
-        if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
-        if (x?.device?.id) setDeviceId(x.device.id);
-        if (x) setPaused(!x.is_playing);
-      });
-      refreshQueue();
-      syncJukebox(token, shortName, deviceId).then(res => {
-        if (!res?.data) {
-          console.error('failed to sync jukebox', res);
-        }
-        refreshQueue();
-      });
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [deviceId, shortName, token, refreshQueue]);
-
-  useEffect(() => {
-    if (!token) return;
-    const existing_script = document.getElementById('spotify-player');
-    if (!existing_script) {
-      const script = document.createElement('script');
-      script.src = 'https://sdk.scdn.co/spotify-player.js';
-      script.id = 'spotify-player';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const player = new window.Spotify.Player({
-        name: 'PlebFM',
-        getOAuthToken: cb => {
-          cb(token);
-        },
-        volume: 0.5,
-      });
-
-      setPlayer(player);
-
-      player.addListener('ready', ({ device_id }) => {
-        console.log('Ready with Device ID', device_id);
-        setBrowserDeviceId(device_id);
-      });
-
-      player.addListener('not_ready', ({ device_id }) => {
-        console.log('Device ID has gone offline', device_id);
-        setBrowserDeviceId('');
-      });
-
-      player.on('authentication_error', event => {
-        console.error('Failed to authenticate', event.message);
-        signIn('spotify', { callbackUrl: '/host/queue' });
-      });
-
-      player.addListener('player_state_changed', state => {
-        if (!state) return;
-        const {
-          paused,
-          position,
-          duration,
-          track_window: { current_track },
-        } = state;
-        if (!current_track) {
-          console.log('no current track');
-          setActive(false);
-        } else {
-          console.log('Currently Playing', current_track);
-          console.log('Position in Song', position);
-          console.log('Duration of Song', duration);
-          setPosition(position);
-          setDuration(duration);
-          setPaused(paused);
-          setTrack(current_track);
-          player.getCurrentState().then(state => {
-            console.log('state', state);
-            if (state) {
-              setActive(true);
-              setPosition(state.position);
-            }
-          });
-        }
-      });
-
-      player.connect();
-    };
-  }, [isActive, token]);
+  const {
+    isPaused,
+    trackDuration,
+    trackPosition,
+    isActive,
+    player,
+    deviceId,
+    browserDeviceId,
+    track,
+  } = useSpotifyPlayback({ token, shortName, refreshQueue });
 
   if (!isActive && !track?.name) {
     return (
