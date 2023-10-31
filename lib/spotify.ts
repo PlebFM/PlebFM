@@ -45,34 +45,50 @@ export const searchTrack = async (
   const result = await res.json();
   return result.tracks;
 };
+const getCurrentTrack = async (accessToken: string) => {
+  const url = `https://api.spotify.com/v1/me/player/currently-playing`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+  });
+  console.log('res track', res.ok, res.bodyUsed);
+  console.log('res track', res.status, res.statusText);
+  if (res.status === 204) return null;
+  const result = await res.json();
+  return result;
+};
 
 export const getPlaybackState = async (accessToken: string) => {
-  try {
-    const searchUrl = `https://api.spotify.com/v1/me/player`;
-    const res = await fetch(searchUrl, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        Accept: '*/*',
-      },
-    });
-    if (!res.ok) return null;
-    const result = await res.json();
-    const response = {
-      deviceName: result.device.name,
-      deviceId: result.device.id,
-      repeatState: result.repeat_state,
-      shuffleState: result.shuffle_state,
-      trackUri: result.item.id,
-      progressMs: result.progress_ms,
-      durationMs: result.item.duration_ms,
-    };
-    return response;
-  } catch (e) {
-    console.error(e);
+  // try {
+  const url = `https://api.spotify.com/v1/me/player`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+  });
+  if (res.status === 204) {
+    const trackRes = await getCurrentTrack(accessToken);
     return null;
   }
+  const result = await res.json();
+  return result;
+  const response = {
+    deviceName: result.device.name,
+    deviceId: result.device.id,
+    repeatState: result.repeat_state,
+    shuffleState: result.shuffle_state,
+    trackUri: result.item.id,
+    progressMs: result.progress_ms,
+    durationMs: result.item.duration_ms,
+  };
+  return response;
 };
 
 export const getTrack = async (trackId: string, accessToken: string) => {
@@ -160,10 +176,6 @@ export const clearSpotifyQueue = async (
   // await addTrackToSpotifyQueue(trackUri, deviceId, accessToken);
   // const newSpotifyQueue = await getSpotifyQueue(accessToken);
   // console.log('new queue', newSpotifyQueue.queue)
-  for (let i = 0; i < spotifyQueue.length; i++) {
-    // const result = await skipSong(deviceId, accessToken);
-    // console.log('skip result', result.statusText)
-  }
 };
 
 export const addTrackToSpotifyQueue = async (
@@ -184,6 +196,7 @@ export const addTrackToSpotifyQueue = async (
       Accept: '*/*',
     },
   });
+  console.log('add track result', result.statusText, result.status);
   return result;
 };
 

@@ -142,7 +142,7 @@ const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
   // should we NOT clear if we're currently playing it too?
   if (spotifyLastPlayedInJuke && spotifyCurrent?.id !== spotifyLastPlayed?.id) {
     // if (spotifyLastPlayed?.track?.id === jukeboxCurrent.songId) {
-    console.log(`updating ${spotifyLastPlayedInJuke.songName} to played`);
+    console.log(`updating ${spotifyLastPlayedInJuke?.songName} to played`);
     await Plays.findOneAndUpdate(
       { playId: spotifyLastPlayedInJuke.playId },
       { status: 'played' },
@@ -155,7 +155,7 @@ const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
   else if (jukeboxPlayingStatus.length > 1) {
     for (const play of jukeboxPlayingStatus) {
       if (play.songId === spotifyCurrent?.id) continue;
-      console.log(`updating ${play.songName} to played`);
+      console.log(`updating ${play?.songName} to played`);
       await Plays.findOneAndUpdate(
         { playId: play.playId },
         { status: 'played' },
@@ -167,7 +167,7 @@ const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
 
   // 2. if currently playing "next" in jukebox...
   //   change "next" to "playing"
-  else if (spotifyCurrent?.id === jukeboxNext?.songId) {
+  else if (spotifyCurrent && spotifyCurrent?.id === jukeboxNext?.songId) {
     console.log(`updating ${jukeboxNext.songName} to playing`);
     await Plays.findOneAndUpdate(
       { playId: jukeboxNext.playId },
@@ -233,10 +233,10 @@ const startQueue = async (req: NextApiRequest, res: NextApiResponse) => {
   const spotifyPlaying = spotifyQueue?.currently_playing;
   if (spotifyPlaying?.id !== playingSong.songId) {
     // do nothing if it's the same
-    console.log('starting', playingSong.songName);
+    console.log('starting', playingSong?.songName);
     const result = await startSpotifyQueue(playingTrack, deviceId, accessToken);
   } else {
-    console.log('already playing', playingSong.songName);
+    console.log('already playing', playingSong?.songName);
   }
 };
 
