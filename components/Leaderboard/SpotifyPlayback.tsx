@@ -6,7 +6,7 @@ import {
   ForwardIcon,
   BackwardIcon,
 } from '@heroicons/react/24/outline';
-import { transferPlayback } from '../../lib/spotify';
+import { getPlaybackState, transferPlayback } from '../../lib/spotify';
 import { signIn } from 'next-auth/react';
 
 const emptyTrack = {
@@ -22,6 +22,23 @@ interface WebPlaybackProps {
   shortName: string;
   refreshQueue: () => void;
 }
+// const getPlaybackState = async (
+//   accessToken: string,
+//   shortName: string,
+//   // deviceId: string,
+// ) => {
+//   let url = `/api/spotify/playback?accessToken=${accessToken}&shortName=${shortName}`;
+//   const response = await fetch(url, {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Accept: '*/*',
+//     },
+//   });
+//   const res = await response.json();
+//   return res;
+// };
+
 const syncJukebox = async (
   accessToken: string,
   shortName: string,
@@ -52,6 +69,7 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
   const [isActive, setActive] = useState(false);
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
   const [deviceId, setDeviceId] = useState('');
+  const [browserDeviceId, setBrowserDeviceId] = useState('');
   const [track, setTrack] = useState(emptyTrack);
 
   // progress bar
@@ -66,11 +84,19 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
 
   useEffect(() => {
     const interval = setInterval(() => {
+      getPlaybackState(token).then(x => {
+        console.log('GET PLAYBACK STATE', x);
+        if (x?.item) setTrack(x.item);
+        if (x?.progress_ms) setPosition(x.progress_ms);
+        if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
+        if (x?.device?.id) setDeviceId(x.device.id);
+        if (x) setPaused(!x.is_playing);
+      });
+      refreshQueue();
       syncJukebox(token, shortName, deviceId).then(res => {
         if (!res?.data) {
           console.error('failed to sync jukebox', res);
         }
-        // if (res.data?.updated) refreshQueue();
         refreshQueue();
       });
     }, 5000);
@@ -101,12 +127,12 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
 
       player.addListener('ready', ({ device_id }) => {
         console.log('Ready with Device ID', device_id);
-        setDeviceId(device_id);
+        setBrowserDeviceId(device_id);
       });
 
       player.addListener('not_ready', ({ device_id }) => {
         console.log('Device ID has gone offline', device_id);
-        setDeviceId('');
+        setBrowserDeviceId('');
       });
 
       player.on('authentication_error', event => {
@@ -124,38 +150,30 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
         } = state;
         if (!current_track) {
           console.log('no current track');
-          const existing_script = document.getElementById('spotify-player');
-          existing_script?.remove();
           setActive(false);
+        } else {
+          console.log('Currently Playing', current_track);
+          console.log('Position in Song', position);
+          console.log('Duration of Song', duration);
+          setPosition(position);
+          setDuration(duration);
+          setPaused(paused);
+          setTrack(current_track);
+          player.getCurrentState().then(state => {
+            console.log('state', state);
+            if (state) {
+              setActive(true);
+              setPosition(state.position);
+            }
+          });
         }
-        console.log('Currently Playing', current_track);
-        console.log('Position in Song', position);
-        console.log('Duration of Song', duration);
-        setPosition(position);
-        setDuration(duration);
-        setPaused(paused);
-        setTrack(current_track);
-        player.getCurrentState().then(state => {
-          console.log('state', state);
-          if (state) {
-            setActive(true);
-            setPosition(state.position);
-          } else {
-          }
-        });
       });
 
       player.connect();
     };
-  }, []);
+  }, [isActive, token]);
 
-  useEffect(() => {
-    if (deviceId && token) {
-      transferPlayback(deviceId, token);
-    }
-  }, [deviceId]);
-
-  if (!isActive || !track) {
+  if (!isActive && !track?.name) {
     return (
       <div className="text-3xl p-8 flex flex-col space-y-6 mb-8 h-screen">
         Instance not active. Transfer your playback using your Spotify app, or
@@ -166,7 +184,7 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
             size={'small'}
             onClick={() => {
               player?.activateElement();
-              transferPlayback(deviceId, token);
+              transferPlayback(browserDeviceId, token);
               console.log('transferPlayback called');
             }}
           >
@@ -225,6 +243,21 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
             </div>
 
             {/* Playback Controls */}
+            {!isActive && (
+              <div className="flex flex-col space-y-2 text-lg gap-2">
+                Playing on another device
+                <Button
+                  size={'small'}
+                  onClick={() => {
+                    player?.activateElement();
+                    transferPlayback(browserDeviceId, token);
+                    console.log('transferPlayback called');
+                  }}
+                >
+                  Transfer playback to PlebFM
+                </Button>
+              </div>
+            )}
             <div className="flex flex-row space-x-2 items-center">
               <Button
                 className="btn-spotify"
@@ -244,6 +277,7 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
                 icon={isPaused ? <PlayIcon /> : <PauseIcon />}
                 onClick={() => {
                   if (player) player.togglePlay();
+                  else console.log('play');
                 }}
                 iconOnly={true}
               >
