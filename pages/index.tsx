@@ -62,20 +62,34 @@ export default function Index() {
               </Link>
             </li>
             <li className="p-4">
-              <span
-                className="underline cursor-pointer flex flex-row gap-2 items-center"
-                onClick={() => setShowForm(!showForm)}
-              >
-                Start Your Own
-                <span>
-                  {showForm ? (
-                    <CaretUpIcon className="w-6 h-6" />
-                  ) : (
-                    <CaretDownIcon className="w-6 h-6" />
-                  )}
-                </span>
-              </span>
+              <Link href="/pleblab" className="underline text-pfm-orange-800">
+                PlebLab - Austin, TX
+              </Link>
             </li>
+            <li className="p-4">
+              <Link href="/btcgrove" className="underline text-pfm-orange-800">
+                Bitcoin Grove - Miami, FL
+              </Link>
+            </li>
+            <li className="p-4">
+              <Link href="/satsconf" className="underline text-pfm-orange-800">
+                Sats Conf - Sao Paulo, Brazil
+              </Link>
+            </li>
+            <br />
+            <span
+              className="underline cursor-pointer flex flex-row gap-2 items-center"
+              onClick={() => setShowForm(!showForm)}
+            >
+              Start Your Own
+              <span>
+                {showForm ? (
+                  <CaretUpIcon className="w-6 h-6" />
+                ) : (
+                  <CaretDownIcon className="w-6 h-6" />
+                )}
+              </span>
+            </span>
           </ul>
           {showForm ? (
             <div>
