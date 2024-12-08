@@ -32,10 +32,12 @@ export const fetchSong = async (
   const result = await res.json();
   return result;
 };
-export const cleanSong = (song: Play, user: User): SongObject => {
+export const cleanSong = (song: Play, user?: User): SongObject => {
   const bidders = song.bids.map((x: Bid) => x.user);
   const totalBid = song.runningTotal;
-  const myPick = bidders.some((x: User) => x.userId === user.userId);
+  const myPick = user
+    ? bidders.some((x: User) => x.userId === user.userId)
+    : undefined;
   return {
     trackTitle: song.songName,
     artistName: song.songArtist,
@@ -58,6 +60,17 @@ export const getQueue = async (
   if (isProfile) {
     url += `&userId=${user?.userId}`;
   }
+  const response = await fetch(url);
+  const res = await response.json();
+  if (!res?.data) {
+    return [];
+  }
+  const songs = res.data.map(cleanSong);
+  return songs;
+};
+
+export const getLeaderboardQueue = async (host: string) => {
+  let url = `/api/leaderboard/queue?shortName=${host}`;
   const response = await fetch(url);
   const res = await response.json();
   if (!res?.data) {

@@ -64,14 +64,13 @@ export const useSpotifyPlayback = ({
   useEffect(() => {
     const interval = setInterval(() => {
       getPlaybackState(token).then(x => {
-        console.log('GET PLAYBACK STATE', x);
+        console.log('spotify playback state', x);
         if (x?.item) setTrack(x.item);
         if (x?.progress_ms) setPosition(x.progress_ms);
         if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
         if (x?.device?.id) setDeviceId(x.device.id);
         if (x) setPaused(!x.is_playing);
       });
-      refreshQueue();
       syncJukebox(token, shortName, deviceId).then(res => {
         if (!res?.data) {
           console.error('failed to sync jukebox', res);
@@ -131,9 +130,9 @@ export const useSpotifyPlayback = ({
           console.log('no current track');
           setActive(false);
         } else {
-          console.log('Currently Playing', current_track);
-          console.log('Position in Song', position);
-          console.log('Duration of Song', duration);
+          console.log('Currently Playing', current_track.name);
+          // console.log('Position in Song', position);
+          // console.log('Duration of Song', duration);
           setPosition(position);
           setDuration(duration);
           setPaused(paused);

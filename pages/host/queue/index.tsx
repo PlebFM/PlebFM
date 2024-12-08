@@ -1,58 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import plebFMLogo from '../../../public/plebfm-logo.svg';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
 import { getSession, signIn, useSession } from 'next-auth/react';
 import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
-import { SongObject, fetchSong } from '../../[slug]/queue';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Song } from '../../../components/Leaderboard/Song';
-import { Host } from '../../../models/Host';
-import { Play } from '../../../models/Play';
-import { Bid } from '../../../models/Bid';
 import { QR } from '../../../components/Leaderboard/Qr';
 import { Notifications } from '../../../components/Leaderboard/Notifications';
-
-const getLeaderboardQueue = async (host: string) => {
-  let url = `/api/leaderboard/queue?shortName=${host}`;
-  const response = await fetch(url);
-  const res = await response.json();
-  if (!res?.data) {
-    return [];
-  }
-  const songs = res.data.map(cleanSong);
-  return songs;
-};
-
-const cleanSong = (song: Play) => {
-  const bidders = song.bids.map((x: Bid) => x.user);
-  const totalBid = song.runningTotal;
-  return {
-    trackTitle: song.songName,
-    artistName: song.songArtist,
-    feeRate: totalBid,
-    playing: song.status === 'playing',
-    upNext: song.status === 'next',
-    bidders,
-    queued: song.status === 'queued',
-    status: song.status,
-  };
-};
-
-const findHost = async (spotifyId: string): Promise<Host> => {
-  const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
-    method: 'GET',
-    mode: 'no-cors',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      Accept: 'application/json',
-    },
-  });
-  const resJson = await res.json();
-  return resJson?.hosts[0];
-};
+import { getLeaderboardQueue, SongObject } from '../../../utils/songs';
+import { findHost } from '../../../utils/host';
 
 export default function Queue() {
   const { data: session, status } = useSession();
@@ -97,12 +56,15 @@ export default function Queue() {
 
   useEffect(() => {
     if (!host || !refreshQueue) return;
-    console.log('refreshing');
     getLeaderboardQueue(host).then(res => {
       if (res) setQueueData(res);
     });
     setRefreshQueue(false);
   }, [host, refreshQueue]);
+
+  const refresh = useCallback(() => {
+    setRefreshQueue(true);
+  }, []);
 
   return (
     <>
@@ -141,13 +103,13 @@ export default function Queue() {
             </div>
 
             <div className="relative z-20">
-              <Notifications refreshQueue={() => setRefreshQueue(true)} />
+              <Notifications refreshQueue={refresh} />
             </div>
 
             {session?.accessToken && host && (
               <WebPlayback
                 shortName={host}
-                refreshQueue={() => setRefreshQueue(true)}
+                refreshQueue={refresh}
                 token={session.accessToken}
               />
             )}

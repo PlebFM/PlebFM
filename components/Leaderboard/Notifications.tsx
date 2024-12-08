@@ -1,14 +1,17 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Avatar from '../Utils/Avatar';
 import { usePusher } from '../hooks/usePusher';
 
-export const Notifications = ({
-  refreshQueue,
-}: {
+type Props = {
   refreshQueue: () => void;
-}) => {
+};
+
+export const Notifications = ({ refreshQueue }: Props) => {
   const { notifications } = usePusher(refreshQueue);
+  useEffect(() => {
+    console.warn('REMOUNT');
+  }, []);
   useEffect(() => {
     console.log('NOTIFICATIONS', notifications);
   }, [notifications]);

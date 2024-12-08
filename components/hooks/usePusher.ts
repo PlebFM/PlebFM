@@ -6,28 +6,28 @@ const appKey = process.env.NEXT_PUBLIC_PUSHER_APP_KEY!;
 const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER!;
 const channelId = process.env.NEXT_PUBLIC_PUSHER_CHANNEL!;
 
-export type Notification =
-  | {
-      message: string;
-      user: User;
-    }
-  | string;
+const pusher = new Pusher(appKey, {
+  cluster: cluster,
+});
+
+export type Notification = {
+  message: string;
+  user: User;
+};
 
 export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
   // const [notifications, setNotifications] = useState<Notification[]>(sampleNotifications);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const pusher = new Pusher(appKey, {
-      cluster: cluster,
-    });
+    console.log('hook firing-------------');
     const channelName = `${channelId}-${jukeboxName}`;
     const channel = pusher.subscribe(channelName);
 
     channel.bind('bid', (data: any) => {
+      console.warn('Pusher (bid)---', typeof data, data);
       if (typeof data === 'string') {
-        setNotifications(prev => [...prev, data]);
-        refreshQueue();
+        // refreshQueue();
       } else {
         const prefix = data?.isBoost ? ' boosted ' : ' bid on ';
         const message = `${prefix} ${data?.song?.songName} by ${data?.song?.songArtist}`;
@@ -38,12 +38,12 @@ export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
     });
 
     channel.bind('pusher:cache_miss', (data: any) => {
-      console.log('MISSED CACHE', data);
+      console.log('Pusher (missed cache)', data);
     });
 
-    channel.bind_global((eventName: string, data: any) => {
-      console.log('PUSHER GLOBAL', eventName, data);
-    });
+    // channel.bind_global((eventName: string, data: any) => {
+    //   console.log('Pusher (global)', eventName, data);
+    // });
 
     return () => {
       pusher.unbind_all();
