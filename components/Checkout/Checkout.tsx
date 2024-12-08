@@ -6,29 +6,27 @@ import PaymentScreen from './PaymentScreen';
 import SelectBid from './SelectBid';
 import { Song } from '../../models/Song';
 
-interface CheckoutProps {
-  // songId: string,
+type Props = {
   song: Song;
   parentCallback: javascript;
   slug: string;
-}
+};
 
-export default function Checkout(props: CheckoutProps) {
+export default function Checkout({ song, parentCallback, slug }: Props) {
   const [songConfirmed, setSongConfirmed] = useState(false);
   const [readyToCheckout, setReadyToCheckout] = useState(false);
   const [invoicePaid, setInvoicePaid] = useState(false);
   const [totalBid, setTotalBid] = useState(0);
-  const [bid, setBid] = useState(0);
 
   const cancelSong = () => {
-    props.parentCallback('');
+    parentCallback('');
   };
 
   // Displays album art, user has chance to back out of song
   if (!songConfirmed) {
     return (
       <AlbumScreen
-        track={props.song}
+        track={song}
         setSongConfirmed={setSongConfirmed}
         cancelSong={cancelSong}
       />
@@ -38,12 +36,11 @@ export default function Checkout(props: CheckoutProps) {
   else if (readyToCheckout || invoicePaid) {
     return (
       <PaymentScreen
-        song={props.song}
+        song={song}
         readyToCheckout={readyToCheckout}
         invoicePaid={invoicePaid}
         onPaid={() => setInvoicePaid(true)}
         totalBid={totalBid}
-        bid={bid}
       />
     );
   }
@@ -51,11 +48,10 @@ export default function Checkout(props: CheckoutProps) {
   else {
     return (
       <SelectBid
-        song={props.song}
+        song={song}
         setReadyToCheckout={setReadyToCheckout}
         cancelSong={cancelSong}
         setTotalBid={setTotalBid}
-        setBid={setBid}
       />
     );
   }
