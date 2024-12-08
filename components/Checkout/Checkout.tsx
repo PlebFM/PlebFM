@@ -12,7 +12,7 @@ type Props = {
   slug: string;
 };
 
-export default function Checkout({ song, parentCallback, slug }: Props) {
+export default function Checkout({ song, parentCallback }: Props) {
   const [songConfirmed, setSongConfirmed] = useState(false);
   const [readyToCheckout, setReadyToCheckout] = useState(false);
   const [invoicePaid, setInvoicePaid] = useState(false);

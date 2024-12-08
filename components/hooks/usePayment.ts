@@ -24,7 +24,7 @@ export const usePayment = (
       onPaid();
       setIsPolling(false);
     }
-    return data;
+    return data.settled;
   }, [bolt11.hash, onPaid, pathname, song.id, totalBid]);
 
   const fetchBolt11 = useCallback(async () => {
@@ -57,8 +57,21 @@ export const usePayment = (
   useEffect(() => {
     if (!isPolling) return;
 
-    const interval = setInterval(getPaidStatus, 2000);
-    return () => clearInterval(interval);
+    let timeoutId: NodeJS.Timeout;
+
+    const checkStatus = async () => {
+      const settled = await getPaidStatus();
+      if (!settled) {
+        timeoutId = setTimeout(checkStatus, 2000);
+      }
+    };
+
+    checkStatus();
+
+    return () => {
+      clearTimeout(timeoutId);
+      setIsPolling(false);
+    };
   }, [getPaidStatus, isPolling]);
 
   return {

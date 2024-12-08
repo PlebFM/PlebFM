@@ -78,6 +78,10 @@ export const submitBid = async (
     rHash: rHash,
   };
   if (existingPlay) {
+    // Don't double count bid
+    if (existingPlay.bids.find((b: Bid) => b.rHash === bid.rHash)) {
+      return existingPlay;
+    }
     const result = await handleExistingBid(bid, existingPlay);
     await triggerBid(user ?? Anon, result, bid, false, hostId);
     return result;
