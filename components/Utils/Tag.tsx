@@ -1,4 +1,4 @@
-import { SongObject } from '../../pages/[slug]/queue';
+import { SongObject } from '../../utils/songs';
 
 interface TagProps {
   song?: SongObject;

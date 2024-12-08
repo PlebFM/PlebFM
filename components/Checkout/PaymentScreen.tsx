@@ -33,6 +33,7 @@ function PaymentScreen({
   return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={song?.album?.images[0]?.url ?? bokeh2}
           alt={song?.album?.name ?? 'Album'}
