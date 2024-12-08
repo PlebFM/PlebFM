@@ -11,6 +11,7 @@ import { usePathname } from 'next/navigation';
 import { Bid } from '../../models/Bid';
 import { Play } from '../../models/Play';
 import { usePusher } from '../../components/hooks/usePusher';
+import { getUserProfileFromLocal } from '../../utils/profile';
 
 // pleb.fm/bantam/queue
 // Used for frontend hydration
@@ -76,12 +77,6 @@ export const getQueue = async (
 };
 
 export default function Queue() {
-  const getUserProfileFromLocal = () => {
-    const userProfileJSON = localStorage.getItem('userProfile');
-    if (userProfileJSON) {
-      return JSON.parse(userProfileJSON);
-    }
-  };
   const [queueData, setQueueData] = useState<SongObject[]>([]);
   const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);

@@ -10,6 +10,7 @@ import { User } from '../../models/User';
 import { Spinner } from '../../components/Utils/LoadingSpinner';
 import { usePathname } from 'next/navigation';
 import { usePusher } from '../../components/hooks/usePusher';
+import { getUserProfileFromLocal } from '../../utils/profile';
 
 export default function UserProfile() {
   const [userProfile, setUserProfile] = useState({
@@ -23,16 +24,10 @@ export default function UserProfile() {
 
   usePusher(() => setRefreshQueue(true));
 
-  const getUserProfileFromLocal = () => {
-    const userProfileJSON = localStorage.getItem('userProfile');
-    if (userProfileJSON) {
-      setUserProfile(JSON.parse(userProfileJSON));
-    }
-  };
-
   useEffect(() => {
     setLoading(true);
-    getUserProfileFromLocal();
+    const profile = getUserProfileFromLocal();
+    if (profile) setUserProfile(profile);
   }, []);
 
   useEffect(() => {

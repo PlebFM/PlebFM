@@ -1,6 +1,4 @@
 // pleb.fm/shiners
-// Bidding landing page
-// import { Host } from "../models/Host";
 import { usePathname } from 'next/navigation';
 import React, { useEffect, useCallback } from 'react';
 import Onboarding from '../../components/Onboarding/Onboarding';
@@ -11,6 +9,7 @@ import Checkout from '../../components/Checkout/Checkout';
 import LoadingSpinner from '../../components/Utils/LoadingSpinner';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Layout from '../../components/Utils/Layout';
+import { getUserProfileFromLocal } from '../../utils/profile';
 
 export default function Bidding() {
   const pathName = usePathname()?.replaceAll('/', '');
@@ -42,17 +41,15 @@ export default function Bidding() {
     setNewUser(false);
   };
 
-  const getUserProfileFromLocal = useCallback(() => {
-    const userProfileJSON = localStorage.getItem('userProfile');
-    if (userProfileJSON) {
-      setUserProfile(JSON.parse(userProfileJSON));
-      setUser();
-    } else setNewUser(true);
-  }, []);
-
   React.useEffect(() => {
-    getUserProfileFromLocal();
-  }, [getUserProfileFromLocal]);
+    const profile = getUserProfileFromLocal();
+    if (profile) {
+      setUserProfile(profile);
+      setUser();
+    } else {
+      setNewUser(true);
+    }
+  }, []);
 
   if (!newUser && !userProfile.firstNym) {
     return (

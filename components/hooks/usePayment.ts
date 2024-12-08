@@ -1,13 +1,7 @@
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Song } from '../../models/Song';
-
-const getUserProfileFromLocal = () => {
-  const userProfileJSON = localStorage.getItem('userProfile');
-  if (userProfileJSON) {
-    return JSON.parse(userProfileJSON);
-  }
-};
+import { getUserProfileFromLocal } from '../../utils/profile';
 
 export const usePayment = (
   song: Song,

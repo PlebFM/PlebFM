@@ -11,6 +11,7 @@ import { Spinner } from '../Utils/LoadingSpinner';
 import Tag from '../Utils/Tag';
 import { SongObject, cleanSong } from '../../pages/[slug]/queue';
 import { User } from '../../models/User';
+import { getUserProfileFromLocal } from '../../utils/profile';
 
 const fetchSong = async (
   query: string,
@@ -57,13 +58,6 @@ export default function Search(props: SearchProps) {
   const [queue, setQueue] = useState<Map<string, SongObject>>();
   const [loading, setLoading] = useState(true);
   const name = usePathname()?.replaceAll('/', '') || '';
-
-  const getUserProfileFromLocal = () => {
-    const userProfileJSON = localStorage.getItem('userProfile');
-    if (userProfileJSON) {
-      return JSON.parse(userProfileJSON);
-    }
-  };
 
   useEffect(() => {
     const userProfile = getUserProfileFromLocal();
