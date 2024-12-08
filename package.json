@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next-dev-https --https --port 3000",
+    "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -34,7 +34,7 @@
     "eslint-config-next": "^13.0.6",
     "mongodb": "^4.12.1",
     "mongoose": "^6.7.5",
-    "next": "^13.0.6",
+    "next": "^13.5.7",
     "next-auth": "^4.17.0",
     "next-dev-https": "^0.1.1",
     "node-fetch": "^3.3.0",
@@ -51,7 +51,7 @@
     "webpack": "^5.75.0"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "4.29.5-appdir.0",
+    "@netlify/plugin-nextjs": "^5.8.1",
     "@storybook/addon-essentials": "7.0.0-beta.20",
     "@storybook/addon-interactions": "7.0.0-beta.20",
     "@storybook/addon-links": "7.0.0-beta.20",
