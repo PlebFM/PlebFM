@@ -88,7 +88,7 @@ export default function Bidding() {
     else {
       return (
         <Layout title="Song Search">
-          <Search setSong={setSongChoice} />
+          <Search selectSong={setSongChoice} />
         </Layout>
       );
     }

@@ -1,93 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import NavBar from '../Utils/NavBar';
 import plebFMLogo from '../../public/plebfm-logo.svg';
 import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import Image from 'next/image';
-import { webpack } from 'next/dist/compiled/webpack/webpack';
-import javascript = webpack.javascript;
-import { usePathname } from 'next/navigation';
-import { Play } from '../../models/Play';
 import { Spinner } from '../Utils/LoadingSpinner';
 import Tag from '../Utils/Tag';
-import { SongObject, cleanSong } from '../../pages/[slug]/queue';
-import { User } from '../../models/User';
-import { getUserProfileFromLocal } from '../../utils/profile';
+import { useSearch } from '../hooks/useSearch';
 
-const fetchSong = async (
-  query: string,
-  shortName: string,
-): Promise<{ name: string; artists: { name: string }[]; id: string }[]> => {
-  if (query === '') return [];
-  const queryString = new URLSearchParams({
-    query: query,
-    shortName: shortName,
-    limit: '10',
-  });
-  const res = await fetch(`/api/spotify/search?${queryString}`, {
-    headers: { 'Access-Control-Allow-Origin': '*' },
-  });
-  if (!res.ok) throw new Error('Failed to search song');
-  return (await res.json()).items;
+type Props = {
+  selectSong: (song: string) => void;
 };
 
-interface SearchProps {
-  setSong: javascript;
-}
-const getQueue = async (
-  host: string,
-  user: User,
-): Promise<Map<string, SongObject>> => {
-  let url = `/api/leaderboard/queue?playing=${true}&shortName=${host}`;
-  const response = await fetch(url);
-  const res = await response.json();
-  if (!res?.data) {
-    return new Map();
-  }
-  const songs: Array<[string, SongObject]> = res.data.map((song: Play) => [
-    song.songId,
-    cleanSong(song, user),
-  ]);
-  return new Map(songs);
-};
-
-export default function Search(props: SearchProps) {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [searchResult, setSearchResult] = useState<
-    { name: string; artists: { name: string }[]; id: string }[]
-  >([]);
-  const [queue, setQueue] = useState<Map<string, SongObject>>();
-  const [loading, setLoading] = useState(true);
-  const name = usePathname()?.replaceAll('/', '') || '';
-
-  useEffect(() => {
-    const userProfile = getUserProfileFromLocal();
-    const fetchQueue = async () => {
-      const queue = await getQueue(name, userProfile);
-      if (queue) setQueue(queue);
-    };
-    fetchQueue();
-  }, [name]);
-
-  useEffect(() => {
-    setLoading(true);
-    if (!searchTerm || !name) {
-      setSearchResult([]);
-      setLoading(false);
-      return;
-    }
-    const search = setTimeout(async () => {
-      const results = (await fetchSong(searchTerm.trim(), name)) ?? [];
-      console.log(JSON.stringify(results[0]));
-      setSearchResult(results);
-      setLoading(false);
-    }, 300);
-
-    return () => clearTimeout(search);
-  }, [searchTerm, name]);
-
-  const selectSong = (e: React.ChangeEvent<any>) => {
-    props.setSong(e.target.dataset.song);
-  };
+export default function Search({ selectSong }: Props) {
+  const { setSearchTerm, searchTerm, searchResult, queue, loading } =
+    useSearch();
 
   return (
     <>
@@ -154,9 +80,7 @@ export default function Search(props: SearchProps) {
                   >
                     <div
                       className=""
-                      onClick={selectSong}
-                      data-song={JSON.stringify(track)}
-                      data-song-id="aaaa-bbbb-cccc-ddd"
+                      onClick={() => selectSong(JSON.stringify(track))}
                     >
                       <p className="pointer-events-none">
                         {track?.name ?? 'Track Name'}
