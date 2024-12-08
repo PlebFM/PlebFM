@@ -75,5 +75,5 @@
       "pre-commit": "npx pretty-quick --staged"
     }
   },
-  "packageManager": "pnpm@8.10.5+sha1.4370a069f21873a0ad83c785b8048ed8caf6e6e9"
+  "packageManager": "pnpm@9.0.0"
 }
