@@ -1,12 +1,12 @@
 // pleb.fm/shiners
 // Bidding landing page
 // import { Host } from "../models/Host";
-import { notFound, usePathname } from 'next/navigation';
-import React, { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import React, { useEffect, useCallback } from 'react';
 import Onboarding from '../../components/Onboarding/Onboarding';
 import OnboardingIdentity from '../../components/Onboarding/OnboardingIdentity';
 import Search from '../../components/Checkout/Search';
-import { getHost, getHosts } from '../../lib/hosts';
+import { getHost } from '../../lib/hosts';
 import Checkout from '../../components/Checkout/Checkout';
 import LoadingSpinner from '../../components/Utils/LoadingSpinner';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
@@ -42,21 +42,17 @@ export default function Bidding() {
     setNewUser(false);
   };
 
-  const getUserProfileFromLocal = () => {
+  const getUserProfileFromLocal = useCallback(() => {
     const userProfileJSON = localStorage.getItem('userProfile');
     if (userProfileJSON) {
       setUserProfile(JSON.parse(userProfileJSON));
       setUser();
     } else setNewUser(true);
-  };
+  }, []);
 
   React.useEffect(() => {
     getUserProfileFromLocal();
-  }, []);
-
-  const handleSongChoice = (songChoice: string) => {
-    setSongChoice(songChoice);
-  };
+  }, [getUserProfileFromLocal]);
 
   if (!newUser && !userProfile.firstNym) {
     return (

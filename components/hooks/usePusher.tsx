@@ -43,7 +43,7 @@ export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
       pusher.unbind_all();
       pusher.unsubscribe(channelName);
     };
-  }, []);
+  }, [jukeboxName, refreshQueue]);
 
   return { notifications };
 };

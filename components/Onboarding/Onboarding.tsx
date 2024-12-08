@@ -17,6 +17,29 @@ interface OnboardingProps {
   generateUserFunc: javascript;
 }
 
+const slides = [
+  {
+    text: 'Welcome to PlebFM, the lightning jukebox. Here’s how it works.',
+    contBtnActive: true,
+  },
+  {
+    text: 'Search for your favorite song in the whole world.',
+    contBtnActive: true,
+  },
+  {
+    text: 'Pay for it with your favorite lightning wallet.',
+    contBtnActive: true,
+  },
+  {
+    text: 'Outbid others to push your song to the top of the queue.',
+    contBtnActive: true,
+  },
+  {
+    text: 'One moment. Generating your secret identity...',
+    contBtnActive: false,
+  },
+];
+
 export default function Onboarding(props: OnboardingProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
 
@@ -24,30 +47,7 @@ export default function Onboarding(props: OnboardingProps) {
     if (currentSlide === slides.length - 1) {
       props.generateUserFunc();
     }
-  }, [currentSlide]);
-
-  const slides = [
-    {
-      text: 'Welcome to PlebFM, the lightning jukebox. Here’s how it works.',
-      contBtnActive: true,
-    },
-    {
-      text: 'Search for your favorite song in the whole world.',
-      contBtnActive: true,
-    },
-    {
-      text: 'Pay for it with your favorite lightning wallet.',
-      contBtnActive: true,
-    },
-    {
-      text: 'Outbid others to push your song to the top of the queue.',
-      contBtnActive: true,
-    },
-    {
-      text: 'One moment. Generating your secret identity...',
-      contBtnActive: false,
-    },
-  ];
+  }, [currentSlide, props]);
 
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) gotoSlide(currentSlide + 1);
