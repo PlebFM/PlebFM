@@ -10,85 +10,27 @@ import { Song } from '../../models/Song';
 import { usePathname } from 'next/navigation';
 import { Spinner } from '../Utils/LoadingSpinner';
 import { CheckoutHeader } from './CheckoutHeader';
+import { usePayment } from '../hooks/usePayment';
 
 function PaymentScreen(props: {
   song: Song;
   readyToCheckout: boolean;
   invoicePaid: boolean;
-  setInvoicePaid: Dispatch<SetStateAction<boolean>>;
+  onPaid: () => void;
   totalBid: number;
   bid: number;
 }) {
-  const [bolt11, setBolt11] = useState({ hash: '', paymentRequest: '' });
-  const [loading, setLoading] = useState(true);
-  const [startPolling, setStartPolling] = useState(false);
   const pathname = usePathname();
 
-  const getUserProfileFromLocal = () => {
-    const userProfileJSON = localStorage.getItem('userProfile');
-    if (userProfileJSON) {
-      return JSON.parse(userProfileJSON);
-    }
-  };
-
-  useEffect(() => {
-    const getBolt11 = async () => {
-      setLoading(true);
-      const hostId = pathname?.substring(1) ?? 'atl'; // /atl -> atl
-      const response = await fetch('/api/invoice', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          value: props.totalBid,
-          memo: `PlebFM - ${props?.song?.name ?? 'Bid'}`,
-          shortName: hostId,
-        }),
-      });
-      const res = await response.json();
-      setBolt11({
-        hash: res.payment_hash,
-        paymentRequest: res.payment_request,
-      });
-      setLoading(false);
-      setStartPolling(true);
-    };
-    getBolt11();
-    // console.log(bolt11);
-  }, [pathname, props?.song?.name, props.totalBid]);
-
-  useEffect(() => {
-    if (!startPolling || !bolt11.hash || !pathname) return;
-
-    const getPaidStatus = async () => {
-      const hostId = pathname?.substring(1); // /atl -> atl
-      const user = getUserProfileFromLocal();
-      const url = `/api/invoice?hash=${bolt11.hash}&hostId=${hostId}&songId=${props.song?.id}&bidAmount=${props.totalBid}&userId=${user.userId}&shortName=${hostId}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.settled === true) {
-        console.log('PAID');
-        props.setInvoicePaid(true);
-        setStartPolling(false);
-      }
-      return data;
-    };
-
-    const interval = setInterval(async () => {
-      console.log('checking paid status...');
-      const res = await getPaidStatus();
-      console.log('poll', res);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [startPolling, bolt11.hash, pathname, props]);
+  const { loading, bolt11 } = usePayment(
+    props.song,
+    props.totalBid,
+    props.onPaid,
+  );
 
   return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
-        {/* <Image src={albumPlaceholder} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" /> */}
-        {/* eslint-disable */}
         <img
           src={props?.song?.album?.images[0]?.url ?? bokeh2}
           alt={props?.song?.album?.name ?? 'Album'}

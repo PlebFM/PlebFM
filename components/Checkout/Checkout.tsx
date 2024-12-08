@@ -41,7 +41,7 @@ export default function Checkout(props: CheckoutProps) {
         song={props.song}
         readyToCheckout={readyToCheckout}
         invoicePaid={invoicePaid}
-        setInvoicePaid={setInvoicePaid}
+        onPaid={() => setInvoicePaid(true)}
         totalBid={totalBid}
         bid={bid}
       />
