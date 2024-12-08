@@ -1,7 +1,7 @@
 import Pusher from 'pusher-js';
 import { useEffect, useState } from 'react';
 
-export const usePusher = (refreshQueue: () => void) => {
+export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
   // const [notifications, setNotifications] = useState<any[]>(sampleNotifications);
   const [notifications, setNotifications] = useState<any[]>([]);
   useEffect(() => {
@@ -12,7 +12,8 @@ export const usePusher = (refreshQueue: () => void) => {
     const pusher = new Pusher(appKey, {
       cluster: cluster,
     });
-    const channelName = process.env.NEXT_PUBLIC_PUSHER_CHANNEL!;
+    const channelName = `${process.env
+      .NEXT_PUBLIC_PUSHER_CHANNEL!}-${jukeboxName}`;
     const channel = pusher.subscribe(channelName);
     channel.bind('bid', (data: any) => {
       console.log('BID RECEIVED', data);

@@ -79,13 +79,13 @@ export const submitBid = async (
   };
   if (existingPlay) {
     const result = await handleExistingBid(bid, existingPlay);
-    await triggerBid(user ?? Anon, result, bid, false);
+    await triggerBid(user ?? Anon, result, bid, false, hostId);
     return result;
   } else {
     // Create new play
     const track = await getTrack(songId, accessToken);
     const result = await handleNewBid(bid, track, host);
-    await triggerBid(user ?? Anon, result, bid, true);
+    await triggerBid(user ?? Anon, result, bid, true, hostId);
     return result;
   }
 };
