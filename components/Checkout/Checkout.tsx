@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { webpack } from 'next/dist/compiled/webpack/webpack';
-import javascript = webpack.javascript;
 import AlbumScreen from './AlbumScreen';
 import PaymentScreen from './PaymentScreen';
 import SelectBid from './SelectBid';
@@ -8,7 +6,7 @@ import { Song } from '../../models/Song';
 
 type Props = {
   song: Song;
-  parentCallback: javascript;
+  parentCallback: (choice: string) => void;
   slug: string;
 };
 

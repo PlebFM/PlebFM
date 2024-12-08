@@ -4,8 +4,6 @@ import Avatar from '../Utils/Avatar';
 import Button from '../Utils/Button';
 import { SearchIcon } from '@bitcoin-design/bitcoin-icons-react/outline';
 import React from 'react';
-import { webpack } from 'next/dist/compiled/webpack/webpack';
-import javascript = webpack.javascript;
 
 interface OnboardingIdentityProps {
   userProfile: {
@@ -13,7 +11,7 @@ interface OnboardingIdentityProps {
     lastNym: string;
     color: string;
   };
-  setNewUserFunc: javascript;
+  setNewUserFunc: () => void;
 }
 
 export default function OnboardingIdentity(props: OnboardingIdentityProps) {

@@ -10,11 +10,9 @@ import {
 import Boop from '../Utils/Boop';
 import React from 'react';
 import OnboardingAnimation from './OnboardingAnimation';
-import { webpack } from 'next/dist/compiled/webpack/webpack';
-import javascript = webpack.javascript;
 
 interface OnboardingProps {
-  generateUserFunc: javascript;
+  generateUserFunc: () => void;
 }
 
 const slides = [

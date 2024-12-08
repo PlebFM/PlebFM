@@ -1,7 +1,7 @@
 import { Host } from '../models/Host';
 
-export const getHosts = async (): Promise<Host[]> => {
-  const res = await fetch(`/api/hosts`, {
+export const getHosts = async (url: string): Promise<Host[]> => {
+  const res = await fetch(`https://${url}/api/hosts`, {
     method: 'GET',
     mode: 'no-cors',
     headers: {
@@ -17,7 +17,7 @@ export const getHost = async (
   slug: string,
   url?: string,
 ): Promise<Host | void> => {
-  const res = await fetch(`https:/${url}/api/hosts/${slug}`, {
+  const res = await fetch(`https://${url}/api/hosts/${slug}`, {
     method: 'GET',
     mode: 'no-cors',
     headers: {
