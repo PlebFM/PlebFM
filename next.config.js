@@ -3,12 +3,6 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   // experimental:{appDir: true},
-  headers: () => [
-    {
-      source: '/:path*',
-      headers: [{ key: 'Cache-Control', value: 'no-store' }],
-    },
-  ],
   async headers() {
     return [
       {
@@ -18,17 +12,15 @@ const nextConfig = {
           { key: 'Access-Control-Allow-Origin', value: '*' },
         ],
       },
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'no-store' },
-          { key: 'Accept', value: '*/*' },
-        ],
-      },
+      // {
+      //   source: '/:path*',
+      //   headers: [
+      //     { key: 'Cache-Control', value: 'no-store' },
+      //   ],
+      // },
       {
         source: '/api/:path*',
         headers: [
-          { key: 'origins', value: '*' },
           { key: 'Bypass-Tunnel-Reminder', value: '*' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
           {
