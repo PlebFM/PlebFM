@@ -1,8 +1,6 @@
 // pleb.fm/shiners
-// Bidding landing page
-// import { Host } from "../models/Host";
 import { usePathname } from 'next/navigation';
-import React, { useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Onboarding from '../../components/Onboarding/Onboarding';
 import OnboardingIdentity from '../../components/Onboarding/OnboardingIdentity';
 import Search from '../../components/Checkout/Search';
@@ -11,20 +9,17 @@ import Checkout from '../../components/Checkout/Checkout';
 import LoadingSpinner from '../../components/Utils/LoadingSpinner';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Layout from '../../components/Utils/Layout';
+import { getUserProfileFromLocal } from '../../utils/profile';
 
 export default function Bidding() {
   const pathName = usePathname()?.replaceAll('/', '');
-  const [newUser, setNewUser] = React.useState(false);
-  const [userProfile, setUserProfile] = React.useState({
+  const [newUser, setNewUser] = useState(false);
+  const [userProfile, setUserProfile] = useState({
     firstNym: '',
     lastNym: '',
     color: '',
   });
-  const [songChoice, setSongChoice] = React.useState('');
-
-  useEffect(() => {
-    if (!songChoice) return;
-  }, [songChoice]);
+  const [songChoice, setSongChoice] = useState('');
 
   const generateUser = async () => {
     const result = await fetch('/api/user', {
@@ -32,7 +27,7 @@ export default function Bidding() {
     });
     const userData = await result.json();
     userData.user.color = userData.user.avatar;
-    let timer = setTimeout(() => {
+    setTimeout(() => {
       setUserProfile(userData.user);
       localStorage.setItem('userProfile', JSON.stringify(userData.user));
     }, 1500);
@@ -42,17 +37,15 @@ export default function Bidding() {
     setNewUser(false);
   };
 
-  const getUserProfileFromLocal = useCallback(() => {
-    const userProfileJSON = localStorage.getItem('userProfile');
-    if (userProfileJSON) {
-      setUserProfile(JSON.parse(userProfileJSON));
+  useEffect(() => {
+    const profile = getUserProfileFromLocal();
+    if (profile) {
+      setUserProfile(profile);
       setUser();
-    } else setNewUser(true);
+    } else {
+      setNewUser(true);
+    }
   }, []);
-
-  React.useEffect(() => {
-    getUserProfileFromLocal();
-  }, [getUserProfileFromLocal]);
 
   if (!newUser && !userProfile.firstNym) {
     return (
@@ -91,7 +84,7 @@ export default function Bidding() {
     else {
       return (
         <Layout title="Song Search">
-          <Search setSong={setSongChoice} />
+          <Search selectSong={setSongChoice} />
         </Layout>
       );
     }

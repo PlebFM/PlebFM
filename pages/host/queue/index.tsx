@@ -1,108 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import plebFMLogo from '../../../public/plebfm-logo.svg';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
-import { getSession, signIn, useSession } from 'next-auth/react';
+import { getSession } from 'next-auth/react';
 import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
-import { SongObject, fetchSong } from '../../[slug]/queue';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { Song } from '../../../components/Leaderboard/Song';
-import { Host } from '../../../models/Host';
-import { Play } from '../../../models/Play';
-import { Bid } from '../../../models/Bid';
 import { QR } from '../../../components/Leaderboard/Qr';
 import { Notifications } from '../../../components/Leaderboard/Notifications';
-
-const getLeaderboardQueue = async (host: string) => {
-  let url = `/api/leaderboard/queue?shortName=${host}`;
-  const response = await fetch(url);
-  const res = await response.json();
-  if (!res?.data) {
-    return [];
-  }
-  const songs = res.data.map(cleanSong);
-  return songs;
-};
-
-const cleanSong = (song: Play) => {
-  const bidders = song.bids.map((x: Bid) => x.user);
-  const totalBid = song.runningTotal;
-  return {
-    trackTitle: song.songName,
-    artistName: song.songArtist,
-    feeRate: totalBid,
-    playing: song.status === 'playing',
-    upNext: song.status === 'next',
-    bidders,
-    queued: song.status === 'queued',
-    status: song.status,
-  };
-};
-
-const findHost = async (spotifyId: string): Promise<Host> => {
-  const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
-    method: 'GET',
-    mode: 'no-cors',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      Accept: 'application/json',
-    },
-  });
-  const resJson = await res.json();
-  return resJson?.hosts[0];
-};
+import { useLeaderboard } from '../../../components/hooks/useLeaderboard';
 
 export default function Queue() {
-  const { data: session, status } = useSession();
-  const [queueData, setQueueData] = useState<SongObject[]>([]);
-  const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
-  const [host, setHost] = useState<string>();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!router) return;
-    if (status === 'unauthenticated') {
-      void signIn('spotify');
-    }
-    if (status === 'authenticated') {
-      //@ts-ignore
-      const spotifyId = session?.user?.id;
-      if (!spotifyId) return;
-      findHost(spotifyId).then(host => {
-        if (!host) {
-          console.error('HOST NOT FOUND');
-          router.push('/host?error=host_not_found');
-        } else {
-          setHost(host.shortName);
-        }
-      });
-    }
-  }, [status, session, router]);
-
-  useEffect(() => {
-    console.log('Session', session);
-    if (session?.error === 'RefreshAccessTokenError') {
-      signIn('spotify');
-    }
-    // const foo = async () => {
-    //   console.log(session)
-    //   //@ts-ignore
-    //   const accessToken = session.accessToken ?? '';
-    //   if (!accessToken) console.warn('ACCESS TOKEN MISSING FOR SPOTIFY');
-    // };
-    // foo();
-  }, [session]);
-
-  useEffect(() => {
-    if (!host || !refreshQueue) return;
-    console.log('refreshing');
-    getLeaderboardQueue(host).then(res => {
-      if (res) setQueueData(res);
-    });
-    setRefreshQueue(false);
-  }, [host, refreshQueue]);
+  const { queueData, refresh, session, host } = useLeaderboard();
 
   return (
     <>
@@ -141,13 +51,13 @@ export default function Queue() {
             </div>
 
             <div className="relative z-20">
-              <Notifications refreshQueue={() => setRefreshQueue(true)} />
+              <Notifications refreshQueue={refresh} host={host ?? ''} />
             </div>
 
             {session?.accessToken && host && (
               <WebPlayback
                 shortName={host}
-                refreshQueue={() => setRefreshQueue(true)}
+                refreshQueue={refresh}
                 token={session.accessToken}
               />
             )}

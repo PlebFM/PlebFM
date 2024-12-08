@@ -1,17 +1,15 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Avatar from '../Utils/Avatar';
 import { usePusher } from '../hooks/usePusher';
 
-export const Notifications = ({
-  refreshQueue,
-}: {
+type Props = {
   refreshQueue: () => void;
-}) => {
-  const { notifications } = usePusher(refreshQueue);
-  useEffect(() => {
-    console.log('NOTIFICATIONS', notifications);
-  }, [notifications]);
+  host: string;
+};
+
+export const Notifications = ({ refreshQueue, host }: Props) => {
+  const { notifications } = usePusher(refreshQueue, host);
   return (
     <div className="absolute top-0 left-0">
       <div className="flex flex-row justify-between p-8 pt-0 pr-0">

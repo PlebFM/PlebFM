@@ -1,7 +1,7 @@
 import Tag from './Utils/Tag';
 import Avatar from './Utils/Avatar';
 import React from 'react';
-import { SongObject } from '../pages/[slug]/queue';
+import { SongObject } from '../utils/songs';
 
 // TODO: Replace things like trackTitle with song.trackTitle
 

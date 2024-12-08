@@ -55,8 +55,6 @@ const getCurrentTrack = async (accessToken: string) => {
       Accept: '*/*',
     },
   });
-  console.log('res track', res.ok, res.bodyUsed);
-  console.log('res track', res.status, res.statusText);
   if (res.status === 204) return null;
   const result = await res.json();
   return result;

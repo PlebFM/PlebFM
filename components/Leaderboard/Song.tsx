@@ -1,5 +1,5 @@
-import { SongObject } from '../../pages/[slug]/queue';
 import { User } from '../../models/User';
+import { SongObject } from '../../utils/songs';
 import QueueSong from '../QueueSong';
 
 const cleanBidders = (bidders: User[]): User[] => {

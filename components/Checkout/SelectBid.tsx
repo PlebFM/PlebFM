@@ -11,13 +11,19 @@ import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
 import { CheckoutHeader } from './CheckoutHeader';
 
-export default function SelectBid(props: {
+type Props = {
   song: Song;
   setReadyToCheckout: Dispatch<SetStateAction<boolean>>;
   cancelSong: () => void;
   setTotalBid: Dispatch<SetStateAction<number>>;
-  setBid: Dispatch<SetStateAction<number>>;
-}) {
+};
+
+export default function SelectBid({
+  song,
+  setReadyToCheckout,
+  cancelSong,
+  setTotalBid,
+}: Props) {
   const maxSats = parseInt(process.env.NEXT_PUBLIC_MAX_BID ?? '100');
   const [feeRate, setFeeRate] = useState(0);
   const [feeTotal, setFeeTotal] = useState(0);
@@ -44,7 +50,7 @@ export default function SelectBid(props: {
 
   const updateFees = (fee: number) => {
     setFeeRate(fee);
-    setFeeTotal(Math.floor((fee * props.song.duration_ms) / 60_000));
+    setFeeTotal(Math.floor((fee * song.duration_ms) / 60_000));
     if (fee === 0) setFeeBracket(0);
     else if (fee > 0 && fee <= 0.25 * maxSats) setFeeBracket(1);
     else if (fee > 0.25 * maxSats && fee <= 0.5 * maxSats) setFeeBracket(2);
@@ -73,8 +79,8 @@ export default function SelectBid(props: {
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         {/* eslint-disable */}
         <img
-          src={props?.song?.album?.images[0]?.url ?? bokeh2}
-          alt={props?.song?.album?.name ?? 'Album'}
+          src={song?.album?.images[0]?.url ?? bokeh2}
+          alt={song?.album?.name ?? 'Album'}
           width={100}
           height={100}
           className="object-cover w-full h-full blur-2xl opacity-50"
@@ -83,7 +89,7 @@ export default function SelectBid(props: {
       </div>
 
       <div className="m-auto max-w-xl px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
-        <CheckoutHeader song={props?.song} />
+        <CheckoutHeader song={song} />
         <div
           className="bg-white/10 w-[348px] h-[348px] p-[32px] rounded-full flex flex-col space-y-2 text-center p-8 touch-none relative"
           onPointerDown={handleMouseDown}
@@ -153,7 +159,7 @@ export default function SelectBid(props: {
               className="w-full"
               icon={<CrossIcon />}
               iconPosition="left"
-              onClick={props.cancelSong}
+              onClick={cancelSong}
             >
               Cancel
             </Button>
@@ -163,9 +169,8 @@ export default function SelectBid(props: {
                 className="w-full"
                 icon={<ArrowRightIcon />}
                 onClick={() => {
-                  props.setTotalBid(feeTotal);
-                  props.setBid(feeRate);
-                  props.setReadyToCheckout(true);
+                  setTotalBid(feeTotal);
+                  setReadyToCheckout(true);
                 }}
               >
                 Checkout
@@ -174,7 +179,7 @@ export default function SelectBid(props: {
                 className="w-full"
                 icon={<CrossIcon />}
                 iconPosition="left"
-                onClick={props.cancelSong}
+                onClick={cancelSong}
                 style="free"
                 size="small"
               >

@@ -8,15 +8,17 @@ import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
 import { CheckoutHeader } from './CheckoutHeader';
 
-export default function AlbumScreen(props: {
+type Props = {
   track: Song;
   setSongConfirmed: Dispatch<SetStateAction<boolean>>;
   cancelSong: () => void;
-}) {
-  // useEffect(() => {
-  //   console.log('TRACK', props?.track);
-  //   console.log(props?.track?.album?.images[0]?.url);
-  // }, [props.track]);
+};
+
+export default function AlbumScreen({
+  track,
+  setSongConfirmed,
+  cancelSong,
+}: Props) {
   return (
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
@@ -29,12 +31,12 @@ export default function AlbumScreen(props: {
       </div>
 
       <div className="m-auto max-w-xl px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">
-        <CheckoutHeader song={props?.track} />
+        <CheckoutHeader song={track} />
 
         {/* eslint-disable */}
         <img
-          src={props?.track?.album?.images[0]?.url ?? bokeh2}
-          alt={props?.track?.album?.name ?? 'Album'}
+          src={track?.album?.images[0]?.url ?? bokeh2}
+          alt={track?.album?.name ?? 'Album'}
           width={100}
           height={100}
           className="w-full"
@@ -45,7 +47,7 @@ export default function AlbumScreen(props: {
             size="small"
             className="w-full"
             onClick={() => {
-              props.setSongConfirmed(true);
+              setSongConfirmed(true);
             }}
           >
             Select Song
@@ -56,7 +58,7 @@ export default function AlbumScreen(props: {
             className="w-full"
             icon={<ArrowLeftIcon />}
             iconPosition="left"
-            onClick={() => props.cancelSong()}
+            onClick={cancelSong}
           >
             Cancel
           </Button>
