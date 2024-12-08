@@ -1,6 +1,6 @@
 // pleb.fm/shiners
 import { usePathname } from 'next/navigation';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import Onboarding from '../../components/Onboarding/Onboarding';
 import OnboardingIdentity from '../../components/Onboarding/OnboardingIdentity';
 import Search from '../../components/Checkout/Search';

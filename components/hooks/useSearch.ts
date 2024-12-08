@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { cleanSong } from '../../pages/[slug]/queue';
+import { cleanSong, SongObject } from '../../utils/songs';
 import { User } from '../../models/User';
-import { SongObject } from '../../pages/[slug]/queue';
 import { getUserProfileFromLocal } from '../../utils/profile';
 import { Play } from '../../models/Play';
 import { usePathname } from 'next/navigation';

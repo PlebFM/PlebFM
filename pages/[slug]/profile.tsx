@@ -1,18 +1,28 @@
 // User profile
 import Image from 'next/image';
 import Avatar from '../../components/Utils/Avatar';
-import React from 'react';
+import React, { useMemo } from 'react';
 import Tag from '../../components/Utils/Tag';
 import NavBar from '../../components/Utils/NavBar';
 import Layout from '../../components/Utils/Layout';
-import { SongObject } from '../[slug]/queue';
+import { SongObject } from '../../utils/songs';
 import { Spinner } from '../../components/Utils/LoadingSpinner';
 import { usePusher } from '../../components/hooks/usePusher';
 import { useProfile } from '../../components/hooks/useProfile';
+import { useQueue } from '../../components/hooks/useQueue';
 
 export default function UserProfile() {
-  const { userProfile, queueData, queueDataPlayed, loading, refreshQueue } =
-    useProfile();
+  const { userProfile } = useProfile();
+
+  const { queueData: queueDataProfile, loading, refreshQueue } = useQueue(true);
+
+  const queueData = useMemo(() => {
+    return queueDataProfile?.filter(x => x.queued) ?? [];
+  }, [queueDataProfile]);
+
+  const queueDataPlayed = useMemo(() => {
+    return queueData?.filter(x => x.status === 'played') ?? [];
+  }, [queueData]);
 
   usePusher(refreshQueue);
 
