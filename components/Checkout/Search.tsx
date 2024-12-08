@@ -68,12 +68,11 @@ export default function Search(props: SearchProps) {
   useEffect(() => {
     const userProfile = getUserProfileFromLocal();
     const fetchQueue = async () => {
-      const queue = await getQueue(name, userProfile).then(res => {
-        if (res) setQueue(res);
-      });
+      const queue = await getQueue(name, userProfile);
+      if (queue) setQueue(queue);
     };
     fetchQueue();
-  }, []);
+  }, [name]);
 
   useEffect(() => {
     setLoading(true);

@@ -16,8 +16,9 @@ export const triggerBid = async (
   song: Play,
   bid: Bid,
   isBoost: boolean = false,
+  hostId: string,
 ) => {
-  const channelName = process.env.NEXT_PUBLIC_PUSHER_CHANNEL!;
+  const channelName = `${process.env.NEXT_PUBLIC_PUSHER_CHANNEL!}-${hostId}`;
   console.log('triggering', channelName, 'bid');
   await client.trigger(channelName, 'bid', { user, song, bid, isBoost });
 };

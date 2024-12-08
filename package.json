@@ -10,6 +10,7 @@
     "prepare": "npx husky install",
     "format": "npx prettier --write .",
     "pretty-quick": "npx pretty-quick --staged",
+    "preinstall": "npx only-allow pnpm",
     "storybook": "concurrently \"npm:watch:*\"",
     "build-storybook": "concurrently \"npm:build:*\"",
     "build:css": "npx tailwindcss -i ./src/tailwind.css -o ./public/tailwind.css",
@@ -73,5 +74,6 @@
     "hooks": {
       "pre-commit": "npx pretty-quick --staged"
     }
-  }
+  },
+  "packageManager": "pnpm@9.15.0"
 }
