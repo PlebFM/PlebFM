@@ -1,43 +1,13 @@
 import { signIn } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { getPlaybackState } from '../../lib/spotify';
+import { syncJukebox } from '../../utils/host';
 
-const syncJukebox = async (
-  accessToken: string,
-  shortName: string,
-  deviceId: string,
-) => {
-  let url = `/api/leaderboard/queue`;
-  const body = JSON.stringify({
-    shortName: shortName,
-    accessToken: accessToken,
-    deviceId: deviceId,
-  });
-  const response = await fetch(url, {
-    method: 'POST',
-    body: body,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-  });
-  const res = await response.json();
-  return res;
-};
-
-const emptyTrack = {
-  name: '',
-  album: {
-    images: [{ url: '' }],
-  },
-  artists: [{ name: '' }],
-};
-
-interface WebPlaybackProps {
+type WebPlaybackProps = {
   token: string;
   shortName: string;
   refreshQueue: () => void;
-}
+};
 export const useSpotifyPlayback = ({
   token,
   shortName,
@@ -50,7 +20,7 @@ export const useSpotifyPlayback = ({
   const [player, setPlayer] = useState<Spotify.Player | undefined>(undefined);
   const [deviceId, setDeviceId] = useState('');
   const [browserDeviceId, setBrowserDeviceId] = useState('');
-  const [track, setTrack] = useState(emptyTrack);
+  const [track, setTrack] = useState<Spotify.Track>();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -69,6 +39,7 @@ export const useSpotifyPlayback = ({
         if (x?.progress_ms) setPosition(x.progress_ms);
         if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
         if (x?.device?.id) setDeviceId(x.device.id);
+        if (x?.device?.is_active) setActive(x.device.is_active);
         if (x) setPaused(!x.is_playing);
       });
       syncJukebox(token, shortName, deviceId).then(res => {
