@@ -1,30 +1,36 @@
 import Pusher from 'pusher-js';
 import { useEffect, useState } from 'react';
+import { User } from '../../models/User';
+
+const appKey = process.env.NEXT_PUBLIC_PUSHER_APP_KEY!;
+const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER!;
+const channelId = process.env.NEXT_PUBLIC_PUSHER_CHANNEL!;
+
+export type Notification =
+  | {
+      message: string;
+      user: User;
+    }
+  | string;
 
 export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
-  // const [notifications, setNotifications] = useState<any[]>(sampleNotifications);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  useEffect(() => {
-    const appKey = process.env.NEXT_PUBLIC_PUSHER_APP_KEY!;
-    const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER!;
+  // const [notifications, setNotifications] = useState<Notification[]>(sampleNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
-    console.log(appKey, cluster);
+  useEffect(() => {
     const pusher = new Pusher(appKey, {
       cluster: cluster,
     });
-    const channelName = `${process.env
-      .NEXT_PUBLIC_PUSHER_CHANNEL!}-${jukeboxName}`;
+    const channelName = `${channelId}-${jukeboxName}`;
     const channel = pusher.subscribe(channelName);
+
     channel.bind('bid', (data: any) => {
-      console.log('BID RECEIVED', data);
-      // setNotifications(prev => [...prev.filter(notification => parseInt(notification?.bid?.timestamp) + 5_000 < Date.now()), data]);
       if (typeof data === 'string') {
         setNotifications(prev => [...prev, data]);
         refreshQueue();
       } else {
-        const message = ` ${data?.isBoost ? ' boosted ' : ' bid on '} ${
-          data?.song?.songName
-        } by ${data?.song?.songArtist}`;
+        const prefix = data?.isBoost ? ' boosted ' : ' bid on ';
+        const message = `${prefix} ${data?.song?.songName} by ${data?.song?.songArtist}`;
         data.message = message;
         setNotifications(prev => [...prev, data]);
         refreshQueue();
