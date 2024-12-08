@@ -1,5 +1,4 @@
 'use client';
-import Button from './Button';
 import {
   ContactsIcon,
   SearchIcon,
@@ -13,9 +12,6 @@ interface NavBarProps {
 }
 
 export default function NavBar(props: NavBarProps) {
-  const tempFunc = () => {
-    alert('test');
-  };
   const pathname = usePathname();
   const [host, setHost] = useState<string>();
 

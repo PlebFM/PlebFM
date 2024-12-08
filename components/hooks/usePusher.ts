@@ -1,3 +1,5 @@
+'use client';
+
 import Pusher from 'pusher-js';
 import { useEffect, useState } from 'react';
 import { User } from '../../models/User';
@@ -6,9 +8,7 @@ const appKey = process.env.NEXT_PUBLIC_PUSHER_APP_KEY!;
 const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER!;
 const channelId = process.env.NEXT_PUBLIC_PUSHER_CHANNEL!;
 
-const pusher = new Pusher(appKey, {
-  cluster: cluster,
-});
+const pusher = new Pusher(appKey, { cluster });
 
 export type Notification = {
   message: string;
@@ -20,12 +20,10 @@ export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    console.log('hook firing-------------');
     const channelName = `${channelId}-${jukeboxName}`;
     const channel = pusher.subscribe(channelName);
 
     channel.bind('bid', (data: any) => {
-      console.warn('Pusher (bid)---', typeof data, data);
       if (typeof data === 'string') {
         // refreshQueue();
       } else {
