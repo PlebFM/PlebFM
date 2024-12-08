@@ -1,57 +1,20 @@
 // User profile
 import Image from 'next/image';
 import Avatar from '../../components/Utils/Avatar';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Tag from '../../components/Utils/Tag';
 import NavBar from '../../components/Utils/NavBar';
 import Layout from '../../components/Utils/Layout';
-import { SongObject, cleanSong, fetchSong, getQueue } from '../[slug]/queue';
-import { User } from '../../models/User';
+import { SongObject } from '../[slug]/queue';
 import { Spinner } from '../../components/Utils/LoadingSpinner';
-import { usePathname } from 'next/navigation';
 import { usePusher } from '../../components/hooks/usePusher';
-import { getUserProfileFromLocal } from '../../utils/profile';
+import { useProfile } from '../../components/hooks/useProfile';
 
 export default function UserProfile() {
-  const [userProfile, setUserProfile] = useState({
-    firstNym: '',
-    lastNym: '',
-    color: '',
-  });
-  const [refreshQueue, setRefreshQueue] = useState<boolean>(true);
-  const pathname = usePathname();
-  const [loading, setLoading] = useState(false);
+  const { userProfile, queueData, queueDataPlayed, loading, refreshQueue } =
+    useProfile();
 
-  usePusher(() => setRefreshQueue(true));
-
-  useEffect(() => {
-    setLoading(true);
-    const profile = getUserProfileFromLocal();
-    if (profile) setUserProfile(profile);
-  }, []);
-
-  useEffect(() => {
-    if (!userProfile || !pathname || !refreshQueue) return;
-    const host = pathname.substring(1).split('/')[0];
-    getQueue(host, userProfile as User, true)
-      .then(res => {
-        if (res) {
-          const queued = res.filter(x => x.queued);
-          const played = res.filter(x => x.status === 'played');
-          setQueueData(queued);
-          setQueueDataPlayed(played);
-        }
-        setLoading(false);
-      })
-      .catch(e => {
-        console.error(e);
-        setLoading(false);
-      });
-    setRefreshQueue(false);
-  }, [userProfile, pathname, refreshQueue]);
-
-  const [queueData, setQueueData] = useState<SongObject[]>([]);
-  const [queueDataPlayed, setQueueDataPlayed] = useState<SongObject[]>([]);
+  usePusher(refreshQueue);
 
   const Song = ({ song }: { song: SongObject }) => {
     return (
@@ -98,33 +61,37 @@ export default function UserProfile() {
     <Layout title="Your Profile">
       <>
         <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
-          <Image
-            src={`/Avatar/${userProfile.lastNym}.png`}
-            alt={`${userProfile.firstNym} ${userProfile.lastNym}`}
-            width="100"
-            height="100"
-            className="object-cover w-full h-full blur-2xl opacity-75"
-          />
+          {userProfile && (
+            <Image
+              src={`/Avatar/${userProfile.lastNym}.png`}
+              alt={`${userProfile.firstNym} ${userProfile.lastNym}`}
+              width="100"
+              height="100"
+              className="object-cover w-full h-full blur-2xl opacity-75"
+            />
+          )}
         </div>
 
         <div className="max-w-screen-md m-auto px-0 py-12 pb-0 text-white relative z-50 flex flex-col space-y-6 items-center font-thin">
-          <div className="mx-auto flex flex-col space-y-4 text-center">
-            <Avatar
-              firstNym={userProfile.firstNym}
-              lastNym={userProfile.lastNym}
-              color={userProfile.color}
-            />
-            <p className="text-2xl">
-              {userProfile.firstNym
-                ? userProfile.firstNym + ' ' + userProfile.lastNym
-                : '- - -'}
-            </p>
-          </div>
-          {queueData.length > 0 && (
+          {userProfile && (
+            <div className="mx-auto flex flex-col space-y-4 text-center">
+              <Avatar
+                firstNym={userProfile.firstNym}
+                lastNym={userProfile.lastNym}
+                color={userProfile.color}
+              />
+              <p className="text-2xl">
+                {userProfile.firstNym
+                  ? userProfile.firstNym + ' ' + userProfile.lastNym
+                  : '- - -'}
+              </p>
+            </div>
+          )}
+          {queueData && queueData.length > 0 && (
             <h2 className="text-left font-bold w-full px-6">In Queue</h2>
           )}
           <div className="w-full pb-16 text-white relative z-50 flex flex-col items-center font-thin">
-            {queueData.map((song, key) => (
+            {queueData?.map((song, key) => (
               <Song song={song} key={key} />
             ))}
           </div>
