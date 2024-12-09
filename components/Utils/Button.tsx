@@ -36,7 +36,8 @@ export default function Button(props: ButtonProps) {
     className += ' drop-shadow-glow-white';
 
   if (props.size === 'large') className += ' p-6 space-x-4 text-2xl';
-  else if (props.size === 'small') className += ' p-3 space-x-2 text-base';
+  else if (props.size === 'small')
+    className += ` p-3 ${!props.iconOnly ? 'space-x-2' : ''} text-base`;
   else className += ' p-5 space-x-3 text-xl';
 
   if (props.iconOnly) className += ' space-x-0';
@@ -54,19 +55,7 @@ export default function Button(props: ButtonProps) {
         ? 'w-4 h-4'
         : 'w-5 h-5';
     if (props.iconPosition === 'left') iconClassName += ' order-0';
-    return (
-      <span
-        className={
-          props.size === 'large'
-            ? 'w-6 h-6'
-            : props.size === 'small'
-            ? 'w-4 h-4'
-            : 'w-5 h-5'
-        }
-      >
-        {props.icon}
-      </span>
-    );
+    return <span className={iconClassName}>{props.icon}</span>;
   };
 
   if (props.href) {
