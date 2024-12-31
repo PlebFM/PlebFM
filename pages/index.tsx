@@ -3,16 +3,8 @@ import plebFMLogo from '../public/plebfm-logo.svg';
 import Image from 'next/image';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import Link from 'next/link';
-import { useState } from 'react';
-import {
-  CaretDownIcon,
-  CaretUpIcon,
-} from '@bitcoin-design/bitcoin-icons-react/outline';
-import { SignupForm } from '../components/Landing/SignupForm';
 
 export default function Index() {
-  const [showForm, setShowForm] = useState(false);
-
   return (
     <div>
       <Head>

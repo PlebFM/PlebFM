@@ -1,7 +1,10 @@
-import { useSession, signIn, signOut, getSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { Host } from '../../models/Host';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import { useEffect } from 'react';
 import Button from '../Utils/Button';
+
+interface SpotifyAuthButtonProps {
+  onSuccess?: () => void;
+}
 
 const findHost = async (spotifyId: string) => {
   const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
@@ -15,55 +18,35 @@ const findHost = async (spotifyId: string) => {
   const resJson = await res.json();
   return resJson.hosts[0];
 };
-const updateHost = async (shortName: string, refreshToken: string) => {
-  const res = await fetch(`/api/hosts`, {
-    method: 'PATCH',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ shortName, refreshToken }),
-  });
-};
 
-const SpotifyAuthButton = () => {
+const SpotifyAuthButton = ({ onSuccess }: SpotifyAuthButtonProps) => {
   const { data: session } = useSession();
-  const [host, setHost] = useState<Host | null>(null);
 
   useEffect(() => {
     if (!session || !session.user) return;
-    // @ts-ignore
+
     const spotifyId = session.user.id;
     if (!spotifyId) signOut();
+
     findHost(spotifyId).then(async host => {
-      if (host) {
-        setHost(host);
-        // @ts-ignore
-        const refreshToken = session.refreshToken;
-        if (refreshToken !== host?.spotifyRefreshToken) {
-          await updateHost(host.shortName, refreshToken);
-        }
-      }
+      if (!host) signOut();
+      else onSuccess?.();
     });
-  }, [session]);
+  }, [session, onSuccess]);
 
   if (session) {
     return (
       <div className="flex flex-col space-y-8">
-        <p>Signed in as {session?.user?.email ?? 'Spotify User'}</p>
+        <p className="text-white/80">
+          Signed in as {session?.user?.id ?? 'Spotify User'}
+        </p>
         <Button onClick={() => signOut()}>Sign Out</Button>
-        <p>Host</p>
-        <code className="bg-pfm-purple-100 p-4 truncate">
-          {host ? host.shortName : '...'}
-        </code>
-        <Button href="/host/queue">Go to Leaderboard</Button>
       </div>
     );
   }
   return (
     <>
-      <Button onClick={() => signIn('spotify')}>Sign In</Button>
+      <Button onClick={() => signIn('spotify')}>Connect Spotify</Button>
     </>
   );
 };
