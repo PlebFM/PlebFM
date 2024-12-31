@@ -57,7 +57,7 @@ export default function HostDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="fixed inset-0 bg-black text-white flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -71,7 +71,7 @@ export default function HostDashboard() {
 
   if (!host) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="fixed inset-0 bg-black text-white flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -91,13 +91,14 @@ export default function HostDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black overflow-x-hidden">
+    <div className="fixed inset-0 bg-black overflow-y-auto">
       <Head>
         <title>{host.hostName} - Host Dashboard - PlebFM</title>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
+        <meta name="theme-color" content="#000000" />
       </Head>
 
       {/* Header */}
@@ -106,7 +107,7 @@ export default function HostDashboard() {
         animate={{ y: 0 }}
         className="bg-black/50 backdrop-blur-lg border-b border-white/10 sticky top-0 z-50"
       >
-        <div className="px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Image
@@ -210,7 +211,7 @@ export default function HostDashboard() {
         initial="initial"
         animate="animate"
         variants={staggerChildren}
-        className="px-4 py-8"
+        className="max-w-7xl mx-auto px-4 py-8"
       >
         {/* Welcome Section */}
         <motion.div variants={fadeIn} className="mb-8">
