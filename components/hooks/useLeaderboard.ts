@@ -32,7 +32,6 @@ export const useLeaderboard = () => {
   }, [status, session, router]);
 
   useEffect(() => {
-    console.log('Session', session);
     if (session?.error === 'RefreshAccessTokenError') {
       signIn('spotify');
     }

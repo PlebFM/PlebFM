@@ -56,7 +56,8 @@ export default function HostSignup() {
             router.push('/host/dashboard');
           }, 2000);
         } else {
-          throw new Error(data.error || 'Failed to create host');
+          console.error('Failed to create host', data);
+          signOut();
         }
       } else {
         const error = await response.json();

@@ -47,8 +47,8 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
 
 const createHost = async (spotifyId: string, refreshToken: string) => {
   const host = await Hosts.findOneAndUpdate(
-    { spotifyId },
-    { spotifyRefreshToken: refreshToken, spotifyId },
+    { hostId: spotifyId },
+    { spotifyRefreshToken: refreshToken, spotifyId, hostId: spotifyId },
     { new: true, upsert: true },
   );
   return host;

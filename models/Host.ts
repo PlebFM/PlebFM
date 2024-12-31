@@ -15,6 +15,7 @@ export type Host = {
   shortName?: string;
   spotifyRefreshToken: string;
   spotifyId: string;
+  hostId: string;
 };
 
 const HostSchema = new Schema<Host>({
@@ -34,6 +35,10 @@ const HostSchema = new Schema<Host>({
     required: true,
   },
   spotifyId: {
+    type: String,
+    required: true,
+  },
+  hostId: {
     type: String,
     unique: true,
     required: true,
