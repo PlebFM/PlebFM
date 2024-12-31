@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import bokeh1 from 'public/pfm-bokeh-1.jpg';
 import Avatar from '../Utils/Avatar';
 import Button from '../Utils/Button';
 import {
@@ -63,7 +62,7 @@ export default function Onboarding(props: OnboardingProps) {
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
-          src={bokeh1}
+          src={'/pfm-bokeh-1.jpg'}
           alt=""
           width="100"
           className="object-cover w-full h-full blur-2xl opacity-75"
