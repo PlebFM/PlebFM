@@ -16,6 +16,9 @@ importers:
       cuid:
         specifier: ^2.1.8
         version: 2.1.8
+      framer-motion:
+        specifier: ^11.15.0
+        version: 11.15.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       mongodb:
         specifier: ^4.12.1
         version: 4.17.2(@aws-sdk/client-sso-oidc@3.699.0(@aws-sdk/client-sts@3.699.0))
@@ -5632,6 +5635,23 @@ packages:
       }
     engines: { node: '>=0.10.0' }
 
+  framer-motion@11.15.0:
+    resolution:
+      {
+        integrity: sha512-MLk8IvZntxOMg7lDBLw2qgTHHv664bYoYmnFTmE0Gm/FW67aOJk0WM3ctMcG+Xhcv+vh5uyyXwxvxhSeJzSe+w==,
+      }
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   fresh@0.5.2:
     resolution:
       {
@@ -7318,6 +7338,18 @@ packages:
         integrity: sha512-podJEaIF/5N2mQymkyyUzN2NeL/68MOyYjf3O0zsgCU2B2Omnhg6NhGHVavt9ZH/VxOrwKE9XphbuHDFK+T06g==,
       }
     engines: { node: '>=12.0.0' }
+
+  motion-dom@11.14.3:
+    resolution:
+      {
+        integrity: sha512-lW+D2wBy5vxLJi6aCP0xyxTxlTfiu+b+zcpVbGVFUxotwThqhdpPRSmX8xztAgtZMPMeU0WGVn/k1w4I+TbPqA==,
+      }
+
+  motion-utils@11.14.3:
+    resolution:
+      {
+        integrity: sha512-Xg+8xnqIJTpr0L/cidfTTBFkvRw26ZtGGuIhA94J9PQ2p4mEa06Xx7QVYZH0BP+EpMSaDlu+q0I0mmvwADPsaQ==,
+      }
 
   mpath@0.9.0:
     resolution:
@@ -15213,6 +15245,15 @@ snapshots:
     dependencies:
       map-cache: 0.2.2
 
+  framer-motion@11.15.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      motion-dom: 11.14.3
+      motion-utils: 11.14.3
+      tslib: 2.8.1
+    optionalDependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
   fresh@0.5.2: {}
 
   fs-extra@10.1.0:
@@ -16190,6 +16231,10 @@ snapshots:
       - '@aws-sdk/client-sso-oidc'
       - aws-crt
       - supports-color
+
+  motion-dom@11.14.3: {}
+
+  motion-utils@11.14.3: {}
 
   mpath@0.9.0: {}
 

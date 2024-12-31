@@ -5,6 +5,7 @@ import { Host } from '../../models/Host';
 import Link from 'next/link';
 import Image from 'next/image';
 import plebFMLogo from '../../public/plebfm-logo.svg';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChartBarIcon,
   QueueListIcon,
@@ -14,6 +15,20 @@ import {
   CurrencyDollarIcon,
   Bars3Icon,
 } from '@heroicons/react/24/outline';
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 20 },
+};
+
+const staggerChildren = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 export default function HostDashboard() {
   const { data: session } = useSession();
@@ -43,7 +58,13 @@ export default function HostDashboard() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading...
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          Loading...
+        </motion.div>
       </div>
     );
   }
@@ -51,7 +72,12 @@ export default function HostDashboard() {
   if (!host) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+        >
           <p className="mb-4">No host account found.</p>
           <Link
             href="/host/signup"
@@ -59,7 +85,7 @@ export default function HostDashboard() {
           >
             Create a Jukebox
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -75,7 +101,11 @@ export default function HostDashboard() {
       </Head>
 
       {/* Header */}
-      <header className="bg-black/50 backdrop-blur-lg border-b border-white/10 sticky top-0 z-50">
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="bg-black/50 backdrop-blur-lg border-b border-white/10 sticky top-0 z-50"
+      >
         <div className="px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -131,119 +161,127 @@ export default function HostDashboard() {
           </div>
 
           {/* Mobile menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden py-2 space-y-1">
-              <Link
-                href="/host/dashboard"
-                className="block text-white/90 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="md:hidden py-2 space-y-1 overflow-hidden"
               >
-                Dashboard
-              </Link>
-              <Link
-                href="/host/queue"
-                className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
-              >
-                Queue
-              </Link>
-              <Link
-                href="/host/analytics"
-                className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
-              >
-                Analytics
-              </Link>
-              <Link
-                href="/host/settings"
-                className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
-              >
-                Settings
-              </Link>
-              <Link
-                href={`/${host.shortName}`}
-                className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
-                target="_blank"
-              >
-                View Public Page
-              </Link>
-            </div>
-          )}
+                <Link
+                  href="/host/dashboard"
+                  className="block text-white/90 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/host/queue"
+                  className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Queue
+                </Link>
+                <Link
+                  href="/host/analytics"
+                  className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Analytics
+                </Link>
+                <Link
+                  href="/host/settings"
+                  className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Settings
+                </Link>
+                <Link
+                  href={`/${host.shortName}`}
+                  className="block text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                  target="_blank"
+                >
+                  View Public Page
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </header>
+      </motion.header>
 
-      <main className="px-4 py-8">
+      <motion.main
+        initial="initial"
+        animate="animate"
+        variants={staggerChildren}
+        className="px-4 py-8"
+      >
         {/* Welcome Section */}
-        <div className="mb-8">
+        <motion.div variants={fadeIn} className="mb-8">
           <h1 className="text-2xl font-medium text-white">Welcome back!</h1>
           <p className="text-white/60 mt-1">
             Here&apos;s what&apos;s happening with your jukebox today.
           </p>
-        </div>
+        </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/60">
-                  Current Queue
-                </p>
-                <p className="text-2xl font-semibold text-white mt-1">
-                  0 songs
-                </p>
+        <motion.div
+          variants={staggerChildren}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8"
+        >
+          {[
+            {
+              title: 'Current Queue',
+              value: '0 songs',
+              trend: '12% more',
+              icon: <QueueListIcon className="h-6 w-6 text-orange-400" />,
+              iconBg: 'bg-orange-400/10',
+            },
+            {
+              title: 'Total Earned',
+              value: '0 sats',
+              trend: '8% more',
+              icon: <CurrencyDollarIcon className="h-6 w-6 text-green-400" />,
+              iconBg: 'bg-green-400/10',
+            },
+            {
+              title: 'Songs Played',
+              value: '0',
+              trend: '23% more',
+              icon: <MusicalNoteIcon className="h-6 w-6 text-purple-400" />,
+              iconBg: 'bg-purple-400/10',
+            },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.title}
+              variants={fadeIn}
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/60">
+                    {stat.title}
+                  </p>
+                  <p className="text-2xl font-semibold text-white mt-1">
+                    {stat.value}
+                  </p>
+                </div>
+                <div className={`${stat.iconBg} p-3 rounded-xl`}>
+                  {stat.icon}
+                </div>
               </div>
-              <div className="bg-orange-400/10 p-3 rounded-xl">
-                <QueueListIcon className="h-6 w-6 text-orange-400" />
+              <div className="mt-4 flex items-center text-sm">
+                <ArrowTrendingUpIcon className="h-4 w-4 text-green-400 mr-1" />
+                <span className="text-green-400">{stat.trend}</span>
+                <span className="text-white/40 ml-1.5">vs last week</span>
               </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <ArrowTrendingUpIcon className="h-4 w-4 text-green-400 mr-1" />
-              <span className="text-green-400">12% more</span>
-              <span className="text-white/40 ml-1.5">vs last week</span>
-            </div>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/60">
-                  Total Earned
-                </p>
-                <p className="text-2xl font-semibold text-white mt-1">0 sats</p>
-              </div>
-              <div className="bg-green-400/10 p-3 rounded-xl">
-                <CurrencyDollarIcon className="h-6 w-6 text-green-400" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <ArrowTrendingUpIcon className="h-4 w-4 text-green-400 mr-1" />
-              <span className="text-green-400">8% more</span>
-              <span className="text-white/40 ml-1.5">vs last week</span>
-            </div>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-white/60">
-                  Songs Played
-                </p>
-                <p className="text-2xl font-semibold text-white mt-1">0</p>
-              </div>
-              <div className="bg-purple-400/10 p-3 rounded-xl">
-                <MusicalNoteIcon className="h-6 w-6 text-purple-400" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <ArrowTrendingUpIcon className="h-4 w-4 text-green-400 mr-1" />
-              <span className="text-green-400">23% more</span>
-              <span className="text-white/40 ml-1.5">vs last week</span>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Queue Manager */}
-          <div className="lg:col-span-2 bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+          <motion.div
+            variants={fadeIn}
+            className="lg:col-span-2 bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-medium text-white">Queue Manager</h2>
               <Link
@@ -257,7 +295,9 @@ export default function HostDashboard() {
               No songs in queue
             </div>
             <div className="mt-4 flex flex-col sm:flex-row gap-4">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   /* TODO: Implement skip */
                 }}
@@ -265,8 +305,10 @@ export default function HostDashboard() {
               >
                 <QueueListIcon className="h-5 w-5" />
                 Manage Queue
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   /* TODO: Implement skip */
                 }}
@@ -274,58 +316,80 @@ export default function HostDashboard() {
               >
                 <ChartBarIcon className="h-5 w-5" />
                 View Stats
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Actions & Settings */}
-          <div className="space-y-4 md:space-y-8">
+          <motion.div
+            variants={staggerChildren}
+            className="space-y-4 md:space-y-8"
+          >
             {/* Quick Actions */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <motion.div
+              variants={fadeIn}
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+            >
               <h2 className="text-lg font-medium text-white mb-4">
                 Quick Actions
               </h2>
               <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    /* TODO: Implement skip */
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors"
-                >
-                  <span>Skip Current Song</span>
-                  <ChartBarIcon className="h-5 w-5 text-white/60" />
-                </button>
-                <button
-                  onClick={() => {
-                    /* TODO: Implement pause */
-                  }}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors"
-                >
-                  <span>Pause Queue</span>
-                  <QueueListIcon className="h-5 w-5 text-white/60" />
-                </button>
-                <Link
-                  href="/host/settings"
-                  className="w-full flex items-center justify-between px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors"
-                >
-                  <span>Settings</span>
-                  <Cog6ToothIcon className="h-5 w-5 text-white/60" />
-                </Link>
+                {[
+                  {
+                    text: 'Skip Current Song',
+                    icon: <ChartBarIcon className="h-5 w-5 text-white/60" />,
+                  },
+                  {
+                    text: 'Pause Queue',
+                    icon: <QueueListIcon className="h-5 w-5 text-white/60" />,
+                  },
+                  {
+                    text: 'Settings',
+                    icon: <Cog6ToothIcon className="h-5 w-5 text-white/60" />,
+                    href: '/host/settings',
+                  },
+                ].map((action, index) =>
+                  action.href ? (
+                    <motion.div key={action.text} variants={fadeIn}>
+                      <Link
+                        href={action.href}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors"
+                      >
+                        <span>{action.text}</span>
+                        {action.icon}
+                      </Link>
+                    </motion.div>
+                  ) : (
+                    <motion.button
+                      key={action.text}
+                      variants={fadeIn}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors"
+                    >
+                      <span>{action.text}</span>
+                      {action.icon}
+                    </motion.button>
+                  ),
+                )}
               </div>
-            </div>
+            </motion.div>
 
             {/* Recent Activity */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <motion.div
+              variants={fadeIn}
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+            >
               <h2 className="text-lg font-medium text-white mb-4">
                 Recent Activity
               </h2>
               <div className="text-white/40 text-center py-8">
                 No recent activity
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </main>
+      </motion.main>
     </div>
   );
 }
