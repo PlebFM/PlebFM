@@ -163,8 +163,8 @@ export default function HostSignup() {
                       Connect Your Spotify Premium Account
                     </h2>
                     <p className="text-white/60 text-sm">
-                      PlebFM uses Spotify to play music at your venue. You'll
-                      need a Premium account to control playback.
+                      PlebFM uses Spotify to play music at your venue.
+                      You&apos;ll need a Premium account to control playback.
                     </p>
                   </div>
                 </div>

@@ -25,6 +25,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         shortName,
         spotifyRefreshToken: refreshToken,
         spotifyId,
+        hostId: spotifyId,
       };
       const result = await Hosts.create(host);
       res.status(200).json({ success: true, host: result });
