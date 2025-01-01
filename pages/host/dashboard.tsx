@@ -1,4 +1,4 @@
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { Host } from '../../models/Host';
@@ -152,6 +152,12 @@ export default function HostDashboard() {
                 View Public Page
               </Link>
               <div className="text-sm text-white/50">{host.hostName}</div>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-sm text-white/50 hover:text-white/70 transition-colors"
+              >
+                Logout
+              </button>
             </div>
             <button
               className="md:hidden p-2"
@@ -201,6 +207,12 @@ export default function HostDashboard() {
                 >
                   View Public Page
                 </Link>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Logout
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
