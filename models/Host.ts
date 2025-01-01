@@ -1,4 +1,3 @@
-// import { Schema, model, models } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 
 /**
@@ -8,43 +7,42 @@ import mongoose, { Schema } from 'mongoose';
  * @field hostId: string - cuid of host object in db
  * @field hostName: string - full name of host
  * @field shortName: string - short name lookup of host
- * @field spotifyRefreshToken: string - token generated upon signup to get spotify auth
+ * @field spotifyRefreshToken: string - token generated upon signup to get spotify a
  */
 export type Host = {
-  hostName?: string;
-  shortName?: string;
+  hostId: string;
+  hostName: string;
+  shortName: string;
   spotifyRefreshToken: string;
   spotifyId: string;
-  hostId: string;
 };
 
 const HostSchema = new Schema<Host>({
-  hostName: {
-    type: String,
-    unique: true,
-    required: false,
-  },
-  shortName: {
-    type: String,
-    unique: true,
-    required: false,
-  },
-  spotifyRefreshToken: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  spotifyId: {
-    type: String,
-    required: true,
-  },
   hostId: {
     type: String,
     unique: true,
     required: true,
   },
+  hostName: {
+    type: String,
+    unique: false,
+    required: true,
+  },
+  shortName: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  spotifyRefreshToken: {
+    type: String,
+    unique: true,
+    required: false,
+  },
+  spotifyId: {
+    type: String,
+    unique: true,
+  },
 });
 
-const Hosts =
-  mongoose.models['hosts-v2'] || mongoose.model('hosts-v2', HostSchema);
+const Hosts = mongoose.models.Hosts || mongoose.model('Hosts', HostSchema);
 export default Hosts;

@@ -17,15 +17,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       // Adds new host
     } else if (req.method === 'POST') {
-      const { hostName, shortName, refreshToken, spotifyId } = req.body;
+      const { hostName, shortName, hostId, refreshToken, spotifyId } = req.body;
       if (!hostName)
         res.status(400).json({ error: `hostName must be present` });
       const host: Host = {
         hostName,
         shortName,
+        hostId,
         spotifyRefreshToken: refreshToken,
         spotifyId,
-        hostId: spotifyId,
       };
       const result = await Hosts.create(host);
       res.status(200).json({ success: true, host: result });
