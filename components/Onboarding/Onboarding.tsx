@@ -64,7 +64,8 @@ export default function Onboarding(props: OnboardingProps) {
         <Image
           src={'/pfm-bokeh-1.jpg'}
           alt=""
-          width="100"
+          width="1"
+          height="1"
           className="object-cover w-full h-full blur-2xl opacity-75"
         />
       </div>

@@ -1,7 +1,9 @@
-import NextAuth, { Session } from 'next-auth';
+import NextAuth, { NextAuthOptions, Session } from 'next-auth';
 import { JWT } from 'next-auth/jwt/types';
 
 import SpotifyProvider from 'next-auth/providers/spotify';
+import connectDB from '../../../middleware/mongodb';
+import Hosts from '../../../models/Host';
 
 type GenericObject<T = unknown> = T & {
   [key: string]: any;
@@ -43,7 +45,16 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
   }
 };
 
-export default NextAuth({
+const createHost = async (spotifyId: string, refreshToken: string) => {
+  const host = await Hosts.findOneAndUpdate(
+    { hostId: spotifyId },
+    { spotifyRefreshToken: refreshToken, spotifyId, hostId: spotifyId },
+    { new: true, upsert: true },
+  );
+  return host;
+};
+
+export const authOptions: NextAuthOptions = {
   providers: [
     SpotifyProvider({
       clientId: process.env.SPOTIFY_CLIENT_ID || '',
@@ -54,8 +65,9 @@ export default NextAuth({
   ],
   callbacks: {
     //@ts-ignore
-    async jwt({ token, user, account }: JwtInterface): Promise<JWT> {
+    jwt: connectDB(async ({ token, user, account }): Promise<JWT> => {
       if (account && user) {
+        await createHost(user.id, account.refresh_token);
         return {
           accessToken: account.access_token,
           refreshToken: account.refresh_token,
@@ -72,7 +84,7 @@ export default NextAuth({
         return newToken;
       }
       // return res;
-    },
+    }),
     // @ts-ignore
     async session({
       session,
@@ -89,4 +101,6 @@ export default NextAuth({
       return session;
     },
   },
-});
+};
+
+export default NextAuth(authOptions);
