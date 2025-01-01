@@ -20,8 +20,7 @@ export default function OnboardingIdentity(props: OnboardingIdentityProps) {
         <Image
           src={'/pfm-bokeh-1.jpg'}
           alt=""
-          width="1"
-          height="1"
+          width="100"
           className="object-cover w-full h-full blur-2xl opacity-75"
         />
       </div>
