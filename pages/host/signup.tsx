@@ -54,11 +54,27 @@ export default function HostSignup() {
   };
 
   useEffect(() => {
-    if (!session || !session.user) return;
-    // @ts-ignore
-    const spotifyId = session.user.id;
-    if (!spotifyId) signOut();
-  }, [session]);
+    const checkExistingHost = async () => {
+      if (!session?.user?.id) return;
+      try {
+        const res = await fetch(`/api/hosts?spotifyId=${session.user.id}`);
+        const data = await res.json();
+        const host = data.hosts[0];
+
+        if (host?.hostName && host?.shortName) {
+          // If host exists and has details set, redirect to dashboard
+          router.push('/host/dashboard');
+        } else if (host) {
+          // If host exists but details not set, go to details step
+          setCurrentStep('details');
+        }
+      } catch (error) {
+        console.error('Error checking host:', error);
+      }
+    };
+
+    checkExistingHost();
+  }, [session, router]);
 
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
