@@ -5,6 +5,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
+import { MusicalNoteIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 type OnboardingStep = 'spotify' | 'details' | 'complete';
 
@@ -151,10 +153,74 @@ export default function HostSignup() {
             className="bg-white/10 backdrop-blur-sm rounded-lg p-8"
           >
             {currentStep === 'spotify' && (
-              <div className="space-y-6">
-                <SpotifyAuthButton
-                  onSuccess={() => setCurrentStep('details')}
-                />
+              <div className="space-y-8">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center">
+                    <MusicalNoteIcon className="h-8 w-8 text-green-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-medium text-white mb-2">
+                      Connect Your Spotify Premium Account
+                    </h2>
+                    <p className="text-white/60 text-sm">
+                      PlebFM uses Spotify to play music at your venue. You'll
+                      need a Premium account to control playback.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white/5 rounded-lg p-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="min-w-8 mt-1">
+                      <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-white/80">
+                          1
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-white mb-1">
+                        Premium Account Required
+                      </h3>
+                      <p className="text-white/60 text-sm">
+                        Make sure you&apos;re using a Spotify Premium account to
+                        enable playback control.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/5 rounded-lg p-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="min-w-8 mt-1">
+                      <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-white/80">
+                          2
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-white mb-1">
+                        Grant Permissions
+                      </h3>
+                      <p className="text-white/60 text-sm">
+                        You&apos;ll need to allow PlebFM to control playback and
+                        manage your queue.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <SpotifyAuthButton
+                    onSuccess={() => setCurrentStep('details')}
+                  />
+                </div>
+
+                <div className="text-center text-white/40 text-sm">
+                  By connecting, you agree to our Terms of Service and Privacy
+                  Policy
+                </div>
               </div>
             )}
 
