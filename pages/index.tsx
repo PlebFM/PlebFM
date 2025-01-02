@@ -30,7 +30,7 @@ export default function Index({ hosts, error }: IndexProps) {
 
       <div className="relative z-50 max-w-2xl mx-auto p-8 text-white">
         <Hero />
-        <div className="flex flex-col md:flex-row gap-8 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
           <UserSection hosts={hosts} error={error} />
           <HostSection />
         </div>

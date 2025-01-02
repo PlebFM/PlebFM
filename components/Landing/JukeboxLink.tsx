@@ -8,7 +8,10 @@ interface JukeboxLinkProps {
 export default function JukeboxLink({ href, children }: JukeboxLinkProps) {
   return (
     <li>
-      <Link href={href} className="text-orange-300 hover:text-orange-200">
+      <Link
+        href={href}
+        className="text-orange-300 hover:text-orange-200 block truncate"
+      >
         {children}
       </Link>
     </li>
