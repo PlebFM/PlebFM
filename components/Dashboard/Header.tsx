@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import plebFMLogo from '../../public/plebfm-logo.svg';
+import { useRouter } from 'next/router';
 
 interface HeaderProps {
   hostName: string;
@@ -18,6 +19,9 @@ export function Header({
   mobileMenuOpen,
   setMobileMenuOpen,
 }: HeaderProps) {
+  const router = useRouter();
+  const currentPath = router.pathname;
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -36,25 +40,41 @@ export function Header({
             <div className="hidden lg:flex ml-8 space-x-6">
               <Link
                 href="/host/dashboard"
-                className="text-white/90 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                className={`${
+                  currentPath === '/host/dashboard'
+                    ? 'text-white'
+                    : 'text-white/70 hover:text-white'
+                } px-3 py-2 rounded-md text-sm font-medium`}
               >
                 Dashboard
               </Link>
               <Link
                 href="/host/queue"
-                className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                className={`${
+                  currentPath === '/host/queue'
+                    ? 'text-white'
+                    : 'text-white/70 hover:text-white'
+                } px-3 py-2 rounded-md text-sm font-medium`}
               >
                 Queue
               </Link>
               <Link
                 href="/host/analytics"
-                className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                className={`${
+                  currentPath === '/host/analytics'
+                    ? 'text-white'
+                    : 'text-white/70 hover:text-white'
+                } px-3 py-2 rounded-md text-sm font-medium`}
               >
                 Analytics
               </Link>
               <Link
                 href="/host/settings"
-                className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                className={`${
+                  currentPath === '/host/settings'
+                    ? 'text-white'
+                    : 'text-white/70 hover:text-white'
+                } px-3 py-2 rounded-md text-sm font-medium`}
               >
                 Settings
               </Link>
@@ -78,7 +98,10 @@ export function Header({
           </div>
           <button
             className="lg:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={e => {
+              e.preventDefault();
+              setMobileMenuOpen(!mobileMenuOpen);
+            }}
           >
             <Bars3Icon className="h-6 w-6 text-white" />
           </button>

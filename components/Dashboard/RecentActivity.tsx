@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ClockIcon } from '@heroicons/react/24/outline';
 
-interface Activity {
+export interface Activity {
   id: string;
   type: 'song_added' | 'song_played' | 'song_skipped';
   title: string;
