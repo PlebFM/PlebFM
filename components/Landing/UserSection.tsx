@@ -1,10 +1,13 @@
 import Section from './Section';
 import JukeboxLink from './JukeboxLink';
-import { useHosts } from '../hooks/useHost';
+import { Host } from '../hooks/useHost';
 
-export default function UserSection() {
-  const { hosts, isLoading, error } = useHosts();
+interface UserSectionProps {
+  hosts: Host[];
+  error?: string;
+}
 
+export default function UserSection({ hosts, error }: UserSectionProps) {
   return (
     <Section>
       <h2 className="text-2xl font-medium mb-4">Ready to Play Music?</h2>
@@ -18,9 +21,7 @@ export default function UserSection() {
         <p className="text-red-400 mb-4">Unable to load jukeboxes: {error}</p>
       )}
 
-      {isLoading ? (
-        <p className="text-white/60">Loading jukeboxes...</p>
-      ) : hosts.length === 0 ? (
+      {hosts.length === 0 ? (
         <p className="text-white/60">No active jukeboxes found</p>
       ) : (
         <ul className="space-y-2">

@@ -1,12 +1,12 @@
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
+import { GetServerSideProps } from 'next';
+import { getSession } from 'next-auth/react';
 import {
   MusicalNoteIcon,
   CurrencyDollarIcon,
-  UsersIcon,
 } from '@heroicons/react/24/outline';
 
 import { Header } from '../../components/Dashboard/Header';
@@ -14,78 +14,21 @@ import { MobileMenu } from '../../components/Dashboard/MobileMenu';
 import { StatsCard } from '../../components/Dashboard/StatsCard';
 import { QuickActions } from '../../components/Dashboard/QuickActions';
 import { RecentActivity } from '../../components/Dashboard/RecentActivity';
-import { useQueue } from '../../components/hooks/useQueue';
 import type { Activity } from '../../components/Dashboard/RecentActivity';
-import type { SongObject } from '../../utils/songs';
+import { cleanSong, SongObject } from '../../utils/songs';
+import type { Host } from '../../components/hooks/useHost';
 
-export default function HostDashboard() {
-  const { data: session } = useSession();
+interface DashboardProps {
+  host: Host | null;
+  queueData: SongObject[];
+}
+
+export default function HostDashboard({ host, queueData }: DashboardProps) {
   const router = useRouter();
-  const [shortName, setShortName] = useState<string | null>(null);
-  const [hostName, setHostName] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [earnings, setEarnings] = useState(0);
 
-  // Get queue data
-  const { queueData, refreshQueue } = useQueue(false, shortName ?? undefined);
-
-  useEffect(() => {
-    const fetchHost = async () => {
-      if (!session?.user?.id) return;
-      try {
-        const res = await fetch(`/api/hosts?spotifyId=${session.user.id}`);
-        const data = await res.json();
-        if (data.hosts.length === 0) {
-          router.push('/host/signup');
-          return;
-        }
-        setShortName(data.hosts[0].shortName);
-        setHostName(data.hosts[0].hostName);
-      } catch (error) {
-        console.error('Error fetching host:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHost();
-  }, [session, router]);
-
-  // Fetch earnings data
-  // useEffect(() => {
-  //   const fetchEarnings = async () => {
-  //     if (!host) return;
-  //     try {
-  //       // const res = await fetch(`/api/earnings?shortName=${host.shortName}`);
-  //       // const data = await res.json();
-  //       // setEarnings(data.total || 0);
-  //     } catch (error) {
-  //       console.error('Error fetching earnings:', error);
-  //     }
-  //   };
-
-  //   fetchEarnings();
-  //   // Refresh earnings every minute
-  //   const interval = setInterval(fetchEarnings, 60000);
-  //   return () => clearInterval(interval);
-  // }, [host]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-white/50"
-        >
-          Loading...
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (!shortName) return null;
+  if (!host) return null;
 
   const recentActivities: Activity[] = [
     // track && {
@@ -116,19 +59,19 @@ export default function HostDashboard() {
   return (
     <div className="min-h-screen bg-black">
       <Head>
-        <title>{shortName} - PlebFM Dashboard</title>
+        <title>Dashboard - PlebFM</title>
       </Head>
 
       <Header
-        hostName={hostName ?? ''}
-        shortName={shortName}
+        hostName={host.hostName}
+        shortName={host.shortName}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
       <MobileMenu
         isOpen={mobileMenuOpen}
-        shortName={shortName}
+        shortName={host.shortName}
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
@@ -139,7 +82,7 @@ export default function HostDashboard() {
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-white">
-            Welcome back, {hostName}
+            Welcome back, {host.hostName}
           </h1>
           <p className="text-white/60 mt-2 mb-8">
             Here&apos;s what&apos;s happening with your jukebox today.
@@ -160,20 +103,13 @@ export default function HostDashboard() {
               icon={<CurrencyDollarIcon className="h-6 w-6 text-green-400" />}
               iconBg="bg-green-400/10"
             />
-            {/* <StatsCard
-              title="Queue Status"
-              value={track ? (isPaused ? 'Paused' : 'Playing') : 'Idle'}
-              trend={track ? track.name : 'No track'}
-              icon={<UsersIcon className="h-6 w-6 text-blue-400" />}
-              iconBg="bg-blue-400/10"
-            /> */}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <QuickActions
               onSkip={() => {
-                if (shortName) {
-                  fetch(`/api/skip?shortName=${shortName}`, {
+                if (host.shortName) {
+                  fetch(`/api/skip?shortName=${host.shortName}`, {
                     method: 'POST',
                   });
                 }
@@ -187,3 +123,56 @@ export default function HostDashboard() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<
+  DashboardProps
+> = async context => {
+  const session = await getSession(context);
+
+  if (!session?.user?.id) {
+    return {
+      redirect: {
+        destination: '/host/login',
+        permanent: false,
+      },
+    };
+  }
+
+  try {
+    // Fetch host data
+    const hostRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?spotifyId=${session.user.id}`,
+    );
+    const hostData = await hostRes.json();
+
+    if (hostData.hosts.length === 0) {
+      return {
+        redirect: {
+          destination: '/host/signup',
+          permanent: false,
+        },
+      };
+    }
+
+    const host = hostData.hosts[0];
+
+    // Fetch queue data
+    const url = `${
+      process.env.NEXT_PUBLIC_BASE_URL
+    }/api/leaderboard/queue?playing=${true}&shortName=${host.shortName}`;
+    const queueRes = await fetch(url);
+    const queue = await queueRes.json();
+
+    return {
+      props: {
+        host,
+        queueData: queue.data.map(cleanSong) || [],
+      },
+    };
+  } catch (err) {
+    console.error(err);
+    throw err instanceof Error
+      ? err
+      : new Error('Failed to fetch data for dashboard');
+  }
+};
