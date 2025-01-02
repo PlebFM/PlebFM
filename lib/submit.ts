@@ -1,4 +1,4 @@
-import cuid from 'cuid';
+import { createId } from '@paralleldrive/cuid2';
 import Hosts, { Host } from '../models/Host';
 import Users, { User } from '../models/User';
 import Plays, { Play } from '../models/Play';
@@ -32,7 +32,7 @@ const handleExistingBid = async (bid: Bid, existingPlay: Play) => {
 
 const handleNewBid = async (bid: Bid, track: Song, host: Host) => {
   const newPlay: Play = {
-    playId: cuid(),
+    playId: createId(),
     hostId: host.hostId,
     songId: track.id,
     status: 'queued',
@@ -71,7 +71,7 @@ export const submitBid = async (
   });
   const now: string = Date.now().toString();
   const bid: Bid = {
-    bidId: cuid(),
+    bidId: createId(),
     user: user ?? Anon,
     bidAmount: bidAmount,
     timestamp: now,

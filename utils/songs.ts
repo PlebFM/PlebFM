@@ -43,7 +43,7 @@ export const cleanSong = (song: Play, user?: User): SongObject => {
     artistName: song.songArtist,
     feeRate: totalBid,
     playing: song.status === 'playing',
-    myPick,
+    myPick: !!myPick,
     upNext: song.status === 'next',
     bidders,
     queued: song.status === 'queued',

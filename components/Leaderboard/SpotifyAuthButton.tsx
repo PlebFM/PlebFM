@@ -1,55 +1,24 @@
-import { useSession, signIn, signOut } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { signIn, signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { Session } from 'next-auth';
 
 interface SpotifyAuthButtonProps {
-  onSuccess?: () => void;
+  session: Session | null;
+  isVerified?: boolean;
+  isLoading: boolean;
+  onSuccessRedirect?: string;
+  onContinue?: () => void;
 }
 
-const findHost = async (spotifyId: string) => {
-  const res = await fetch(`/api/hosts?spotifyId=${spotifyId}`, {
-    method: 'GET',
-    mode: 'no-cors',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      Accept: 'application/json',
-    },
-  });
-  const resJson = await res.json();
-  return resJson.hosts[0];
-};
-
-const SpotifyAuthButton = ({ onSuccess }: SpotifyAuthButtonProps) => {
-  const { data: session } = useSession();
-  const [isVerified, setIsVerified] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!session?.user?.id || isVerified || isLoading) return;
-
-    const verifySpotifyUser = async () => {
-      setIsLoading(true);
-      try {
-        if (!session.user?.id) return;
-        const host = await findHost(session.user.id);
-        if (host) {
-          setIsVerified(true);
-        } else {
-          await signOut();
-        }
-      } catch (error) {
-        console.error('Error verifying Spotify user:', error);
-        await signOut();
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    verifySpotifyUser();
-  }, [isLoading, isVerified, session]);
-
-  if (session) {
+const SpotifyAuthButton = ({
+  session,
+  isVerified = false,
+  isLoading,
+  onSuccessRedirect,
+  onContinue,
+}: SpotifyAuthButtonProps) => {
+  if (session && isVerified) {
     return (
       <div className="flex flex-col items-center space-y-6">
         <motion.div
@@ -69,7 +38,7 @@ const SpotifyAuthButton = ({ onSuccess }: SpotifyAuthButtonProps) => {
         </motion.div>
 
         <AnimatePresence>
-          {isVerified && !isLoading && (
+          {!isLoading && onContinue && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -79,7 +48,7 @@ const SpotifyAuthButton = ({ onSuccess }: SpotifyAuthButtonProps) => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onSuccess?.()}
+                onClick={onContinue}
                 className="flex items-center justify-center space-x-2 bg-orange-300/90 hover:bg-orange-300 text-black font-medium px-8 py-3 rounded-lg transition-colors"
               >
                 <span>Continue</span>
@@ -105,7 +74,7 @@ const SpotifyAuthButton = ({ onSuccess }: SpotifyAuthButtonProps) => {
     <motion.button
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => signIn('spotify')}
+      onClick={() => signIn('spotify', { callbackUrl: onSuccessRedirect })}
       className="w-full flex items-center justify-center space-x-3 bg-[#1DB954] hover:bg-[#1ed760] text-white font-medium px-8 py-3 rounded-lg transition-colors"
     >
       <svg className="w-6 h-6" viewBox="0 0 24 24">

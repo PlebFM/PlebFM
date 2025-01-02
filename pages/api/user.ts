@@ -6,7 +6,7 @@ import Users, {
   randomEnumValue,
   User,
 } from '../../models/User';
-import cuid from 'cuid';
+import { createId } from '@paralleldrive/cuid2';
 import connectDB from '../../middleware/mongodb';
 
 const getColorFromAdjective = (firstNym: any) => {
@@ -17,7 +17,7 @@ const getColorFromAdjective = (firstNym: any) => {
 };
 
 const generateUser = () => {
-  const userId = cuid();
+  const userId = createId();
   const firstNym = randomEnumValue(Adjectives);
   const lastNym = randomEnumValue(Characters);
   const avatar = getColorFromAdjective(firstNym);
