@@ -11,7 +11,7 @@ export default function Section({
   className = '',
   variant = 'default',
 }: SectionProps) {
-  const baseClasses = 'flex-1 backdrop-blur-sm p-6 rounded-lg';
+  const baseClasses = 'flex-1 backdrop-blur-2xl p-6 rounded-lg';
   const variantClasses =
     variant === 'host' ? 'bg-orange-100/10' : 'bg-white/10';
 

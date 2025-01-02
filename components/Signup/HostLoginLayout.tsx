@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import plebFMLogo from '../../public/plebfm-logo.svg';
+import plebFMLogoBold from '../../public/plebfm-logo-bold.svg';
 import { ReactNode } from 'react';
 
 interface HostLayoutProps {
@@ -9,7 +9,7 @@ interface HostLayoutProps {
   children: ReactNode;
 }
 
-export default function HostLayout({ title, children }: HostLayoutProps) {
+export default function HostLoginLayout({ title, children }: HostLayoutProps) {
   return (
     <div className="min-h-screen bg-black">
       <Head>
@@ -24,7 +24,12 @@ export default function HostLayout({ title, children }: HostLayoutProps) {
             href="/"
             className="block w-28 transition-opacity hover:opacity-80"
           >
-            <Image src={plebFMLogo} alt="PlebFM" priority className="w-full" />
+            <Image
+              src={plebFMLogoBold}
+              alt="PlebFM"
+              priority
+              className="w-full"
+            />
           </Link>
         </div>
       </header>

@@ -1,89 +1,90 @@
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import {
+  DashboardLayout,
+  getServerSidePropsForDashboard,
+  type DashboardPageProps,
+} from '../../components/Dashboard/HostDashboardLayout';
+import { SettingsSidebar } from '../../components/Dashboard/SettingsSidebar';
 
-import { Header } from '../../components/Dashboard/Header';
-import { MobileMenu } from '../../components/Dashboard/MobileMenu';
+export default function HostSettings({ host, queueData }: DashboardPageProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-export default function HostSettings() {
-  const { data: session } = useSession();
-  const router = useRouter();
-  const [shortName, setShortName] = useState<string | null>(null);
-  const [hostName, setHostName] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchHost = async () => {
-      if (!session?.user?.id) return;
-      try {
-        const res = await fetch(`/api/hosts?spotifyId=${session.user.id}`);
-        const data = await res.json();
-        if (data.hosts.length === 0) {
-          router.push('/host/signup');
-          return;
-        }
-        setShortName(data.hosts[0].shortName);
-        setHostName(data.hosts[0].hostName);
-      } catch (error) {
-        console.error('Error fetching host:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHost();
-  }, [session, router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-white/50"
-        >
-          Loading...
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (!shortName) return null;
+  if (!host) return null;
 
   return (
-    <div className="min-h-screen bg-black">
-      <Head>
-        <title>{shortName} - Settings</title>
-      </Head>
+    <DashboardLayout
+      host={host}
+      title="Settings"
+      subtitle="Manage your jukebox settings and preferences."
+      margin="large"
+    >
+      <div className="flex gap-8">
+        <SettingsSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-      <Header
-        hostName={hostName ?? ''}
-        shortName={shortName}
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
-
-      <MobileMenu
-        isOpen={mobileMenuOpen}
-        shortName={shortName}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex flex-col items-center justify-center py-20">
-            <h1 className="text-3xl font-bold text-white mb-4">Settings</h1>
-            <p className="text-white/60 text-lg">Coming Soon</p>
+        <div className="flex-1 space-y-6 min-w-0">
+          <div>
+            <h2 className="text-xl font-medium text-white mb-1">Team Name</h2>
+            <p className="text-sm text-white/60 mb-4">
+              This is your jukebox&apos;s visible name to your customers.
+            </p>
+            <div className="bg-white/5 rounded-lg border border-white/10 p-4">
+              <input
+                type="text"
+                value={host.hostName}
+                className="block w-full bg-black border border-white/10 rounded-md px-3 py-2 text-white placeholder-white/40 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Enter your jukebox name"
+              />
+              <p className="mt-2 text-xs text-white/40">
+                Please use 32 characters at maximum.
+              </p>
+            </div>
           </div>
-        </motion.div>
-      </main>
-    </div>
+
+          <div>
+            <h2 className="text-xl font-medium text-white mb-1">Jukebox URL</h2>
+            <p className="text-sm text-white/60 mb-4">
+              Your jukebox&apos;s unique URL where customers can request songs.
+            </p>
+            <div className="bg-white/5 rounded-lg border border-white/10 p-4">
+              <div className="flex rounded-md">
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-white/10 bg-white/5 text-white/40 text-sm">
+                  {process.env.NEXT_PUBLIC_BASE_URL}/
+                </span>
+                <input
+                  type="text"
+                  value={host.shortName}
+                  className="block w-full bg-black border border-white/10 rounded-none rounded-r-md px-3 py-2 text-white placeholder-white/40 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="your-jukebox-name"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-medium text-white mb-1">Danger Zone</h2>
+            <p className="text-sm text-white/60 mb-4">
+              Irreversible and destructive actions.
+            </p>
+            <div className="bg-white/5 rounded-lg border border-red-500/10 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-white">
+                    Delete Jukebox
+                  </h3>
+                  <p className="text-sm text-white/60">
+                    Permanently delete your jukebox and all of its data.
+                  </p>
+                </div>
+                <button className="px-4 py-2 text-sm font-medium text-white bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }
+
+export const getServerSideProps = getServerSidePropsForDashboard;

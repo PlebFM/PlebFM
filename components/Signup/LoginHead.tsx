@@ -4,7 +4,7 @@ interface HostHeadProps {
   title: string;
 }
 
-export default function HostHead({ title }: HostHeadProps) {
+export default function LoginHead({ title }: HostHeadProps) {
   return (
     <Head>
       <title>{title} - PlebFM</title>

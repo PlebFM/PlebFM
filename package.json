@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@bitcoin-design/bitcoin-icons-react": "^0.1.9",
+    "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.0.13",
     "cuid": "^2.1.8",
     "framer-motion": "^11.15.0",

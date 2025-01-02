@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import plebFMLogo from '../../public/plebfm-logo.svg';
 
-export default function HostHeader() {
+export default function LoginHeader() {
   return (
     <header className="absolute top-0 left-0 right-0 p-4">
       <div className="max-w-xl mx-auto">

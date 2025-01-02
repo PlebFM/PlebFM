@@ -1,9 +1,9 @@
 import { signOut, useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import HostLayout from '../../components/Head/HostLayout';
+import HostLoginLayout from '../../components/Signup/HostLoginLayout';
 import { useHostLogin } from '../../components/hooks/useHostLogin';
 import SpotifyStep from '../../components/Signup/SpotifyStep';
 import DetailsStep from '../../components/Signup/DetailsStep';
@@ -98,7 +98,7 @@ export default function HostSignup() {
   };
 
   return (
-    <HostLayout title="Create Your Jukebox">
+    <HostLoginLayout title="Create Your Jukebox">
       {/* Step Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -163,6 +163,6 @@ export default function HostSignup() {
           {currentStep === 'complete' && <CompleteStep />}
         </motion.div>
       </AnimatePresence>
-    </HostLayout>
+    </HostLoginLayout>
   );
 }

@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { GetServerSideProps } from 'next';
+import { motion } from 'framer-motion';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import Hero from '../components/Landing/Hero';
 import UserSection from '../components/Landing/UserSection';
@@ -24,17 +25,34 @@ export default function Index({ hosts, error }: IndexProps) {
           src={bokeh2}
           alt="xl"
           width="100"
-          className="object-cover w-full h-full blur-2xl opacity-10"
+          className="object-cover w-full h-full blur-2xl opacity-15"
         />
       </div>
 
-      <div className="relative z-50 max-w-2xl mx-auto p-8 text-white">
-        <Hero />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-50 max-w-2xl mx-auto p-8 text-white"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <Hero />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8"
+        >
           <UserSection hosts={hosts} error={error} />
           <HostSection />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

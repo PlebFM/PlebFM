@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import logo from '../public/plebfm-logo.svg';
@@ -8,10 +8,11 @@ import Head from 'next/head';
 export default function NotFound() {
   const router = useRouter();
 
+  const [redirectPath, setRedirectPath] = useState('/');
+
   useEffect(() => {
     if (router.asPath.startsWith('/host/')) {
-      router.replace('/host/login');
-      return;
+      setRedirectPath('/host/login');
     }
   }, [router]);
 
@@ -42,7 +43,7 @@ export default function NotFound() {
         <h1 className="text-6xl font-bold mb-4">404</h1>
         <p className="text-xl mb-8">This page doesn&apos;t exist</p>
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push(redirectPath)}
           className="px-6 py-3 bg-pink-600 hover:bg-pink-700 rounded-full transition-colors"
         >
           Go Home

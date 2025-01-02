@@ -2,14 +2,14 @@ import Link from 'next/link';
 import SpotifyAuthButton from '../../components/Leaderboard/SpotifyAuthButton';
 import { motion } from 'framer-motion';
 import { MusicalNoteIcon } from '@heroicons/react/24/outline';
-import HostLayout from '../../components/Head/HostLayout';
+import HostLoginLayout from '../../components/Signup/HostLoginLayout';
 import { useHostLogin } from '../../components/hooks/useHostLogin';
 
 export default function HostLogin() {
-  const { session, isVerified, isLoading } = useHostLogin();
+  const { session, isLoading } = useHostLogin();
 
   return (
-    <HostLayout title="Host Login - PlebFM">
+    <HostLoginLayout title="Host Login">
       {/* Step Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -64,6 +64,6 @@ export default function HostLogin() {
           </div>
         </div>
       </motion.div>
-    </HostLayout>
+    </HostLoginLayout>
   );
 }
