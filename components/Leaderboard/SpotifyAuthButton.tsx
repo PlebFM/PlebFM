@@ -13,12 +13,12 @@ interface SpotifyAuthButtonProps {
 
 const SpotifyAuthButton = ({
   session,
-  isVerified = false,
+  // isVerified = false,
   isLoading,
   onSuccessRedirect,
   onContinue,
 }: SpotifyAuthButtonProps) => {
-  if (session && isVerified) {
+  if (session) {
     return (
       <div className="flex flex-col items-center space-y-6">
         <motion.div
@@ -70,11 +70,13 @@ const SpotifyAuthButton = ({
     );
   }
 
+  const options = onSuccessRedirect ? { callbackUrl: onSuccessRedirect } : {};
+
   return (
     <motion.button
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => signIn('spotify', { callbackUrl: onSuccessRedirect })}
+      onClick={() => signIn('spotify', options)}
       className="w-full flex items-center justify-center space-x-3 bg-[#1DB954] hover:bg-[#1ed760] text-white font-medium px-8 py-3 rounded-lg transition-colors"
     >
       <svg className="w-6 h-6" viewBox="0 0 24 24">

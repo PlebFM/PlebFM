@@ -13,7 +13,7 @@ export default function HostLoginLayout({ title, children }: HostLayoutProps) {
   return (
     <div className="min-h-screen bg-black">
       <Head>
-        <title>{title} - PlebFM</title>
+        <title>{`${title} - PlebFM`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/pleb-fm-favicon.svg" />
       </Head>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { SettingsSection } from './SettingsSection';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 interface JukeboxUrlSettingsProps {
   shortName: string;
@@ -13,28 +15,39 @@ export function JukeboxUrlSettings({
 }: JukeboxUrlSettingsProps) {
   const [currentValue, setCurrentValue] = useState(shortName);
   const hasChanges = currentValue !== shortName;
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const handleChange = (value: string) => {
     setCurrentValue(value);
   };
 
   const handleSave = async () => {
-    toast.promise(
-      new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (currentValue.length > 0) {
-            resolve(currentValue);
-          } else {
-            reject(new Error('Invalid URL'));
-          }
-        }, 1000);
-      }),
-      {
-        loading: 'Saving...',
-        success: 'Jukebox URL updated successfully',
-        error: 'Failed to update jukebox URL',
-      },
-    );
+    const savePromise = async () => {
+      const response = await fetch('/api/hosts', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          spotifyId: session?.user?.id,
+          shortName: currentValue,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update jukebox URL');
+      }
+
+      await router.replace(router.asPath);
+      return response.json();
+    };
+
+    return toast.promise(savePromise(), {
+      loading: 'Saving...',
+      success: 'Jukebox URL updated successfully',
+      error: 'Failed to update jukebox URL',
+    });
   };
 
   return (

@@ -10,33 +10,6 @@ import { TeamNameSettings } from '../../components/Settings/TeamNameSettings';
 import { JukeboxUrlSettings } from '../../components/Settings/JukeboxUrlSettings';
 import { DangerZone } from '../../components/Settings/DangerZone';
 
-// toast('Hello World', {
-//   duration: 4000,
-//   position: 'top-center',
-
-//   // Styling
-//   style: {},
-//   className: '',
-
-//   // Custom Icon
-//   icon: '👏',
-
-//   // Change colors of success/error/loading icon
-//   iconTheme: {
-//     primary: '#000',
-//     secondary: '#fff',
-//   },
-
-//   // Aria
-//   ariaProps: {
-//     role: 'status',
-//     'aria-live': 'polite',
-//   },
-
-//   // Additional Configuration
-//   removeDelay: 1000,
-// });
-
 export default function HostSettings({ host, queueData }: DashboardPageProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);

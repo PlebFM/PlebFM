@@ -40,7 +40,7 @@ export function DashboardLayout({
   return (
     <div className="min-h-screen bg-black">
       <Head>
-        <title>{title} - PlebFM</title>
+        <title>{`${title} - PlebFM`}</title>
       </Head>
 
       <Header hostName={host.hostName} shortName={host.shortName} />

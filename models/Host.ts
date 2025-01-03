@@ -22,12 +22,12 @@ const HostSchema = new Schema<Host>({
   hostName: {
     type: String,
     unique: true,
-    required: false,
+    sparse: true,
   },
   shortName: {
     type: String,
     unique: true,
-    required: false,
+    sparse: true,
   },
   spotifyRefreshToken: {
     type: String,
@@ -46,5 +46,5 @@ const HostSchema = new Schema<Host>({
 });
 
 const Hosts =
-  mongoose.models['hosts-v2'] || mongoose.model('hosts-v2', HostSchema);
+  mongoose.models['hosts-v3'] || mongoose.model('hosts-v3', HostSchema);
 export default Hosts;

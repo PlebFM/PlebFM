@@ -49,7 +49,7 @@ export default function Bidding() {
 
   if (!newUser && !userProfile.firstNym) {
     return (
-      <Layout>
+      <Layout title="Loading">
         <LoadingSpinner />
       </Layout>
     );
