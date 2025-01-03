@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { SettingsSection } from './SettingsSection';
 
 interface JukeboxUrlSettingsProps {
@@ -18,9 +19,22 @@ export function JukeboxUrlSettings({
   };
 
   const handleSave = async () => {
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Saving team name:', currentValue);
+    toast.promise(
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (currentValue.length > 0) {
+            resolve(currentValue);
+          } else {
+            reject(new Error('Invalid URL'));
+          }
+        }, 1000);
+      }),
+      {
+        loading: 'Saving...',
+        success: 'Jukebox URL updated successfully',
+        error: 'Failed to update jukebox URL',
+      },
+    );
   };
 
   return (
