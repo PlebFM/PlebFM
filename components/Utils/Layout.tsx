@@ -7,11 +7,10 @@ interface LayoutProps {
 }
 
 export default function Layout(props: LayoutProps) {
-  const title = (props.title ? props.title + ' | ' : '') + 'PlebFM';
   return (
     <>
       <Head>
-        <title>{title}</title>
+        <title>{`${props.title} - PlebFM`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta
           name="description"

@@ -18,30 +18,33 @@ export function useHostLogin() {
   const { data: session } = useSession();
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasVerified, setHasVerified] = useState(false);
 
   useEffect(() => {
-    if (!session?.user?.id || isVerified || isLoading) return;
+    if (isLoading || hasVerified) return;
 
     const verifySpotifyUser = async () => {
       setIsLoading(true);
       try {
-        if (!session.user?.id) return;
+        if (!session?.user?.id) return;
         const host = await findHost(session.user.id);
-        if (host) {
+        if (host.shortName) {
           setIsVerified(true);
         } else {
-          await signOut();
+          // await signOut();
+          console.warn('host not found');
         }
       } catch (error) {
         console.error('Error verifying Spotify user:', error);
         await signOut();
       } finally {
         setIsLoading(false);
+        setHasVerified(true);
       }
     };
 
     verifySpotifyUser();
-  }, [isLoading, isVerified, session]);
+  }, [isLoading, session, hasVerified]);
 
   return {
     session,
