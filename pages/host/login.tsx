@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { MusicalNoteIcon } from '@heroicons/react/24/outline';
 import HostLoginLayout from '../../components/Signup/HostLoginLayout';
 import { useHostLogin } from '../../components/hooks/useHostLogin';
+import router from 'next/router';
 
 export default function HostLogin() {
   const { session, isLoading } = useHostLogin();
@@ -49,6 +50,9 @@ export default function HostLogin() {
             session={session}
             isLoading={isLoading}
             onSuccessRedirect={'/host/dashboard'}
+            onContinue={() => {
+              router.push('/host/dashboard');
+            }}
           />
 
           <div className="text-center">
