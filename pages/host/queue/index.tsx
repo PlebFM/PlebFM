@@ -10,9 +10,11 @@ import { Song } from '../../../components/Leaderboard/Song';
 import { QR } from '../../../components/Leaderboard/Qr';
 import { Notifications } from '../../../components/Leaderboard/Notifications';
 import { useLeaderboard } from '../../../components/hooks/useLeaderboard';
+import { useWakeLock } from '../../../components/hooks/useWakeLock';
 
 export default function Queue() {
   const { queueData, refresh, session, host } = useLeaderboard();
+  useWakeLock();
 
   return (
     <>
