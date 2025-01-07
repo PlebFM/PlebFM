@@ -1,5 +1,3 @@
-'use client';
-import { useEffect } from 'react';
 import Avatar from '../Utils/Avatar';
 import { usePusher } from '../hooks/usePusher';
 
@@ -32,7 +30,6 @@ export const Notifications = ({ refreshQueue, host }: Props) => {
                   {update?.user?.firstNym} {update?.user?.lastNym}
                 </strong>{' '}
                 {update?.message}
-                {/* {update?.message?.slice(0, Math.min(26)) + '...'} */}
               </p>
             </div>
           ))}

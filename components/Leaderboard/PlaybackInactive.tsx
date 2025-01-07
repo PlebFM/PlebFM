@@ -16,10 +16,13 @@ export const PlaybackInactive = ({ player, browserDeviceId, token }: Props) => {
         {/* Transfer playback to PlebFM  */}
         <Button
           size={'small'}
-          onClick={() => {
-            player?.activateElement();
-            transferPlayback(browserDeviceId, token);
-            console.log('transferPlayback called');
+          onClick={async () => {
+            const connected = await player?.connect();
+            console.warn('connected', connected);
+            await player?.activateElement();
+            console.warn('activated');
+            const transferred = await transferPlayback(browserDeviceId, token);
+            console.log('transferPlayback called', transferred);
           }}
         >
           Transfer playback to PlebFM

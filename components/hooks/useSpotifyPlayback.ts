@@ -97,6 +97,7 @@ export const useSpotifyPlayback = ({
           duration,
           track_window: { current_track },
         } = state;
+        console.warn('STATE', state);
         if (!current_track) {
           console.log('no current track');
           setActive(false);
@@ -120,7 +121,7 @@ export const useSpotifyPlayback = ({
 
       player.connect();
     };
-  }, [isActive, token]);
+  }, [token]);
 
   return {
     isPaused,

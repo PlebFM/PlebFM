@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Button from '../Utils/Button';
-import {
-  PlayIcon,
-  PauseIcon,
-  ForwardIcon,
-  BackwardIcon,
-} from '@heroicons/react/24/outline';
-import { transferPlayback } from '../../lib/spotify';
+import React from 'react';
 import { useSpotifyPlayback } from '../hooks/useSpotifyPlayback';
 import { PlaybackControls } from './PlaybackControls';
 import { PlaybackInactive } from './PlaybackInactive';
 import { PlaybackTrack } from './PlaybackTrack';
 import { PlaybackAlbum } from './PlaybackAlbum';
+import { PlaybackEmpty } from './PlaybackEmpty';
 
 interface WebPlaybackProps {
   token: string;
@@ -31,7 +24,19 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
     track,
   } = useSpotifyPlayback({ token, shortName, refreshQueue });
 
-  if (!isActive && !track?.name) {
+  const controls = (
+    <PlaybackControls
+      isActive={isActive}
+      player={player}
+      browserDeviceId={browserDeviceId}
+      token={token}
+      isPaused={isPaused}
+      trackPosition={trackPosition}
+      trackDuration={trackDuration}
+    />
+  );
+
+  if (!isActive) {
     return (
       <PlaybackInactive
         player={player}
@@ -39,36 +44,28 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
         token={token}
       />
     );
-  } else {
-    return (
-      <>
-        <div className="text-3xl h-full flex flex-col space-y-6 justify-end">
-          {/* Album Art */}
-          <PlaybackAlbum track={track} />
-
-          {/* Wrapper */}
-          <div className="flex flex-col space-y-6 p-6 relative z-50 bg-gradient-to-b from-black/0 to-black/50">
-            <PlaybackTrack
-              track={track}
-              trackPosition={trackPosition}
-              trackDuration={trackDuration}
-            />
-
-            {/* Playback Controls */}
-            <PlaybackControls
-              isActive={isActive}
-              player={player}
-              browserDeviceId={browserDeviceId}
-              token={token}
-              isPaused={isPaused}
-              trackPosition={trackPosition}
-              trackDuration={trackDuration}
-            />
-          </div>
-        </div>
-      </>
-    );
   }
+
+  return (
+    <div className="text-3xl h-full flex flex-col space-y-6 justify-end">
+      {/* Album Art or Empty State */}
+      <div className="flex flex-col space-y-6 p-6 relative z-50 bg-gradient-to-b from-black/0 to-black/50">
+        <div className="text-left flex flex-col items-center justify-center h-[400px] bg-black/30 backdrop-blur-lg rounded-lg">
+          {track?.name ? <PlaybackAlbum track={track} /> : <PlaybackEmpty />}
+        </div>
+
+        {/* Controls Wrapper */}
+        {track?.name && (
+          <PlaybackTrack
+            track={track}
+            trackPosition={trackPosition}
+            trackDuration={trackDuration}
+          />
+        )}
+        {controls}
+      </div>
+    </div>
+  );
 }
 
 export default WebPlayback;
