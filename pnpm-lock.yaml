@@ -67,6 +67,9 @@ importers:
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
+      stripe:
+        specifier: ^17.5.0
+        version: 17.5.0
       tailwindcss:
         specifier: ^3.2.4
         version: 3.4.16
@@ -9760,6 +9763,13 @@ packages:
       }
     engines: { node: '>=8' }
 
+  stripe@17.5.0:
+    resolution:
+      {
+        integrity: sha512-kcyeAkDFjGsVl17FqnG7q/+xIjt0ZjOo9Dm+q8deAvs2Xe4iAHrhxyoP4etUVFc+/LZJANjIPVR+ZOnt9hr/Ug==,
+      }
+    engines: { node: '>=12.*' }
+
   strnum@1.0.5:
     resolution:
       {
@@ -18052,6 +18062,11 @@ snapshots:
       min-indent: 1.0.1
 
   strip-json-comments@3.1.1: {}
+
+  stripe@17.5.0:
+    dependencies:
+      '@types/node': 18.11.9
+      qs: 6.13.1
 
   strnum@1.0.5:
     optional: true
