@@ -68,7 +68,11 @@ export function Header({ hostName, shortName }: HeaderProps) {
       </motion.div>
 
       {/* Bottom row: Navigation - Sticky */}
-      <div className="sticky top-0 z-50 bg-black/50 backdrop-blur-lg border-b border-white/10">
+      <motion.div
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="sticky top-0 z-50 bg-black/50 backdrop-blur-lg border-b border-white/10"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="px-4 flex overflow-x-auto hide-scrollbar">
             <div className="flex space-x-1">
@@ -105,7 +109,7 @@ export function Header({ hostName, shortName }: HeaderProps) {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }
