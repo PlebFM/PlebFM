@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
   swcMinify: true,
   // experimental:{appDir: true},
   headers: () => [
@@ -45,6 +45,9 @@ const nextConfig = {
   },
   async redirects() {
     return [];
+  },
+  images: {
+    domains: ['i.scdn.co'],
   },
 };
 

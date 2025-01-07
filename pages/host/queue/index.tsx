@@ -54,7 +54,7 @@ export default function Queue() {
                 />
                 <div className="flex flex-col justify-end items-end">
                   <p className="text-base m-auto w-full text-center my-0">
-                    Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
+                    Scan to Bid on songs!
                   </p>
                   <QR shortName={host ?? 'atl'} />
                   <p className="text-base m-auto font-bold">
@@ -76,7 +76,7 @@ export default function Queue() {
               )}
             </div>
           </div>
-          <div className="w-1/2 h-full overflow-y-scroll">
+          <div className="w-1/2 h-full overflow-y-scroll scrollbar-hide">
             <div className="text-white relative z-1 flex flex-col items-center min-h-screen font-thin bg-pfm-purple-300/50">
               {queueData.map((song, key) => (
                 <Song song={song} key={key} />
