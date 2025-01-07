@@ -1,29 +1,23 @@
 import React from 'react';
-import { useSpotifyPlayback } from '../hooks/useSpotifyPlayback';
 import { PlaybackControls } from './PlaybackControls';
 import { PlaybackInactive } from './PlaybackInactive';
 import { PlaybackTrack } from './PlaybackTrack';
 import { PlaybackAlbum } from './PlaybackAlbum';
 import { PlaybackEmpty } from './PlaybackEmpty';
 import Image from 'next/image';
+import { usePlayback } from '../Providers/PlaybackProvider';
 
-interface WebPlaybackProps {
-  token: string;
-  shortName: string;
-  refreshQueue: () => void;
-}
-
-function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
+function WebPlayback() {
   const {
     isPaused,
     trackDuration,
     trackPosition,
     isActive,
     player,
-    deviceId,
     browserDeviceId,
     track,
-  } = useSpotifyPlayback({ token, shortName, refreshQueue });
+    token,
+  } = usePlayback();
 
   const controls = (
     <PlaybackControls
@@ -63,7 +57,7 @@ function WebPlayback({ token, shortName, refreshQueue }: WebPlaybackProps) {
 
       <div className="text-3xl h-full flex flex-col space-y-6 justify-end">
         {/* Album Art or Empty State */}
-        <div className="text-left flex flex-col items-center justify-center h-[300px]">
+        <div className="text-left flex flex-col items-left justify-center h-[300px] p-6">
           {track?.name ? <PlaybackAlbum track={track} /> : <PlaybackEmpty />}
         </div>
 

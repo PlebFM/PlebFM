@@ -1,18 +1,37 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useEffect, useState } from 'react';
 import { getPlaybackState } from '../../lib/spotify';
 import { syncJukebox } from '../../utils/host';
 
-type WebPlaybackProps = {
+interface PlaybackContextType {
+  isPaused: boolean;
+  trackDuration?: number;
+  trackPosition?: number;
+  isActive: boolean;
+  player?: Spotify.Player;
+  deviceId: string;
+  browserDeviceId: string;
+  track?: Spotify.Track;
+  token: string;
+}
+
+const PlaybackContext = createContext<PlaybackContextType | undefined>(
+  undefined,
+);
+
+interface PlaybackProviderProps {
+  children: React.ReactNode;
   token: string;
   shortName: string;
   refreshQueue: () => void;
-};
-export const useSpotifyPlayback = ({
+}
+
+export const PlaybackProvider = ({
+  children,
   token,
   shortName,
   refreshQueue,
-}: WebPlaybackProps) => {
+}: PlaybackProviderProps) => {
   const [isPaused, setPaused] = useState(false);
   const [trackDuration, setDuration] = useState<number>();
   const [trackPosition, setPosition] = useState<number>();
@@ -103,8 +122,6 @@ export const useSpotifyPlayback = ({
           setActive(false);
         } else {
           console.log('Currently Playing', current_track.name);
-          // console.log('Position in Song', position);
-          // console.log('Duration of Song', duration);
           setPosition(position);
           setDuration(duration);
           setPaused(paused);
@@ -123,7 +140,7 @@ export const useSpotifyPlayback = ({
     };
   }, [token]);
 
-  return {
+  const value = {
     isPaused,
     trackDuration,
     trackPosition,
@@ -132,5 +149,20 @@ export const useSpotifyPlayback = ({
     deviceId,
     browserDeviceId,
     track,
+    token,
   };
+
+  return (
+    <PlaybackContext.Provider value={value}>
+      {children}
+    </PlaybackContext.Provider>
+  );
+};
+
+export const usePlayback = () => {
+  const context = useContext(PlaybackContext);
+  if (context === undefined) {
+    throw new Error('usePlayback must be used within a PlaybackProvider');
+  }
+  return context;
 };
