@@ -3,7 +3,7 @@ import Image from 'next/image';
 import plebFMLogo from '../../../public/plebfm-logo.svg';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
 import { getSession } from 'next-auth/react';
-import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
+import { WebPlayback } from '../../../components/Leaderboard/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import { Song } from '../../../components/Leaderboard/Song';

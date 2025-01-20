@@ -1,5 +1,15 @@
-// import { Schema, model, models } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
+
+type HostSettings = {
+  backupPlaylist?: {
+    id: string;
+    url: string;
+  };
+  bannedSongsPlaylist?: {
+    id: string;
+    url: string;
+  };
+};
 
 /**
  * Object created when a host signs up as a Host.
@@ -16,6 +26,7 @@ export type Host = {
   spotifyRefreshToken: string;
   spotifyId: string;
   hostId: string;
+  settings?: HostSettings;
 };
 
 const HostSchema = new Schema<Host>({
@@ -42,6 +53,19 @@ const HostSchema = new Schema<Host>({
     type: String,
     unique: true,
     required: true,
+  },
+  settings: {
+    type: {
+      backupPlaylist: {
+        id: String,
+        url: String,
+      },
+      bannedSongsPlaylist: {
+        id: String,
+        url: String,
+      },
+    },
+    required: false,
   },
 });
 

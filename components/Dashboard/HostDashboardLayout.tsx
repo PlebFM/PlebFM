@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
 import { GetServerSideProps } from 'next';
@@ -32,6 +32,7 @@ export interface DashboardPageProps {
   queueData: any[];
   subscription: Subscription | null;
   currentPlan: Plan | null;
+  bannedSongsPlaylist: [];
 }
 
 export function DashboardLayout({
@@ -122,12 +123,21 @@ export const getServerSidePropsForDashboard: GetServerSideProps<
     );
     const subscriptionData = await subscriptionRes.json();
 
+    // // Fetch banned songs playlist
+    // const bannedSongsPlaylist = await fetch(
+    //   `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts/banned-playlist?spotifyId=${session.user.id}&shortName=${host.shortName}`,
+    // );
+    // const bannedSongsPlaylistData = await bannedSongsPlaylist.json();
+    // console.log('bannedSongsPlaylistData', bannedSongsPlaylistData);
+
     return {
       props: {
         host,
         queueData: queue.data.map(cleanSong) || [],
         subscription: subscriptionData.subscription || null,
         currentPlan: subscriptionData.plan || null,
+        // bannedSongsPlaylist: bannedSongsPlaylistData.bannedSongsPlaylist || [],
+        bannedSongsPlaylist: [],
       },
     };
   } catch (err) {

@@ -9,8 +9,12 @@ import {
 import { SettingsSidebar } from '../../components/Dashboard/SettingsSidebar';
 import { GeneralSettings } from '../../components/Settings/GeneralSettings';
 import { BillingSettings } from '../../components/Settings/BillingSettings';
+import { MusicSettings } from '../../components/Settings/MusicSettings';
 
-export default function HostSettings({ host, queueData }: DashboardPageProps) {
+export default function HostSettings({
+  host,
+  bannedSongsPlaylist,
+}: DashboardPageProps) {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const currentSection = (router.query.section as string) || 'general';
@@ -30,6 +34,16 @@ export default function HostSettings({ host, queueData }: DashboardPageProps) {
               shortName={host.shortName}
               baseUrl={process.env.NEXT_PUBLIC_BASE_URL || ''}
             />
+          </>
+        );
+
+      case 'music':
+        return (
+          <>
+            <h2 className="text-2xl font-bold text-white mb-6">
+              Music Settings
+            </h2>
+            <MusicSettings bannedSongsPlaylist={bannedSongsPlaylist} />
           </>
         );
 

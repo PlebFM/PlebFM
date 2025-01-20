@@ -5,6 +5,7 @@ import {
   PlayIcon,
 } from '@heroicons/react/24/outline';
 import { transferPlayback } from '../../lib/spotify';
+import { usePlayback } from '../Providers/PlaybackProvider';
 import Button from '../Utils/Button';
 
 type Props = {
@@ -17,15 +18,18 @@ type Props = {
   trackDuration?: number;
 };
 
-export const PlaybackControls = ({
-  isActive,
-  player,
-  browserDeviceId,
-  token,
-  isPaused,
-  trackPosition,
-  trackDuration,
-}: Props) => {
+export const PlaybackControls = () => {
+  const {
+    isPaused,
+    trackDuration,
+    trackPosition,
+    isActive,
+    player,
+    browserDeviceId,
+    track,
+    token,
+  } = usePlayback();
+
   return (
     <>
       {!isActive && (

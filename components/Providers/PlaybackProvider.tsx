@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { signIn } from 'next-auth/react';
-import { getPlaybackState } from '../../lib/spotify';
+import { getPlaybackState, transferPlayback } from '../../lib/spotify';
 import { syncJukebox } from '../../utils/host';
 
 interface PlaybackContextType {
@@ -13,6 +19,7 @@ interface PlaybackContextType {
   browserDeviceId: string;
   track?: Spotify.Track;
   token: string;
+  isConnected: boolean;
 }
 
 const PlaybackContext = createContext<PlaybackContextType | undefined>(
@@ -40,6 +47,7 @@ export const PlaybackProvider = ({
   const [deviceId, setDeviceId] = useState('');
   const [browserDeviceId, setBrowserDeviceId] = useState('');
   const [track, setTrack] = useState<Spotify.Track>();
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,26 +58,26 @@ export const PlaybackProvider = ({
     return () => clearInterval(interval);
   }, [isPaused, deviceId, setPosition, trackPosition, trackDuration]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getPlaybackState(token).then(x => {
-        console.log('spotify playback state', x);
-        if (x?.item) setTrack(x.item);
-        if (x?.progress_ms) setPosition(x.progress_ms);
-        if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
-        if (x?.device?.id) setDeviceId(x.device.id);
-        if (x?.device?.is_active) setActive(x.device.is_active);
-        if (x) setPaused(!x.is_playing);
-      });
-      syncJukebox(token, shortName, deviceId).then(res => {
-        if (!res?.data) {
-          console.error('failed to sync jukebox', res);
-        }
-        refreshQueue();
-      });
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [deviceId, shortName, token, refreshQueue]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     getPlaybackState(token).then(x => {
+  //       console.log('spotify playback state', x);
+  //       if (x?.item) setTrack(x.item);
+  //       if (x?.progress_ms) setPosition(x.progress_ms);
+  //       if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
+  //       if (x?.device?.id) setDeviceId(x.device.id);
+  //       if (x?.device?.is_active) setActive(x.device.is_active);
+  //       if (x) setPaused(!x.is_playing);
+  //     });
+  //     syncJukebox(token, shortName, deviceId).then(res => {
+  //       if (!res?.data) {
+  //         console.error('failed to sync jukebox', res);
+  //       }
+  //       refreshQueue();
+  //     });
+  //   }, 5000);
+  //   return () => clearInterval(interval);
+  // }, [deviceId, shortName, token, refreshQueue]);
 
   useEffect(() => {
     if (!token) return;
@@ -136,11 +144,14 @@ export const PlaybackProvider = ({
         }
       });
 
-      player.connect();
+      player.connect().then(res => {
+        setIsConnected(res);
+      });
     };
   }, [token]);
 
   const value = {
+    isConnected,
     isPaused,
     trackDuration,
     trackPosition,
@@ -165,4 +176,23 @@ export const usePlayback = () => {
     throw new Error('usePlayback must be used within a PlaybackProvider');
   }
   return context;
+};
+
+export const useActivateDevice = () => {
+  const { player, browserDeviceId, token, isConnected } = usePlayback();
+
+  const activateDevice = useCallback(async () => {
+    // const connected = await player?.connect();
+    console.log('isConnected', isConnected);
+    if (!isConnected) return;
+    // console.warn('connected', connected);
+    await player?.activateElement();
+    console.warn('activated');
+    const status = await getPlaybackState(token);
+    console.log('status', status);
+    const transferred = await transferPlayback(browserDeviceId, token);
+    console.log('transferred', transferred);
+  }, [player, browserDeviceId, token, isConnected]);
+
+  return activateDevice;
 };

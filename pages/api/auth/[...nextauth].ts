@@ -1,4 +1,10 @@
-import NextAuth, { NextAuthOptions, Session } from 'next-auth';
+import { GetServerSidePropsContext, NextApiResponse } from 'next';
+import { NextApiRequest } from 'next';
+import NextAuth, {
+  getServerSession,
+  NextAuthOptions,
+  Session,
+} from 'next-auth';
 import { JWT } from 'next-auth/jwt/types';
 
 import SpotifyProvider from 'next-auth/providers/spotify';
@@ -60,7 +66,7 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.SPOTIFY_CLIENT_ID || '',
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET || '',
       authorization:
-        'https://accounts.spotify.com/authorize?scope=user-read-playback-state,user-modify-playback-state,user-read-playback-position,streaming,user-read-email,user-read-private,user-read-recently-played',
+        'https://accounts.spotify.com/authorize?scope=user-read-playback-state,user-modify-playback-state,user-read-playback-position,streaming,user-read-email,user-read-private,user-read-recently-played,playlist-modify-private,playlist-modify-public,ugc-image-upload',
     }),
   ],
   callbacks: {

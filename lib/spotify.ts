@@ -1,5 +1,7 @@
 import querystring from 'querystring';
 
+const defaultTrack = 'spotify:track:3bMc9oRaUWnojCrYTUXXcQ';
+
 export const getAccessToken = async (refreshToken: string) => {
   const client_id = process.env.SPOTIFY_CLIENT_ID;
   const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -55,6 +57,7 @@ const getCurrentTrack = async (accessToken: string) => {
       Accept: '*/*',
     },
   });
+  console.log('res (Track) -state', res.status);
   if (res.status === 204) return null;
   const result = await res.json();
   return result;
@@ -71,22 +74,15 @@ export const getPlaybackState = async (accessToken: string) => {
       Accept: '*/*',
     },
   });
+  console.log('res -state', res.status);
   if (res.status === 204) {
     const trackRes = await getCurrentTrack(accessToken);
-    return null;
+    console.log('trackRes', trackRes);
+    return trackRes;
+    // return null;
   }
   const result = await res.json();
   return result;
-  const response = {
-    deviceName: result.device.name,
-    deviceId: result.device.id,
-    repeatState: result.repeat_state,
-    shuffleState: result.shuffle_state,
-    trackUri: result.item.id,
-    progressMs: result.progress_ms,
-    durationMs: result.item.duration_ms,
-  };
-  return response;
 };
 
 export const getTrack = async (trackId: string, accessToken: string) => {
@@ -107,6 +103,8 @@ export const transferPlayback = async (
   deviceId: string,
   accessToken: string,
 ) => {
+  const playbackState = await getPlaybackState(accessToken);
+
   const searchUrl = `https://api.spotify.com/v1/me/player`;
   const body = JSON.stringify({ device_ids: [deviceId], play: true });
   const res = await fetch(searchUrl, {
@@ -118,8 +116,28 @@ export const transferPlayback = async (
     },
     body: body,
   });
-  if (res.status === 202) return { success: true };
-  else return { success: false };
+  if (res.status !== 204) return { success: false };
+
+  // If the current track is already playing, stop early
+  if (playbackState?.is_playing) return { success: true };
+
+  // Otherwise, start a default track
+  const playUrl = `https://api.spotify.com/v1/me/player/play`;
+  const playBody = JSON.stringify({
+    device_id: deviceId,
+    uris: [defaultTrack],
+  });
+  const playRes = await fetch(playUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+    body: playBody,
+  });
+  if (playRes.status !== 202) return { success: false };
+  return { success: true };
 };
 
 // Resets spotify queue by playing a song
@@ -129,7 +147,7 @@ export const startSpotifyQueue = async (
   accessToken: string,
 ) => {
   const url = `https://api.spotify.com/v1/me/player/play`;
-  const body = JSON.stringify({ uris: [trackUri], device_id: deviceId });
+  const body = JSON.stringify({ urs: [trackUri], device_id: deviceId });
   const result = await fetch(url, {
     method: 'PUT',
     headers: {
@@ -198,8 +216,9 @@ export const addTrackToSpotifyQueue = async (
   return result;
 };
 
-const spotifyQueueEndpoint = 'https://api.spotify.com/v1/me/player/queue';
 export const getSpotifyQueue = async (accessToken: string) => {
+  const spotifyQueueEndpoint = 'https://api.spotify.com/v1/me/player/queue';
+
   const res = await fetch(spotifyQueueEndpoint, {
     method: 'GET',
     headers: {
@@ -231,4 +250,91 @@ export const getSpotifyRecentlyPlayed = async (
   });
   const result = await res.json();
   return result;
+};
+
+export const getPlaylist = async (playlistId: string, accessToken: string) => {
+  const url = `https://api.spotify.com/v1/playlists/${playlistId}`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+  });
+  if (!res.ok) {
+    throw new Error('Failed to fetch playlist');
+  }
+  return res.json();
+};
+
+export const createPlaylist = async (
+  userId: string,
+  name: string,
+  description: string,
+  isPublic: boolean,
+  accessToken: string,
+) => {
+  const url = `https://api.spotify.com/v1/users/${userId}/playlists`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+    body: JSON.stringify({
+      name,
+      description,
+      public: isPublic,
+    }),
+  });
+  if (!res.ok) {
+    console.error('Failed to create playlist', res.statusText);
+    throw new Error(`Failed to create playlist: ${res.statusText}`);
+  }
+  return res.json();
+};
+
+export const addTracksToPlaylist = async (
+  playlistId: string,
+  trackUris: string[],
+  accessToken: string,
+) => {
+  const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+    body: JSON.stringify({
+      uris: trackUris,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to add tracks to playlist');
+  }
+  return res.json();
+};
+
+export const setPlaylistCoverImage = async (
+  playlistId: string,
+  base64Image: string,
+  accessToken: string,
+) => {
+  const url = `https://api.spotify.com/v1/playlists/${playlistId}/images`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'image/jpeg',
+    },
+    body: base64Image,
+  });
+  if (!res.ok) {
+    throw new Error('Failed to set playlist cover image');
+  }
+  return res.ok;
 };

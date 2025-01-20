@@ -4,6 +4,7 @@ import {
   Cog6ToothIcon,
   PaintBrushIcon,
   CreditCardIcon,
+  MusicalNoteIcon,
 } from '@heroicons/react/24/outline';
 
 interface SettingsSidebarProps {
@@ -16,6 +17,11 @@ const navigationItems = [
     name: 'General',
     href: '/host/settings?section=general',
     icon: Cog6ToothIcon,
+  },
+  {
+    name: 'Music',
+    href: '/host/settings?section=music',
+    icon: MusicalNoteIcon,
   },
   {
     name: 'Appearance',

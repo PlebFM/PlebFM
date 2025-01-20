@@ -7,38 +7,13 @@ import { PlaybackEmpty } from './PlaybackEmpty';
 import Image from 'next/image';
 import { usePlayback } from '../Providers/PlaybackProvider';
 
-function WebPlayback() {
-  const {
-    isPaused,
-    trackDuration,
-    trackPosition,
-    isActive,
-    player,
-    browserDeviceId,
-    track,
-    token,
-  } = usePlayback();
+export const WebPlayback = () => {
+  const { trackDuration, trackPosition, isActive, track } = usePlayback();
 
-  const controls = (
-    <PlaybackControls
-      isActive={isActive}
-      player={player}
-      browserDeviceId={browserDeviceId}
-      token={token}
-      isPaused={isPaused}
-      trackPosition={trackPosition}
-      trackDuration={trackDuration}
-    />
-  );
+  const controls = <PlaybackControls />;
 
   if (!isActive) {
-    return (
-      <PlaybackInactive
-        player={player}
-        browserDeviceId={browserDeviceId}
-        token={token}
-      />
-    );
+    return <PlaybackInactive />;
   }
 
   return (
@@ -75,6 +50,4 @@ function WebPlayback() {
       </div>
     </>
   );
-}
-
-export default WebPlayback;
+};
