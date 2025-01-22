@@ -1,4 +1,6 @@
-import { useState } from 'react';
+'use client';
+
+import { use, useState } from 'react';
 import {
   MusicalNoteIcon,
   CurrencyDollarIcon,
@@ -15,7 +17,12 @@ import { RecentActivity } from '../../components/Dashboard/RecentActivity';
 import type { Activity } from '../../components/Dashboard/RecentActivity';
 import type { SongObject } from '../../utils/songs';
 
-export default function HostDashboard({ host, queueData }: DashboardPageProps) {
+export default function HostDashboard({
+  data,
+}: {
+  data: Promise<DashboardPageProps>;
+}) {
+  const { host, queueData } = use(data);
   const [earnings, setEarnings] = useState(0);
 
   if (!host) return null;

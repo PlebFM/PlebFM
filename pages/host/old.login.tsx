@@ -1,3 +1,4 @@
+'use client';
 import Link from 'next/link';
 import SpotifyAuthButton from '../../components/Leaderboard/SpotifyAuthButton';
 import { motion } from 'framer-motion';

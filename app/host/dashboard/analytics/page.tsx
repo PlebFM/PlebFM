@@ -1,10 +1,9 @@
 import {
   DashboardLayout,
-  getServerSidePropsForDashboard,
-  type DashboardPageProps,
-} from '../../components/Dashboard/HostDashboardLayout';
+  DashboardPageProps,
+} from '../../../../components/Dashboard/HostDashboardLayout';
 
-export default function HostAnalytics({ host, queueData }: DashboardPageProps) {
+export default function HostAnalytics({ host }: DashboardPageProps) {
   if (!host) return null;
 
   return (
@@ -13,6 +12,7 @@ export default function HostAnalytics({ host, queueData }: DashboardPageProps) {
       title="Analytics"
       subtitle="Track your jukebox performance and earnings."
       margin="large"
+      pathname="/host/dashboard/analytics"
     >
       <div className="text-white">
         {/* Analytics content will go here */}
@@ -21,5 +21,3 @@ export default function HostAnalytics({ host, queueData }: DashboardPageProps) {
     </DashboardLayout>
   );
 }
-
-export const getServerSideProps = getServerSidePropsForDashboard;

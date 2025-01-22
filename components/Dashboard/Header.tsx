@@ -1,3 +1,5 @@
+'use client';
+
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,12 +11,10 @@ interface HeaderProps {
   hostName: string;
   shortName: string;
   hide?: boolean;
+  pathname: string;
 }
 
-export function Header({ hostName, shortName, hide }: HeaderProps) {
-  const router = useRouter();
-  const currentPath = router.pathname;
-
+export function Header({ hostName, shortName, hide, pathname }: HeaderProps) {
   return (
     <>
       {/* Top row: Logo and user actions */}
@@ -85,7 +85,7 @@ export function Header({ hostName, shortName, hide }: HeaderProps) {
                 <Link
                   href="/host/dashboard"
                   className={`${
-                    currentPath === '/host/dashboard'
+                    pathname === '/host/dashboard'
                       ? 'text-white border-b-2 border-white'
                       : 'text-white/70 hover:text-white hover:border-b-2 hover:border-white/50'
                   } px-4 py-4 text-sm font-medium whitespace-nowrap transition-colors`}
@@ -95,7 +95,7 @@ export function Header({ hostName, shortName, hide }: HeaderProps) {
                 <Link
                   href="/host/analytics"
                   className={`${
-                    currentPath === '/host/analytics'
+                    pathname === '/host/analytics'
                       ? 'text-white border-b-2 border-white'
                       : 'text-white/70 hover:text-white hover:border-b-2 hover:border-white/50'
                   } px-4 py-4 text-sm font-medium whitespace-nowrap transition-colors`}
@@ -105,7 +105,7 @@ export function Header({ hostName, shortName, hide }: HeaderProps) {
                 <Link
                   href="/host/settings"
                   className={`${
-                    currentPath === '/host/settings'
+                    pathname === '/host/settings'
                       ? 'text-white border-b-2 border-white'
                       : 'text-white/70 hover:text-white hover:border-b-2 hover:border-white/50'
                   } px-4 py-4 text-sm font-medium whitespace-nowrap transition-colors`}
