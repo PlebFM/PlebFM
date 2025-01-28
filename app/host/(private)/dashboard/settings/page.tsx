@@ -16,7 +16,7 @@ export type DashboardData = {
   host: Host;
   queueData: SongObject[];
   subscription: Subscription | null;
-  currentPlan: Plan | null;
+  currentPlan: Plan;
 };
 
 const fetchDashboardData = async (): Promise<DashboardData> => {
@@ -69,10 +69,8 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
 
 export default function SettingsPage({
   searchParams,
-  params,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-  params: string;
 }) {
   const data = fetchDashboardData();
 

@@ -75,7 +75,7 @@ export function Plans({ data }: { data: Promise<DashboardData | null> }) {
               onClick={() => handleSelectPlan(plan.id)}
               disabled={isLoading || isCurrentPlan}
               className={`mt-6 w-full py-2 px-4 rounded-md transition-colors ${
-                plan.tier === 'pro'
+                plan.id === 'pro'
                   ? 'bg-purple-600 hover:bg-purple-700 text-white'
                   : 'bg-white/10 hover:bg-white/20 text-white'
               } disabled:opacity-50`}

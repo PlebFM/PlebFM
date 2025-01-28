@@ -3,7 +3,6 @@ import { Plans } from '../../ui/Plans';
 
 export default function HostPlans() {
   const data = fetchDashboardData(true);
-  console.log('HERERERE');
 
   return (
     <>

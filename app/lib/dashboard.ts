@@ -12,7 +12,7 @@ export type DashboardData = {
   host: Host;
   queueData: SongObject[];
   subscription: Subscription | null;
-  currentPlan: Plan | null;
+  currentPlan: Plan;
 };
 
 export const fetchDashboardData = async (

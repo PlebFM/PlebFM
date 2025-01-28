@@ -24,6 +24,7 @@
     "@heroicons/react": "^2.0.13",
     "@paralleldrive/cuid2": "^2.2.2",
     "framer-motion": "^11.15.0",
+    "micro": "^10.0.1",
     "mongodb": "^4.12.1",
     "mongoose": "^6.7.5",
     "next": "^15.1.6",
