@@ -20,11 +20,11 @@ interface BillingHistory {
 
 type BillingSettingsProps = {
   status: string;
+  currentPlan: Plan;
 };
 
-export function BillingSettings({ status }: BillingSettingsProps) {
+export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPlan] = useState<Plan>(PLANS[1]); // Pro plan
   const [nextBillingDate] = useState('December 1, 2023');
 
   const [billingHistory] = useState<BillingHistory[]>([

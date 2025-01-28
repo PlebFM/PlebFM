@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { Plan } from '../../../../../models/Subscription';
+import { Plan, PLANS } from '../../../../../models/Subscription';
 import { Subscription } from '../../../../../models/Subscription';
 import { Host } from '../../../../../components/hooks/useHost';
 import { auth } from '../../../../../utils/auth';
 import { cleanSong, SongObject } from '../../../../../utils/songs';
-import HostDashboard from '../../../../ui/HostDashboard';
 import LoadingSpinner from '../../../../../components/Utils/LoadingSpinner';
 import DashboardSettings from '../../../../ui/DashboardSettings';
 
@@ -58,7 +57,7 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
       host,
       queueData: queue.data.map(cleanSong) || [],
       subscription: subscriptionData.subscription || null,
-      currentPlan: subscriptionData.plan || null,
+      currentPlan: subscriptionData.plan || PLANS[0],
     };
   } catch (err) {
     console.error(err);

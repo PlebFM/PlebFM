@@ -16,7 +16,7 @@ export default function HostSettings({
   section: Promise<string>;
   status: Promise<string>;
 }) {
-  const { host } = use(data);
+  const { host, currentPlan } = use(data);
 
   const currentSection = use(section);
   const currentStatus = use(status);
@@ -60,7 +60,7 @@ export default function HostSettings({
             <h2 className="text-2xl font-bold text-white mb-6">
               Billing & Subscription
             </h2>
-            <BillingSettings status={currentStatus} />
+            <BillingSettings status={currentStatus} currentPlan={currentPlan} />
           </>
         );
 
