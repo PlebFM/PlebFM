@@ -12,7 +12,7 @@ import { BillingSettings } from '../../components/Settings/BillingSettings';
 
 export default function HostSettings({ host, queueData }: DashboardPageProps) {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const currentSection = (router.query.section as string) || 'general';
 
   if (!host) return null;

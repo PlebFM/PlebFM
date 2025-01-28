@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -19,15 +18,15 @@ interface BillingHistory {
   description: string;
 }
 
-interface BillingSettingsProps {
-  hostId: string;
-}
+type BillingSettingsProps = {
+  status: string;
+};
 
-export function BillingSettings({ hostId }: BillingSettingsProps) {
-  const router = useRouter();
+export function BillingSettings({ status }: BillingSettingsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPlan] = useState<Plan>(PLANS[1]); // Pro plan
   const [nextBillingDate] = useState('December 1, 2023');
+
   const [billingHistory] = useState<BillingHistory[]>([
     {
       id: '1',
@@ -46,12 +45,12 @@ export function BillingSettings({ hostId }: BillingSettingsProps) {
   ]);
 
   useEffect(() => {
-    if (router.query.success) {
+    if (status === 'success') {
       toast.success('Successfully subscribed!');
-    } else if (router.query.canceled) {
+    } else if (status === 'canceled') {
       toast.error('Subscription canceled.');
     }
-  }, [router.query]);
+  }, [status]);
 
   const handleSubscribe = async (
     planId: string,

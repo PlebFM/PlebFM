@@ -1,5 +1,5 @@
 'use client';
-import { use, useState } from 'react';
+import { use } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { SettingsSidebar } from '../../components/Dashboard/SettingsSidebar';
 import { GeneralSettings } from '../../components/Settings/GeneralSettings';
@@ -10,14 +10,16 @@ import { DashboardData } from '../lib/dashboard';
 export default function HostSettings({
   data,
   section,
+  status,
 }: {
   data: Promise<DashboardData>;
   section: Promise<string>;
+  status: Promise<string>;
 }) {
   const { host } = use(data);
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const currentSection = use(section);
+  const currentStatus = use(status);
 
   if (!host) return null;
 
@@ -58,7 +60,7 @@ export default function HostSettings({
             <h2 className="text-2xl font-bold text-white mb-6">
               Billing & Subscription
             </h2>
-            <BillingSettings hostId={host.hostId} />
+            <BillingSettings status={currentStatus} />
           </>
         );
 
@@ -83,11 +85,7 @@ export default function HostSettings({
         }}
       />
       <div className="flex gap-8">
-        <SettingsSidebar
-          // isOpen={isSidebarOpen}
-          // setIsOpen={setIsSidebarOpen}
-          section={currentSection}
-        />
+        <SettingsSidebar section={currentSection} />
 
         <div className="flex-1 min-w-0">
           <div key={currentSection}>{renderContent()}</div>

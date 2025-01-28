@@ -77,17 +77,19 @@ export default function SettingsPage({
 }) {
   const data = fetchDashboardData();
 
-  console.log('SEEARRCH', searchParams);
-
   const section = searchParams.then(
     res => (res.section ?? 'general') as string,
+  );
+
+  const status = searchParams.then(
+    res => (res.success ? 'success' : res.canceled ? 'canceled' : '') as string,
   );
 
   return (
     <Suspense
       fallback={<LoadingSpinner background="black h-[calc(100vh-8rem)]" />}
     >
-      <DashboardSettings data={data} section={section} />
+      <DashboardSettings data={data} section={section} status={status} />
     </Suspense>
   );
 }
