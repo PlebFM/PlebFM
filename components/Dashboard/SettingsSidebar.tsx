@@ -1,37 +1,42 @@
+'use client';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import {
   Cog6ToothIcon,
   PaintBrushIcon,
   CreditCardIcon,
 } from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 interface SettingsSidebarProps {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  // isOpen: boolean;
+  // setIsOpen: (isOpen: boolean) => void;
+  section: string;
 }
 
 const navigationItems = [
   {
     name: 'General',
-    href: '/host/settings?section=general',
+    href: '/host/dashboard/settings?section=general',
     icon: Cog6ToothIcon,
   },
   {
     name: 'Appearance',
-    href: '/host/settings?section=appearance',
+    href: '/host/dashboard/settings?section=appearance',
     icon: PaintBrushIcon,
   },
   {
     name: 'Billing',
-    href: '/host/settings?section=billing',
+    href: '/host/dashboard/settings?section=billing',
     icon: CreditCardIcon,
   },
 ];
 
-export function SettingsSidebar({ isOpen, setIsOpen }: SettingsSidebarProps) {
-  const router = useRouter();
-  const currentSection = (router.query.section as string) || 'general';
+export function SettingsSidebar({
+  // isOpen,
+  // setIsOpen,
+  section,
+}: SettingsSidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div
@@ -42,7 +47,7 @@ export function SettingsSidebar({ isOpen, setIsOpen }: SettingsSidebarProps) {
       <div className="h-full px-4 py-6">
         <nav className="space-y-1">
           {navigationItems.map(item => {
-            const isActive = currentSection === item.href.split('section=')[1];
+            const isActive = section === item.href.split('section=')[1];
             return (
               <Link
                 key={item.name}

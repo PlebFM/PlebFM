@@ -5,7 +5,6 @@ import { useSelectedLayoutSegments } from 'next/navigation';
 
 type SectionHeaderProps = {
   hide?: boolean;
-  pathname: string;
 };
 
 export function SectionHeader({ hide }: SectionHeaderProps) {

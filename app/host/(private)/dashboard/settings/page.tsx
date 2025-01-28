@@ -1,18 +1,20 @@
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { Plan } from '../../../models/Subscription';
-import { Subscription } from '../../../models/Subscription';
-import { Host } from '../../../components/hooks/useHost';
-import { auth } from '../../../utils/auth';
-import { cleanSong, SongObject } from '../../../utils/songs';
-import HostDashboard from '../../ui/HostDashboard';
+import { Plan } from '../../../../../models/Subscription';
+import { Subscription } from '../../../../../models/Subscription';
+import { Host } from '../../../../../components/hooks/useHost';
+import { auth } from '../../../../../utils/auth';
+import { cleanSong, SongObject } from '../../../../../utils/songs';
+import HostDashboard from '../../../../ui/HostDashboard';
+import LoadingSpinner from '../../../../../components/Utils/LoadingSpinner';
+import DashboardSettings from '../../../../ui/DashboardSettings';
 
 export type DashboardPageProps = {
   data: Promise<DashboardData>;
 };
 
 export type DashboardData = {
-  host: Host | null;
+  host: Host;
   queueData: SongObject[];
   subscription: Subscription | null;
   currentPlan: Plan | null;
@@ -66,12 +68,26 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 };
 
-export default function HostDashboardPage({ params }: { params: string }) {
+export default function SettingsPage({
+  searchParams,
+  params,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  params: string;
+}) {
   const data = fetchDashboardData();
 
+  console.log('SEEARRCH', searchParams);
+
+  const section = searchParams.then(
+    res => (res.section ?? 'general') as string,
+  );
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <HostDashboard data={data} pathname={params} />
+    <Suspense
+      fallback={<LoadingSpinner background="black h-[calc(100vh-8rem)]" />}
+    >
+      <DashboardSettings data={data} section={section} />
     </Suspense>
   );
 }

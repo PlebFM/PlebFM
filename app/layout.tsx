@@ -1,5 +1,6 @@
 import '../styles/globals.css';
 import { Metadata, Viewport } from 'next';
+import { Footer } from './ui/Footer';
 
 export default async function RootLayout({
   children,

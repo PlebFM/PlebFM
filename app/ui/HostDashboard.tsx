@@ -12,8 +12,8 @@ import { QuickActions } from '../../components/Dashboard/QuickActions';
 import { RecentActivity } from '../../components/Dashboard/RecentActivity';
 import type { Activity } from '../../components/Dashboard/RecentActivity';
 import type { SongObject } from '../../utils/songs';
-import { DashboardData } from '../host/dashboard/page';
-import { SessionProvider } from 'next-auth/react';
+import { DashboardData } from '../host/(private)/dashboard/page';
+import { DashboardContentWrapper } from './DashboardContentWrapper';
 
 export default function HostDashboard({
   data,
@@ -24,8 +24,6 @@ export default function HostDashboard({
 }) {
   const { host, queueData } = use(data);
   const [earnings, setEarnings] = useState(0);
-
-  if (!host) return null;
 
   const recentActivities: Activity[] = [
     ...queueData
@@ -46,45 +44,41 @@ export default function HostDashboard({
   );
 
   return (
-    <SessionProvider>
-      <DashboardLayout
-        host={host}
-        title="Welcome back"
-        subtitle="Here's what's happening with your jukebox today."
-        margin="large"
-        pathname={pathname}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatsCard
-            title="Songs in Queue"
-            value={queueData.length.toString()}
-            trend={queueData.length > 0 ? 'Active' : 'Empty'}
-            icon={<MusicalNoteIcon className="h-6 w-6 text-purple-400" />}
-            iconBg="bg-purple-400/10"
-          />
-          <StatsCard
-            title="Total Earned"
-            value={`$${(earnings / 100).toFixed(2)}`}
-            trend="+15%"
-            icon={<CurrencyDollarIcon className="h-6 w-6 text-green-400" />}
-            iconBg="bg-green-400/10"
-          />
-        </div>
+    <DashboardContentWrapper
+      title="Welcome back"
+      subtitle="Here's what's happening with your jukebox today."
+      margin="large"
+    >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <StatsCard
+          title="Songs in Queue"
+          value={queueData.length.toString()}
+          trend={queueData.length > 0 ? 'Active' : 'Empty'}
+          icon={<MusicalNoteIcon className="h-6 w-6 text-purple-400" />}
+          iconBg="bg-purple-400/10"
+        />
+        <StatsCard
+          title="Total Earned"
+          value={`$${(earnings / 100).toFixed(2)}`}
+          trend="+15%"
+          icon={<CurrencyDollarIcon className="h-6 w-6 text-green-400" />}
+          iconBg="bg-green-400/10"
+        />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <QuickActions
-            onSkip={() => {
-              if (host.shortName) {
-                fetch(`/api/skip?shortName=${host.shortName}`, {
-                  method: 'POST',
-                });
-              }
-            }}
-            onManageQueue={() => window.open('/host/queue', '_blank')}
-          />
-          <RecentActivity activities={recentActivities} />
-        </div>
-      </DashboardLayout>
-    </SessionProvider>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <QuickActions
+          onSkip={() => {
+            if (host.shortName) {
+              fetch(`/api/skip?shortName=${host.shortName}`, {
+                method: 'POST',
+              });
+            }
+          }}
+          onManageQueue={() => window.open('/host/queue', '_blank')}
+        />
+        <RecentActivity activities={recentActivities} />
+      </div>
+    </DashboardContentWrapper>
   );
 }

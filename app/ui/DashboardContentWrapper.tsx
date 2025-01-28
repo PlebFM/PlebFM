@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import type { Host } from '../hooks/useHost';
 import type { Plan, Subscription } from '../../models/Subscription';
 
 type MarginSize = 'small' | 'medium' | 'large';
@@ -11,33 +10,25 @@ const marginSizes: Record<MarginSize, string> = {
   large: 'max-w-5xl',
 };
 
-interface HostDashboardLayoutProps {
+interface ContentWrapperProps {
   children: ReactNode;
-  host: Host | null;
   title: string;
   subtitle?: string;
   margin?: MarginSize;
-  hideHeader?: boolean;
-  hideFooter?: boolean;
-  pathname: string;
 }
 
 export interface DashboardPageProps {
-  host: Host | null;
   queueData: any[];
   subscription: Subscription | null;
   currentPlan: Plan | null;
 }
 
-export function DashboardLayout({
+export function DashboardContentWrapper({
   children,
-  host,
   title,
   subtitle,
   margin = 'medium',
-}: HostDashboardLayoutProps) {
-  if (!host) return null;
-
+}: ContentWrapperProps) {
   return (
     <main className={`${marginSizes[margin]} w-full mx-auto px-4 py-8 flex-1`}>
       <div className="min-h-[calc(100vh-16rem)]">

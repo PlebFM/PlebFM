@@ -1,75 +1,17 @@
 import { signIn, signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
-import { Session } from 'next-auth';
 
 interface SpotifyAuthButtonProps {
-  session: Session | null;
   isVerified?: boolean;
-  isLoading: boolean;
   onSuccessRedirect?: string;
-  onContinue?: () => void;
+  // onContinue?: () => void;
 }
 
 const SpotifyAuthButton = ({
-  session,
-  // isVerified = false,
-  isLoading,
   onSuccessRedirect,
-  onContinue,
-}: SpotifyAuthButtonProps) => {
-  if (session) {
-    return (
-      <div className="flex flex-col items-center space-y-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center space-x-3 text-white/80"
-        >
-          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
-              />
-            </svg>
-          </div>
-          <span>Connected as {session?.user?.email ?? 'Spotify User'}</span>
-        </motion.div>
-
-        <AnimatePresence>
-          {!isLoading && onContinue && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ delay: 0.3 }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onContinue}
-                className="flex items-center justify-center space-x-2 bg-orange-300/90 hover:bg-orange-300 text-black font-medium px-8 py-3 rounded-lg transition-colors"
-              >
-                <span>Continue</span>
-                <ArrowRightIcon className="w-4 h-4" />
-              </motion.button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => signOut()}
-          className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
-        >
-          Disconnect
-        </motion.button>
-      </div>
-    );
-  }
-
+}: // onContinue,
+SpotifyAuthButtonProps) => {
   const options = onSuccessRedirect ? { callbackUrl: onSuccessRedirect } : {};
 
   return (

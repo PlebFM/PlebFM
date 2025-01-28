@@ -1,19 +1,16 @@
 'use client';
 import Link from 'next/link';
-import SpotifyAuthButton from '../../../components/Leaderboard/SpotifyAuthButton';
 import { motion } from 'framer-motion';
 import { MusicalNoteIcon } from '@heroicons/react/24/outline';
-import HostLoginLayout from '../../../components/Signup/HostLoginLayout';
-import { useHostLogin } from '../../../components/hooks/useHostLogin';
+import SpotifyAuthButton from '../../components/Leaderboard/SpotifyAuthButton';
+import HostLoginLayout from '../../components/Signup/HostLoginLayout';
 import { useRouter } from 'next/navigation';
 
-export default function HostLogin() {
-  const { session, isLoading } = useHostLogin();
+export default function HostLoginUI() {
   const router = useRouter();
 
   return (
     <HostLoginLayout title="Host Login">
-      {/* Step Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -27,7 +24,6 @@ export default function HostLogin() {
         </p>
       </motion.div>
 
-      {/* Content */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -49,12 +45,10 @@ export default function HostLogin() {
           </div>
 
           <SpotifyAuthButton
-            session={session}
-            isLoading={isLoading}
             onSuccessRedirect="/host/dashboard"
-            onContinue={() => {
-              router.push('/host/dashboard');
-            }}
+            // onContinue={() => {
+            //   router.push('/host/dashboard');
+            // }}
           />
 
           <div className="text-center">

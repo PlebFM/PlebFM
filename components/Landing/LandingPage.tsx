@@ -7,6 +7,7 @@ import Hero from './Hero';
 import UserSection from './UserSection';
 import HostSection from './HostSection';
 import { Host } from '../hooks/useHost';
+import { Footer } from '../../app/ui/Footer';
 
 interface IndexProps {
   hosts: Host[];
