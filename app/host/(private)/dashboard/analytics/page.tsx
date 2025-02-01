@@ -3,12 +3,12 @@ import {
   DashboardPageProps,
 } from '../../../../../components/Dashboard/HostDashboardLayout';
 
-export default function HostAnalytics({ host }: DashboardPageProps) {
-  if (!host) return null;
+export default function HostAnalytics(props: DashboardPageProps) {
+  if (!props.host) return null;
 
   return (
     <DashboardLayout
-      host={host}
+      host={props.host}
       title="Analytics"
       subtitle="Track your jukebox performance and earnings."
       margin="large"
