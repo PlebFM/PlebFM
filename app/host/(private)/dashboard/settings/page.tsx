@@ -84,7 +84,7 @@ export default function SettingsPage({
 
   return (
     <Suspense
-      fallback={<LoadingSpinner background="black h-[calc(100vh-8rem)]" />}
+      fallback={<LoadingSpinner background="black h-[calc(100vh-20rem)]" />}
     >
       <DashboardSettings data={data} section={section} status={status} />
     </Suspense>

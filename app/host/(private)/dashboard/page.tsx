@@ -8,7 +8,7 @@ export default function HostDashboardPage({ params }: { params: string }) {
 
   return (
     <Suspense
-      fallback={<LoadingSpinner background="black h-[calc(100vh-8rem)]" />}
+      fallback={<LoadingSpinner background="black h-[calc(100vh-20rem)]" />}
     >
       <HostDashboard data={data} pathname={params} />
     </Suspense>

@@ -4,9 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import plebFMLogo from '../../../public/plebfm-logo.svg';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
-import { getSession } from 'next-auth/react';
 import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
-import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import { Song } from '../../../components/Leaderboard/Song';
 import { QR } from '../../../components/Leaderboard/Qr';
@@ -16,8 +14,18 @@ import { useWakeLock } from '../../../components/hooks/useWakeLock';
 import { useFullscreenControls } from '../../../components/hooks/useFullscreenControls';
 import { FloatingControls } from '../../../components/Leaderboard/FloatingControls';
 
-export default function Queue() {
-  const { queueData, refresh, session, host } = useLeaderboard();
+export const Leaderboard = ({
+  status,
+  error,
+  accessToken,
+  shortName,
+}: {
+  status: string;
+  error: string;
+  accessToken: string;
+  shortName: string;
+}) => {
+  const { queueData, refresh } = useLeaderboard({ status, error, shortName });
   useWakeLock();
   const { isFullscreen, showControls, toggleFullscreen } =
     useFullscreenControls();
@@ -58,22 +66,22 @@ export default function Queue() {
                   <p className="text-base m-auto w-full text-center my-0">
                     Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
                   </p>
-                  <QR shortName={host ?? 'atl'} />
+                  <QR shortName={shortName} />
                   <p className="text-base m-auto font-bold">
-                    pleb.fm/{host ?? ''}
+                    pleb.fm/{shortName}
                   </p>
                 </div>
               </div>
 
               <div className="relative z-20">
-                <Notifications refreshQueue={refresh} host={host ?? ''} />
+                <Notifications refreshQueue={refresh} shortName={shortName} />
               </div>
 
-              {session?.accessToken && host && (
+              {accessToken && shortName && (
                 <WebPlayback
-                  shortName={host}
+                  shortName={shortName}
                   refreshQueue={refresh}
-                  token={session.accessToken}
+                  token={accessToken}
                 />
               )}
             </div>
@@ -85,7 +93,8 @@ export default function Queue() {
               ))}
               {queueData.length === 0 && (
                 <p className="m-10">
-                  Queue is Empty! Place a bid on a song at <b>pleb.fm/{host}</b>
+                  Queue is Empty! Place a bid on a song at{' '}
+                  <b>pleb.fm/{shortName}</b>
                 </p>
               )}
             </div>
@@ -94,19 +103,4 @@ export default function Queue() {
       </div>
     </>
   );
-}
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/host',
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: { session },
-  };
-}
+};
