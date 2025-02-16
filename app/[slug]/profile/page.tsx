@@ -1,3 +1,4 @@
+'use client';
 // User profile
 import Image from 'next/image';
 import Avatar from '../../../components/Utils/Avatar';

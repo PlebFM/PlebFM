@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import logo from '../public/plebfm-logo.svg';
 import Head from 'next/head';
 
@@ -24,7 +23,7 @@ export default function NotFound() {
 
       <div className="fixed w-full h-full bg-black top-0 left-0">
         <Image
-          src={bokeh2}
+          src={'/pfm-bokeh-2.png'}
           alt="background"
           width="100"
           className="object-cover w-full h-full blur-2xl opacity-10"

@@ -12,18 +12,20 @@ import { QuickActions } from '../../components/Dashboard/QuickActions';
 import { RecentActivity } from '../../components/Dashboard/RecentActivity';
 import type { Activity } from '../../components/Dashboard/RecentActivity';
 import type { SongObject } from '../../utils/songs';
-import { DashboardData } from '../host/(private)/dashboard/page';
+import { DashboardData } from '../lib/dashboard';
 import { DashboardContentWrapper } from './DashboardContentWrapper';
 
 export default function HostDashboard({
   data,
   pathname,
 }: {
-  data: Promise<DashboardData>;
+  data: Promise<DashboardData | null>;
   pathname: string;
 }) {
-  const { host, queueData } = use(data);
+  const params = use(data);
   const [earnings, setEarnings] = useState(0);
+  if (!params) return null;
+  const { host, queueData } = params;
 
   const recentActivities: Activity[] = [
     ...queueData

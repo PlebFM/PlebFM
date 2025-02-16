@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import Hero from './Hero';
 import UserSection from './UserSection';
 import HostSection from './HostSection';
@@ -19,7 +18,7 @@ export function LandingPage({ hosts, error }: IndexProps) {
     <div>
       <div className="fixed w-full h-full bg-black top-0 left-0">
         <Image
-          src={bokeh2}
+          src={'/pfm-bokeh-2.png'}
           alt="xl"
           width="100"
           className="object-cover w-full h-full blur-2xl opacity-15"

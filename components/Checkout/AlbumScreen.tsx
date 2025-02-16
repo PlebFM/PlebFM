@@ -2,7 +2,6 @@ import albumPlaceholder from '../../public/album-placeholder.jpg';
 import { ArrowLeftIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
 import Image from 'next/image';
 import Button from '../Utils/Button';
-import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import { Dispatch, SetStateAction, useEffect } from 'react';
 import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
@@ -23,7 +22,7 @@ export default function AlbumScreen({
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
-          src={bokeh2}
+          src={'/pfm-bokeh-2.png'}
           alt=""
           width="100"
           className="object-cover w-full h-full blur-2xl opacity-50"
@@ -35,7 +34,7 @@ export default function AlbumScreen({
 
         {/* eslint-disable */}
         <img
-          src={track?.album?.images[0]?.url ?? bokeh2}
+          src={track?.album?.images[0]?.url ?? '/pfm-bokeh-2.png'}
           alt={track?.album?.name ?? 'Album'}
           width={100}
           height={100}

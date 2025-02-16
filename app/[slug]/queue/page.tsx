@@ -1,5 +1,5 @@
+'use client';
 import Image from 'next/image';
-import bokeh3 from '../../../../public/pfm-bokeh-3.jpg';
 import NavBar from '../../../components/Utils/NavBar';
 import QueueSong from '../../../components/QueueSong';
 import LoadingSpinner from '../../../components/Utils/LoadingSpinner';
@@ -29,7 +29,7 @@ export default function Queue() {
     <Layout title="Queue">
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
-          src={bokeh3}
+          src={'/pfm-bokeh-3.png'}
           alt=""
           width="100"
           className="object-cover w-full h-full blur-2xl opacity-50"

@@ -1,7 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { CartIcon, CopyIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
-import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import { MusicalNoteIcon, QueueListIcon } from '@heroicons/react/24/outline';
 import Button from '../Utils/Button';
 import NavBar from '../Utils/NavBar';
@@ -35,7 +34,7 @@ function PaymentScreen({
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={song?.album?.images[0]?.url ?? bokeh2}
+          src={song?.album?.images[0]?.url ?? '/pfm-bokeh-2.png'}
           alt={song?.album?.name ?? 'Album'}
           width={100}
           height={100}

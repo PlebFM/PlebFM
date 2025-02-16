@@ -3,7 +3,6 @@
 import React from 'react';
 import Image from 'next/image';
 import plebFMLogo from '../../../public/plebfm-logo.svg';
-import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
 import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
 import Head from 'next/head';
 import { Song } from '../../../components/Leaderboard/Song';
@@ -40,7 +39,7 @@ export const Leaderboard = ({
       <div className={`${!showControls ? 'cursor-none' : ''}`}>
         <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
           <Image
-            src={bokeh4}
+            src={'/pfm-bokeh-4.png'}
             alt=""
             width="100"
             className="object-cover w-full h-full blur-2xl opacity-75"
