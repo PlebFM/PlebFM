@@ -4,7 +4,6 @@ import {
   CopyIcon,
   CrossIcon,
 } from '@bitcoin-design/bitcoin-icons-react/filled';
-import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import Button from '../Utils/Button';
 import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import NavBar from '../Utils/NavBar';
@@ -79,7 +78,7 @@ export default function SelectBid({
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         {/* eslint-disable */}
         <img
-          src={song?.album?.images[0]?.url ?? bokeh2}
+          src={song?.album?.images[0]?.url ?? '/pfm-bokeh-2.png'}
           alt={song?.album?.name ?? 'Album'}
           width={100}
           height={100}

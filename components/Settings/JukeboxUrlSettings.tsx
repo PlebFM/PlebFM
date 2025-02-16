@@ -1,22 +1,21 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { SettingsSection } from './SettingsSection';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
+import { revalidatePath } from 'next/cache';
 
-interface JukeboxUrlSettingsProps {
+type JukeboxUrlSettingsProps = {
   shortName: string;
   baseUrl: string;
-}
+  hostId: string;
+};
 
 export function JukeboxUrlSettings({
   shortName,
   baseUrl,
+  hostId,
 }: JukeboxUrlSettingsProps) {
   const [currentValue, setCurrentValue] = useState(shortName);
   const hasChanges = currentValue !== shortName;
-  const { data: session } = useSession();
-  const router = useRouter();
 
   const handleChange = (value: string) => {
     setCurrentValue(value);
@@ -30,7 +29,7 @@ export function JukeboxUrlSettings({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          spotifyId: session?.user?.id,
+          spotifyId: hostId,
           shortName: currentValue,
         }),
       });
@@ -39,7 +38,7 @@ export function JukeboxUrlSettings({
         throw new Error('Failed to update jukebox URL');
       }
 
-      await router.replace(router.asPath);
+      revalidatePath('/host/dashboard/settings');
       return response.json();
     };
 

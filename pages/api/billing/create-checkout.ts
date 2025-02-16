@@ -48,8 +48,8 @@ export default async function handler(
             quantity: 1,
           },
         ],
-        success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/host/settings?section=billing&success=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/host/settings?section=billing&canceled=true`,
+        success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/host/dashboard/settings?section=billing&success=true`,
+        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/host/dashboard/settings?section=billing&canceled=false`,
         metadata: {
           hostId: session.user.id,
           planId: plan.id,

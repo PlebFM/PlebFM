@@ -1,10 +1,11 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import BitcoinLogo from '../../public/bitcoin-logo.svg';
-import { PLANS, type Plan } from '../../models/Subscription';
+import { type Plan } from '../../models/Subscription';
 import { CurrentPlanCard } from '../Billing/CurrentPlanCard';
 import { PaymentMethodCard } from '../Billing/PaymentMethodCard';
 import { BillingHistoryItem } from '../Billing/BillingHistoryItem';
@@ -15,41 +16,53 @@ interface BillingHistory {
   amount: number;
   status: 'paid' | 'pending' | 'failed';
   description: string;
+  receiptUrl?: string;
 }
 
-interface BillingSettingsProps {
-  hostId: string;
-}
+type BillingSettingsProps = {
+  status: string;
+  currentPlan: Plan;
+};
 
-export function BillingSettings({ hostId }: BillingSettingsProps) {
-  const router = useRouter();
+export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPlan] = useState<Plan>(PLANS[1]); // Pro plan
   const [nextBillingDate] = useState('December 1, 2023');
-  const [billingHistory] = useState<BillingHistory[]>([
-    {
-      id: '1',
-      date: 'Nov 1, 2023',
-      amount: 2900,
-      status: 'paid',
-      description: 'Pro Plan - Monthly',
-    },
-    {
-      id: '2',
-      date: 'Oct 1, 2023',
-      amount: 2900,
-      status: 'paid',
-      description: 'Pro Plan - Monthly',
-    },
-  ]);
+  const [billingHistory, setBillingHistory] = useState<BillingHistory[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   useEffect(() => {
-    if (router.query.success) {
+    async function fetchBillingHistory() {
+      // Skip fetching for free tier
+      if (currentPlan.id === 'free') {
+        setIsLoadingHistory(false);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/billing/history');
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+
+        setBillingHistory(data.invoices);
+      } catch (error) {
+        console.error('Failed to fetch billing history:', error);
+        toast.error('Failed to load billing history');
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    }
+
+    fetchBillingHistory();
+  }, [currentPlan.id]);
+
+  useEffect(() => {
+    if (status === 'success') {
       toast.success('Successfully subscribed!');
-    } else if (router.query.canceled) {
+    } else if (status === 'canceled') {
       toast.error('Subscription canceled.');
     }
-  }, [router.query]);
+  }, [status]);
 
   const handleSubscribe = async (
     planId: string,
@@ -120,18 +133,38 @@ export function BillingSettings({ hostId }: BillingSettingsProps) {
           <h3 className="text-lg font-semibold text-white mb-4">
             Billing History
           </h3>
-          <div className="space-y-4">
-            {billingHistory.map(item => (
-              <BillingHistoryItem
-                key={item.id}
-                description={item.description}
-                date={item.date}
-                amount={item.amount}
-                status={item.status}
-                onDownload={() => console.log('Download invoice', item.id)}
-              />
-            ))}
-          </div>
+          {currentPlan.id === 'free' ? (
+            <p className="text-white/60 text-center py-4">
+              Billing history is available for paid plans only
+            </p>
+          ) : isLoadingHistory ? (
+            <div className="animate-pulse space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-16 bg-white/5 rounded-lg" />
+              ))}
+            </div>
+          ) : billingHistory.length > 0 ? (
+            <div className="space-y-4">
+              {billingHistory.map(item => (
+                <BillingHistoryItem
+                  key={item.id}
+                  description={item.description}
+                  date={item.date}
+                  amount={item.amount}
+                  status={item.status}
+                  onDownload={() => {
+                    if (item.receiptUrl) {
+                      window.open(item.receiptUrl, '_blank');
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-white/60 text-center py-4">
+              No billing history available
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -1,24 +1,31 @@
-import { useState } from 'react';
+'use client';
+
+import { use, useState } from 'react';
 import {
   MusicalNoteIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 
-import {
-  DashboardLayout,
-  getServerSidePropsForDashboard,
-  type DashboardPageProps,
-} from '../../components/Dashboard/HostDashboardLayout';
+import { DashboardLayout } from '../../components/Dashboard/HostDashboardLayout';
 import { StatsCard } from '../../components/Dashboard/StatsCard';
 import { QuickActions } from '../../components/Dashboard/QuickActions';
 import { RecentActivity } from '../../components/Dashboard/RecentActivity';
 import type { Activity } from '../../components/Dashboard/RecentActivity';
 import type { SongObject } from '../../utils/songs';
+import { DashboardData } from '../lib/dashboard';
+import { DashboardContentWrapper } from './DashboardContentWrapper';
 
-export default function HostDashboard({ host, queueData }: DashboardPageProps) {
+export default function HostDashboard({
+  data,
+  pathname,
+}: {
+  data: Promise<DashboardData | null>;
+  pathname: string;
+}) {
+  const params = use(data);
   const [earnings, setEarnings] = useState(0);
-
-  if (!host) return null;
+  if (!params) return null;
+  const { host, queueData } = params;
 
   const recentActivities: Activity[] = [
     ...queueData
@@ -39,8 +46,7 @@ export default function HostDashboard({ host, queueData }: DashboardPageProps) {
   );
 
   return (
-    <DashboardLayout
-      host={host}
+    <DashboardContentWrapper
       title="Welcome back"
       subtitle="Here's what's happening with your jukebox today."
       margin="large"
@@ -75,8 +81,6 @@ export default function HostDashboard({ host, queueData }: DashboardPageProps) {
         />
         <RecentActivity activities={recentActivities} />
       </div>
-    </DashboardLayout>
+    </DashboardContentWrapper>
   );
 }
-
-export const getServerSideProps = getServerSidePropsForDashboard;

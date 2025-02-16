@@ -1,19 +1,25 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
+'use client';
+import { use } from 'react';
 import { Toaster } from 'react-hot-toast';
-import {
-  DashboardLayout,
-  getServerSidePropsForDashboard,
-  type DashboardPageProps,
-} from '../../components/Dashboard/HostDashboardLayout';
 import { SettingsSidebar } from '../../components/Dashboard/SettingsSidebar';
 import { GeneralSettings } from '../../components/Settings/GeneralSettings';
 import { BillingSettings } from '../../components/Settings/BillingSettings';
+import { DashboardContentWrapper } from './DashboardContentWrapper';
+import { DashboardData } from '../lib/dashboard';
 
-export default function HostSettings({ host, queueData }: DashboardPageProps) {
-  const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const currentSection = (router.query.section as string) || 'general';
+export default function HostSettings({
+  data,
+  section,
+  status,
+}: {
+  data: Promise<DashboardData>;
+  section: Promise<string>;
+  status: Promise<string>;
+}) {
+  const { host, currentPlan } = use(data);
+
+  const currentSection = use(section);
+  const currentStatus = use(status);
 
   if (!host) return null;
 
@@ -28,6 +34,7 @@ export default function HostSettings({ host, queueData }: DashboardPageProps) {
             <GeneralSettings
               hostName={host.hostName}
               shortName={host.shortName}
+              hostId={host.hostId}
               baseUrl={process.env.NEXT_PUBLIC_BASE_URL || ''}
             />
           </>
@@ -53,7 +60,7 @@ export default function HostSettings({ host, queueData }: DashboardPageProps) {
             <h2 className="text-2xl font-bold text-white mb-6">
               Billing & Subscription
             </h2>
-            <BillingSettings hostId={host.hostId} />
+            <BillingSettings status={currentStatus} currentPlan={currentPlan} />
           </>
         );
 
@@ -63,8 +70,7 @@ export default function HostSettings({ host, queueData }: DashboardPageProps) {
   };
 
   return (
-    <DashboardLayout
-      host={host}
+    <DashboardContentWrapper
       title="Settings"
       subtitle="Manage your jukebox settings and preferences."
       margin="large"
@@ -79,14 +85,12 @@ export default function HostSettings({ host, queueData }: DashboardPageProps) {
         }}
       />
       <div className="flex gap-8">
-        <SettingsSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <SettingsSidebar section={currentSection} />
 
         <div className="flex-1 min-w-0">
           <div key={currentSection}>{renderContent()}</div>
         </div>
       </div>
-    </DashboardLayout>
+    </DashboardContentWrapper>
   );
 }
-
-export const getServerSideProps = getServerSidePropsForDashboard;
