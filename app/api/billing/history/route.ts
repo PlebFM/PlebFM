@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/utils/auth';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function GET(request: NextRequest) {
   console.log('Billing history API called');

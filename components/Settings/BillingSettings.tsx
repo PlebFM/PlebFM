@@ -55,41 +55,44 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
   const [lastInvoiceId, setLastInvoiceId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const fetchBillingHistory = async (startingAfter?: string) => {
-    // If loading more pages, don't reset the existing history
-    if (!startingAfter) {
-      setIsLoadingHistory(true);
-    }
-
-    try {
-      // Build query params
-      const params = new URLSearchParams();
-      if (startingAfter) params.append('startingAfter', startingAfter);
-      if (statusFilter !== 'all') params.append('status', statusFilter);
-      params.append('limit', '10');
-
-      const url = `/api/billing/history?${params.toString()}`;
-      const res = await fetch(url);
-      const data: BillingHistoryResponse = await res.json();
-
-      if (!res.ok) throw new Error(data.error as string);
-
-      // If loading more, append to existing history; otherwise replace
-      if (startingAfter) {
-        setBillingHistory(prev => [...prev, ...data.invoices]);
-      } else {
-        setBillingHistory(data.invoices);
+  const fetchBillingHistory = useCallback(
+    async (startingAfter?: string) => {
+      // If loading more pages, don't reset the existing history
+      if (!startingAfter) {
+        setIsLoadingHistory(true);
       }
 
-      setHasMoreInvoices(data.hasMore);
-      setLastInvoiceId(data.lastInvoiceId);
-    } catch (error) {
-      console.error('Failed to fetch billing history:', error);
-      toast.error('Failed to load billing history');
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
+      try {
+        // Build query params
+        const params = new URLSearchParams();
+        if (startingAfter) params.append('startingAfter', startingAfter);
+        if (statusFilter !== 'all') params.append('status', statusFilter);
+        params.append('limit', '10');
+
+        const url = `/api/billing/history?${params.toString()}`;
+        const res = await fetch(url);
+        const data: BillingHistoryResponse = await res.json();
+
+        if (!res.ok) throw new Error(data.error as string);
+
+        // If loading more, append to existing history; otherwise replace
+        if (startingAfter) {
+          setBillingHistory(prev => [...prev, ...data.invoices]);
+        } else {
+          setBillingHistory(data.invoices);
+        }
+
+        setHasMoreInvoices(data.hasMore);
+        setLastInvoiceId(data.lastInvoiceId);
+      } catch (error) {
+        console.error('Failed to fetch billing history:', error);
+        toast.error('Failed to load billing history');
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    },
+    [statusFilter],
+  );
 
   // Load initial billing history
   useEffect(() => {
@@ -99,7 +102,7 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
     } else {
       setIsLoadingHistory(false);
     }
-  }, [currentPlan, statusFilter]);
+  }, [currentPlan, statusFilter, fetchBillingHistory]);
 
   // Handle subscription status messages
   useEffect(() => {
