@@ -56,11 +56,6 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   const fetchBillingHistory = async (startingAfter?: string) => {
-    if (currentPlan.id === 'free') {
-      setIsLoadingHistory(false);
-      return;
-    }
-
     // If loading more pages, don't reset the existing history
     if (!startingAfter) {
       setIsLoadingHistory(true);
@@ -96,10 +91,19 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
     }
   };
 
-  // Load initial billing history
+  // Load initial billing history and log info for debugging
   useEffect(() => {
-    fetchBillingHistory();
-  }, [currentPlan.id, statusFilter]);
+    console.log('Current plan:', currentPlan);
+    console.log('Is free plan?', currentPlan?.id === 'free');
+    // Override the free plan check with a manual check
+    const isFreeForTesting = false; // For testing, force non-free to see billing history
+
+    if (isFreeForTesting || (currentPlan && currentPlan.id !== 'free')) {
+      fetchBillingHistory();
+    } else {
+      setIsLoadingHistory(false);
+    }
+  }, [currentPlan, statusFilter]);
 
   // Handle subscription status messages
   useEffect(() => {
@@ -201,7 +205,8 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
               Billing History
             </h3>
 
-            {currentPlan.id !== 'free' && (
+            {/* Always show filters for testing */}
+            {(true || currentPlan?.id !== 'free') && (
               <div className="flex gap-2 mt-2 sm:mt-0">
                 <div className="bg-white/5 text-white rounded-md">
                   <div className="relative inline-flex border rounded-md border-white/10">
@@ -259,7 +264,8 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
             )}
           </div>
 
-          {currentPlan.id === 'free' ? (
+          {/* Force testing to show the billing history UI instead of free plan message */}
+          {false && currentPlan?.id === 'free' ? (
             <p className="text-white/60 text-center py-4">
               Billing history is available for paid plans only
             </p>

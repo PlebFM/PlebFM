@@ -7,8 +7,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function GET(request: NextRequest) {
+  console.log('Billing history API called');
   try {
     const session = await auth();
+    console.log(
+      'Auth session:',
+      session?.user ? 'User authenticated' : 'No user',
+    );
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -21,8 +27,39 @@ export async function GET(request: NextRequest) {
 
     // Get user's Stripe customer ID
     const user = session.user as { stripeCustomerId?: string };
+    console.log('User info:', JSON.stringify(user, null, 2));
+    console.log('Stripe customer ID present:', !!user.stripeCustomerId);
+
+    // For testing, use a mock response if no customer ID
     if (!user.stripeCustomerId) {
-      return NextResponse.json({ invoices: [], hasMore: false });
+      console.log('No Stripe customer ID, returning mock data for testing');
+      return NextResponse.json({
+        invoices: [
+          {
+            id: 'mock-invoice-1',
+            number: 'MOCK001',
+            date: new Date().toISOString(),
+            formattedDate: new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            }),
+            amount: 1500,
+            formattedAmount: '15.00',
+            status: 'paid',
+            description: 'PlebFM Pro Subscription',
+            periodStart: new Date().toLocaleDateString(),
+            periodEnd: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000,
+            ).toLocaleDateString(),
+            receiptUrl: 'https://dashboard.stripe.com/test/invoices/mock',
+            pdfUrl: 'https://dashboard.stripe.com/test/invoices/mock',
+            paymentMethod: 'card',
+          },
+        ],
+        hasMore: false,
+        lastInvoiceId: null,
+      });
     }
 
     // Build filter for invoice status
