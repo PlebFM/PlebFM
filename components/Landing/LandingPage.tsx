@@ -18,9 +18,10 @@ export function LandingPage({ hosts, error }: IndexProps) {
     <div>
       <div className="fixed w-full h-full bg-black top-0 left-0">
         <Image
-          src={'/pfm-bokeh-2.png'}
-          alt="xl"
-          width="100"
+          src={'/pfm-bokeh-2.jpg'}
+          alt="background"
+          fill
+          sizes="100vw"
           className="object-cover w-full h-full blur-2xl opacity-15"
         />
       </div>
