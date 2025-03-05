@@ -91,14 +91,10 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
     }
   };
 
-  // Load initial billing history and log info for debugging
+  // Load initial billing history
   useEffect(() => {
-    console.log('Current plan:', currentPlan);
-    console.log('Is free plan?', currentPlan?.id === 'free');
-    // Override the free plan check with a manual check
-    const isFreeForTesting = false; // For testing, force non-free to see billing history
-
-    if (isFreeForTesting || (currentPlan && currentPlan.id !== 'free')) {
+    // Only fetch billing history for paid plans
+    if (currentPlan && currentPlan.id !== 'free') {
       fetchBillingHistory();
     } else {
       setIsLoadingHistory(false);
@@ -160,6 +156,8 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
       window.open(item.receiptUrl, '_blank');
     } else if (type === 'pdf' && item.pdfUrl) {
       window.open(item.pdfUrl, '_blank');
+    } else {
+      toast.error('Download URL not available');
     }
   };
 
@@ -205,8 +203,7 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
               Billing History
             </h3>
 
-            {/* Always show filters for testing */}
-            {(true || currentPlan?.id !== 'free') && (
+            {currentPlan?.id !== 'free' && (
               <div className="flex gap-2 mt-2 sm:mt-0">
                 <div className="bg-white/5 text-white rounded-md">
                   <div className="relative inline-flex border rounded-md border-white/10">
@@ -264,8 +261,7 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
             )}
           </div>
 
-          {/* Force testing to show the billing history UI instead of free plan message */}
-          {false && currentPlan?.id === 'free' ? (
+          {currentPlan?.id === 'free' ? (
             <p className="text-white/60 text-center py-4">
               Billing history is available for paid plans only
             </p>

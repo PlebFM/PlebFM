@@ -30,33 +30,11 @@ export async function GET(request: NextRequest) {
     console.log('User info:', JSON.stringify(user, null, 2));
     console.log('Stripe customer ID present:', !!user.stripeCustomerId);
 
-    // For testing, use a mock response if no customer ID
+    // If no customer ID, return empty array
     if (!user.stripeCustomerId) {
-      console.log('No Stripe customer ID, returning mock data for testing');
+      console.log('No Stripe customer ID, returning empty invoices array');
       return NextResponse.json({
-        invoices: [
-          {
-            id: 'mock-invoice-1',
-            number: 'MOCK001',
-            date: new Date().toISOString(),
-            formattedDate: new Date().toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            }),
-            amount: 1500,
-            formattedAmount: '15.00',
-            status: 'paid',
-            description: 'PlebFM Pro Subscription',
-            periodStart: new Date().toLocaleDateString(),
-            periodEnd: new Date(
-              Date.now() + 30 * 24 * 60 * 60 * 1000,
-            ).toLocaleDateString(),
-            receiptUrl: 'https://dashboard.stripe.com/test/invoices/mock',
-            pdfUrl: 'https://dashboard.stripe.com/test/invoices/mock',
-            paymentMethod: 'card',
-          },
-        ],
+        invoices: [],
         hasMore: false,
         lastInvoiceId: null,
       });
@@ -78,7 +56,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch invoices from Stripe
+    console.log(
+      'Fetching invoices with options:',
+      JSON.stringify(filterOptions, null, 2),
+    );
     const invoices = await stripe.invoices.list(filterOptions);
+    console.log(`Got ${invoices.data.length} invoices from Stripe`);
 
     // Format invoice data for frontend
     const formattedInvoices = invoices.data.map(invoice => ({
@@ -106,6 +89,7 @@ export async function GET(request: NextRequest) {
         : 'unknown',
     }));
 
+    // Return formatted real invoices
     return NextResponse.json({
       invoices: formattedInvoices,
       hasMore: invoices.has_more,
