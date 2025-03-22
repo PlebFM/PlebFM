@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTrack, getAccessToken } from '@/lib/spotify';
 import Host from '@/models/Host';
-import connectDB from '@/middleware/mongodb';
+import { withMongo } from '@/middleware/mongodb';
 
-// Connect to MongoDB before handling request
-const mongoHandler = connectDB(async (req: NextRequest) => {
+// GET handler for fetching a specific song from Spotify
+export const GET = withMongo(async (req: NextRequest) => {
   // Get the query parameters from the URL
   const searchParams = req.nextUrl.searchParams;
   const trackId = searchParams.get('id');
@@ -64,5 +64,3 @@ const mongoHandler = connectDB(async (req: NextRequest) => {
     );
   }
 });
-
-export const GET = mongoHandler;

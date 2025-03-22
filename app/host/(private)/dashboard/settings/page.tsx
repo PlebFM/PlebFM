@@ -8,10 +8,6 @@ import { cleanSong, SongObject } from '../../../../../utils/songs';
 import LoadingSpinner from '../../../../../components/Utils/LoadingSpinner';
 import DashboardSettings from '../../../../ui/DashboardSettings';
 
-export type DashboardPageProps = {
-  data: Promise<DashboardData>;
-};
-
 export type DashboardData = {
   host: Host;
   queueData: SongObject[];
@@ -67,19 +63,20 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 };
 
-export default async function SettingsPage(props: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const searchParams = await props.searchParams;
+// Use the simplest form of page component that works with App Router
+export default async function SettingsPage({ searchParams }: any) {
   const data = fetchDashboardData();
 
-  const section = searchParams.then(
-    res => (res.section ?? 'general') as string,
-  );
-
-  const status = searchParams.then(
-    res => (res.success ? 'success' : res.canceled ? 'canceled' : '') as string,
-  );
+  // Extract params with defaults
+  const section =
+    typeof searchParams?.section === 'string'
+      ? searchParams.section
+      : 'general';
+  const status = searchParams?.success
+    ? 'success'
+    : searchParams?.canceled
+    ? 'canceled'
+    : '';
 
   return (
     <Suspense

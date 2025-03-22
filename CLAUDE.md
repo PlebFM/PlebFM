@@ -15,6 +15,7 @@
   - Semicolons required, no JSX single quotes
   - Auto-formatted on commit via Husky + pretty-quick
   - Use arrow functions over the function keyword
+  - DON'T leave any comments unless explicitly asked.
 - **Components**: React functional components with TypeScript interfaces
 - **Naming**: PascalCase for components/types, camelCase for variables/functions
 - **Imports**: Group by: 1) React/Next, 2) External libs, 3) Internal modules

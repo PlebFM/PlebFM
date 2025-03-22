@@ -32,6 +32,7 @@ export default function Search({ selectSong }: Props) {
             src={plebFMLogo}
             alt="PlebFM"
             className="w-auto mx-auto lg:w-full"
+            priority
           />
 
           <div className="text-left space-y-2">

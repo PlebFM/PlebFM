@@ -1,6 +1,7 @@
 import '../styles/globals.css';
 import { Metadata, Viewport } from 'next';
 import { Footer } from './ui/Footer';
+import { AvatarPreloader } from './ui/AvatarPreloader';
 
 export default async function RootLayout({
   children,
@@ -9,7 +10,20 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head>
+        {/* Preload critical avatar assets */}
+        <link
+          rel="preload"
+          href="/Avatar/Loading.png"
+          as="image"
+          type="image/png"
+        />
+      </head>
+      <body>
+        {children}
+        {/* Preload other avatars after page load */}
+        <AvatarPreloader />
+      </body>
     </html>
   );
 }

@@ -83,12 +83,12 @@ const DashboardSettings = memo(function DashboardSettings({
   status,
 }: {
   data: Promise<DashboardData>;
-  section: Promise<string>;
-  status: Promise<string>;
+  section: string;
+  status: string;
 }) {
   const { host, currentPlan } = use(data);
-  const currentSection = use(section);
-  const currentStatus = use(status);
+  const currentSection = section;
+  const currentStatus = status;
 
   if (!host) return null;
 

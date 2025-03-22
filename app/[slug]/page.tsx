@@ -8,7 +8,7 @@ import { Suspense } from 'react';
 export default async function Bidding({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
 

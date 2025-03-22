@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPlaybackState, getAccessToken } from '@/lib/spotify';
 import Host from '@/models/Host';
-import connectDB from '@/middleware/mongodb';
+import { withMongo } from '@/middleware/mongodb';
 
-// Connect to MongoDB before handling request
-const mongoHandler = connectDB(async (req: NextRequest) => {
+// GET handler for retrieving Spotify playback state
+export const GET = withMongo(async (req: NextRequest) => {
   // Get the query parameters from the URL
   const searchParams = req.nextUrl.searchParams;
   const shortName = searchParams.get('shortName');
@@ -49,5 +49,3 @@ const mongoHandler = connectDB(async (req: NextRequest) => {
     );
   }
 });
-
-export const GET = mongoHandler;

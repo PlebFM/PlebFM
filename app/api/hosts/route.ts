@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Host from '@/models/Host';
-import connectDB from '@/middleware/mongodb';
+import { withMongo } from '@/middleware/mongodb';
 
-const GET = connectDB(async (request: NextRequest) => {
+// GET handler for fetching all hosts
+export const GET = withMongo(async (request: NextRequest) => {
   try {
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -21,7 +22,8 @@ const GET = connectDB(async (request: NextRequest) => {
   }
 });
 
-const PATCH = connectDB(async (request: NextRequest) => {
+// PATCH handler for updating a host
+export const PATCH = withMongo(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { spotifyId, shortName, hostName, refreshToken } = body;
@@ -55,5 +57,3 @@ const PATCH = connectDB(async (request: NextRequest) => {
     );
   }
 });
-
-export { GET, PATCH };

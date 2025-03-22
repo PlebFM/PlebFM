@@ -6,7 +6,11 @@ import { Suspense } from 'react';
 import QueueClientWrapper from './QueueClientWrapper';
 import { getQueueData } from '../../lib/queue';
 
-export default async function Queue({ params }: { params: { slug: string } }) {
+export default async function Queue({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
 
   if (!slug) notFound();

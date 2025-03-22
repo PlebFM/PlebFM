@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Host from '@/models/Host';
-import connectDB from '@/middleware/mongodb';
+import { withMongo } from '@/middleware/mongodb';
 
-const GET = connectDB(
+// GET handler for fetching a host
+export const GET = withMongo(
   async (
     request: NextRequest,
     { params }: { params: { shortName: string } },
   ) => {
     try {
-      const { shortName } = await params;
+      const { shortName } = params;
 
       const host = await Host.findOne({ shortName });
 
@@ -30,13 +31,14 @@ const GET = connectDB(
   },
 );
 
-const POST = connectDB(
+// POST handler for creating a host
+export const POST = withMongo(
   async (
     request: NextRequest,
     { params }: { params: { shortName: string } },
   ) => {
     try {
-      const { shortName } = await params;
+      const { shortName } = params;
       const body = await request.json();
       const { hostName, refreshToken, spotifyId } = body;
 
@@ -67,5 +69,3 @@ const POST = connectDB(
     }
   },
 );
-
-export { GET, POST };

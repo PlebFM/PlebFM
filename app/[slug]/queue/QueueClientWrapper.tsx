@@ -5,7 +5,6 @@ import QueueSong from '../../../components/QueueSong';
 import LoadingSpinner from '../../../components/Utils/LoadingSpinner';
 import { usePusher } from '../../../components/hooks/usePusher';
 import { SongObject } from '../../../utils/songs';
-import { refreshQueueData } from '../../lib/queue';
 
 interface QueueClientWrapperProps {
   initialQueueData: SongObject[];
@@ -19,12 +18,22 @@ export default function QueueClientWrapper({
   const [queueData, setQueueData] = useState<SongObject[]>(initialQueueData);
   const [loading, setLoading] = useState(false);
 
-  // Function to refresh queue data using server action
   const refreshQueue = async () => {
+    if (loading) return;
+
     setLoading(true);
     try {
-      const freshData = await refreshQueueData(slug);
-      setQueueData(freshData);
+      const response = await fetch(`/api/queue/refresh?shortName=${slug}`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh queue data');
+      }
+
+      const result = await response.json();
+      setQueueData(result.data || []);
     } catch (error) {
       console.error('Error refreshing queue:', error);
     } finally {
@@ -32,17 +41,17 @@ export default function QueueClientWrapper({
     }
   };
 
-  // Set up Pusher for real-time updates
+  // Setup Pusher for real-time updates
   usePusher(() => {
     refreshQueue();
-  });
+  }, slug);
 
-  // Fallback to client-side fetch if initial data is empty
-  useEffect(() => {
-    if (initialQueueData.length === 0) {
-      refreshQueue();
-    }
-  }, [initialQueueData]);
+  // // Fallback to client-side fetch if initial data is empty
+  // useEffect(() => {
+  //   if (initialQueueData.length === 0) {
+  //     refreshQueue();
+  //   }
+  // }, [initialQueueData]);
 
   if (loading) {
     return <LoadingSpinner />;

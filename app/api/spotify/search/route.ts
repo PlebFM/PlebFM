@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchTrack } from '@/lib/spotify';
+import { searchTrack, getAccessToken } from '@/lib/spotify';
 import Host from '@/models/Host';
-import connectDB from '@/middleware/mongodb';
-import { getAccessToken } from '@/lib/spotify';
+import { withMongo } from '@/middleware/mongodb';
 
-// Connect to MongoDB before handling request
-const mongoHandler = connectDB(async (req: NextRequest) => {
+// GET handler for searching Spotify tracks
+export const GET = withMongo(async (req: NextRequest) => {
   // Get the query parameters from the URL
   const searchParams = req.nextUrl.searchParams;
   const query = searchParams.get('query') || '';
@@ -59,5 +58,3 @@ const mongoHandler = connectDB(async (req: NextRequest) => {
     );
   }
 });
-
-export const GET = mongoHandler;

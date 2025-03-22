@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --experimental-https --port 3000",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --experimental-https",
     "lint": "next lint",
     "prepare": "npx husky install",
     "format": "npx prettier --write .",

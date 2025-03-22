@@ -72,9 +72,6 @@ export default function SpotifyStep({
 
       <div className="pt-4">
         <SpotifyAuthButton
-          session={session}
-          isLoading={isLoading}
-          onContinue={onContinue}
           onSuccessRedirect={isVerified ? '/host/dashboard' : undefined}
         />
       </div>
