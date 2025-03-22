@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchTrack } from '@/lib/spotify';
-import { Host } from '@/models/Host';
+import Host from '@/models/Host';
 import connectDB from '@/middleware/mongodb';
 import { getAccessToken } from '@/lib/spotify';
 
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   // Get the query parameters from the URL
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('query') || '';
@@ -19,9 +19,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Connect to the database first
-    await connectDB();
-
     // Find the host by shortName
     const customer = await Host.findOne({ shortName: shortName });
 
@@ -61,3 +58,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export default connectDB(GET);

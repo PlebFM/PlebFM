@@ -10,16 +10,21 @@ export default async function Bidding({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  // const pathName = usePathname()?.replaceAll('/', '');
   const { slug } = await params;
 
   if (!slug) notFound();
 
-  const host = getHost(slug);
+  const hostPromise = getHost(slug).then(host => {
+    if (!host) {
+      console.warn('Host not found', slug);
+      notFound();
+    }
+    return host;
+  });
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <Home host={host} />
+      <Home host={hostPromise} />
     </Suspense>
   );
 }
