@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+'use client';
+import { ReactNode, memo } from 'react';
 import { motion } from 'framer-motion';
 import type { Plan, Subscription } from '../../models/Subscription';
 
@@ -23,7 +24,7 @@ export interface DashboardPageProps {
   currentPlan: Plan | null;
 }
 
-export function DashboardContentWrapper({
+export const DashboardContentWrapper = memo(function DashboardContentWrapper({
   children,
   title,
   subtitle,
@@ -35,6 +36,7 @@ export function DashboardContentWrapper({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
           className="mb-8"
         >
           <h1 className="text-3xl font-bold text-white">{title}</h1>
@@ -44,4 +46,7 @@ export function DashboardContentWrapper({
       </div>
     </main>
   );
-}
+});
+
+// Also export as default for compatibility
+export default DashboardContentWrapper;

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
 
@@ -9,7 +10,7 @@ interface StatsCardProps {
   iconBg: string;
 }
 
-export function StatsCard({
+export const StatsCard = memo(function StatsCard({
   title,
   value,
   trend,
@@ -18,11 +19,9 @@ export function StatsCard({
 }: StatsCardProps) {
   return (
     <motion.div
-      variants={{
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: 20 },
-      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
     >
       <div className="flex items-center justify-between">
@@ -39,4 +38,4 @@ export function StatsCard({
       </div>
     </motion.div>
   );
-}
+});
