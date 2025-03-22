@@ -1,21 +1,29 @@
-// import {
-//   DashboardLayout,
-//   DashboardPageProps,
-// } from '../../../../../components/Dashboard/HostDashboardLayout';
+import { memo } from 'react';
+import { Suspense } from 'react';
+import LoadingSpinner from '../../../../../components/Utils/LoadingSpinner';
+import { DashboardContentWrapper } from '../../../../ui/DashboardContentWrapper';
 
-export default function HostAnalytics() {
+const AnalyticsContent = memo(function AnalyticsContent() {
   return (
-    // <DashboardLayout
-    //   host={props.host}
-    //   title="Analytics"
-    //   subtitle="Track your jukebox performance and earnings."
-    //   margin="large"
-    //   pathname="/host/dashboard/analytics"
-    // >
     <div className="text-white">
       {/* Analytics content will go here */}
       Coming soon...
     </div>
-    // </DashboardLayout>
+  );
+});
+
+export default function HostAnalytics() {
+  return (
+    <Suspense
+      fallback={<LoadingSpinner background="black h-[calc(100vh-20rem)]" />}
+    >
+      <DashboardContentWrapper
+        title="Analytics"
+        subtitle="Track your jukebox performance and earnings."
+        margin="large"
+      >
+        <AnalyticsContent />
+      </DashboardContentWrapper>
+    </Suspense>
   );
 }

@@ -9,6 +9,7 @@ import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
 import { CheckoutHeader } from './CheckoutHeader';
+import Image from 'next/image';
 
 type Props = {
   song: Song;
@@ -77,14 +78,15 @@ export default function SelectBid({
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         {/* eslint-disable */}
-        <img
-          src={song?.album?.images[0]?.url ?? '/pfm-bokeh-2.png'}
-          alt={song?.album?.name ?? 'Album'}
-          width={100}
-          height={100}
-          className="object-cover w-full h-full blur-2xl opacity-50"
-        />
-        {/* <Image src={albumPlaceholder} alt="" width="100" className="object-cover w-full h-full blur-2xl opacity-50" /> */}
+        <div className="w-full h-full relative">
+          <Image
+            src={song?.album?.images[0]?.url ?? '/pfm-bokeh-2.jpg'}
+            alt={song?.album?.name ?? 'Album'}
+            fill
+            sizes="100vw"
+            className="object-cover w-full h-full blur-2xl opacity-50"
+          />
+        </div>
       </div>
 
       <div className="m-auto max-w-xl px-12 pt-12 pb-36 text-white relative z-50 flex flex-col space-y-8 items-center min-h-screen font-thin">

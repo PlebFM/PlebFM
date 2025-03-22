@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useCallback, memo } from 'react';
 import {
   MusicalNoteIcon,
   CurrencyDollarIcon,
@@ -15,19 +15,8 @@ import type { SongObject } from '../../utils/songs';
 import { DashboardData } from '../lib/dashboard';
 import { DashboardContentWrapper } from './DashboardContentWrapper';
 
-export default function HostDashboard({
-  data,
-  pathname,
-}: {
-  data: Promise<DashboardData | null>;
-  pathname: string;
-}) {
-  const params = use(data);
-  const [earnings, setEarnings] = useState(0);
-  if (!params) return null;
-  const { host, queueData } = params;
-
-  const recentActivities: Activity[] = [
+function prepareActivities(queueData: SongObject[]): Activity[] {
+  return [
     ...queueData
       .map((song: SongObject, index) => ({
         id: `queue-${index}`,
@@ -44,6 +33,35 @@ export default function HostDashboard({
     (activity): activity is Activity =>
       activity !== null && activity !== undefined,
   );
+}
+
+const HostDashboard = memo(function HostDashboard({
+  data,
+  pathname,
+}: {
+  data: Promise<DashboardData | null>;
+  pathname: string;
+}) {
+  const params = use(data);
+  const [earnings, setEarnings] = useState(0);
+
+  // Move hooks before any conditionals
+  const handleSkip = useCallback(() => {
+    if (params?.host?.shortName) {
+      fetch(`/api/skip?shortName=${params.host.shortName}`, {
+        method: 'POST',
+      });
+    }
+  }, [params?.host?.shortName]);
+
+  const handleManageQueue = useCallback(() => {
+    window.open('/host/queue', '_blank');
+  }, []);
+
+  if (!params) return null;
+  const { host, queueData } = params;
+
+  const recentActivities = prepareActivities(queueData);
 
   return (
     <DashboardContentWrapper
@@ -69,18 +87,11 @@ export default function HostDashboard({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <QuickActions
-          onSkip={() => {
-            if (host.shortName) {
-              fetch(`/api/skip?shortName=${host.shortName}`, {
-                method: 'POST',
-              });
-            }
-          }}
-          onManageQueue={() => window.open('/host/queue', '_blank')}
-        />
+        <QuickActions onSkip={handleSkip} onManageQueue={handleManageQueue} />
         <RecentActivity activities={recentActivities} />
       </div>
     </DashboardContentWrapper>
   );
-}
+});
+
+export default HostDashboard;

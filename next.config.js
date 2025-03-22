@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  swcMinify: true,
-  // experimental:{appDir: true},
+  // Note: swcMinify removed as it's now default in Next.js 15+
+  // experimental:{appDir: true}, // No longer needed as App Router is stable
   headers: () => [
     {
       source: '/:path*',

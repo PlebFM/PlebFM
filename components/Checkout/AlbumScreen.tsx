@@ -22,9 +22,10 @@ export default function AlbumScreen({
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
-          src={'/pfm-bokeh-2.png'}
-          alt=""
-          width="100"
+          src={'/pfm-bokeh-2.jpg'}
+          alt="background"
+          fill
+          sizes="100vw"
           className="object-cover w-full h-full blur-2xl opacity-50"
         />
       </div>
