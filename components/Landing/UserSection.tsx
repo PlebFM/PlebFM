@@ -25,8 +25,8 @@ export default function UserSection({ hosts, error }: UserSectionProps) {
         <p className="text-white/60">No active jukeboxes found</p>
       ) : (
         <ul className="space-y-2">
-          {hosts.map(host => (
-            <JukeboxLink key={host.shortName} href={`/${host.shortName}`}>
+          {hosts.map((host, i) => (
+            <JukeboxLink key={`host-link-${i}`} href={`/${host.shortName}`}>
               {host.hostName}
             </JukeboxLink>
           ))}

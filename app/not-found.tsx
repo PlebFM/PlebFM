@@ -1,35 +1,25 @@
-import { useRouter } from 'next/router';
+'use client';
+
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import logo from '../public/plebfm-logo.svg';
-import Head from 'next/head';
+import BackgroundGradient from './ui/BackgroundGradient';
 
 export default function NotFound() {
   const router = useRouter();
-
+  const pathname = usePathname();
   const [redirectPath, setRedirectPath] = useState('/');
 
   useEffect(() => {
-    if (router.asPath.startsWith('/host/')) {
+    if (pathname?.startsWith('/host/')) {
       setRedirectPath('/host/login');
     }
-  }, [router]);
+  }, [pathname]);
 
   return (
     <div>
-      <Head>
-        <title>404 - Page Not Found | PlebFM</title>
-      </Head>
-
-      <div className="fixed w-full h-full bg-black top-0 left-0">
-        <Image
-          src={bokeh2}
-          alt="background"
-          width="100"
-          className="object-cover w-full h-full blur-2xl opacity-10"
-        />
-      </div>
+      <BackgroundGradient />
 
       <div className="relative z-50 h-screen flex flex-col items-center justify-center p-8 text-white">
         <Image

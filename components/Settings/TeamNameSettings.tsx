@@ -1,18 +1,18 @@
+'use client';
+
+import { revalidatePath } from 'next/cache';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { SettingsSection } from './SettingsSection';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
 
-interface TeamNameSettingsProps {
+type TeamNameSettingsProps = {
   hostName: string;
-}
+  hostId: string;
+};
 
-export function TeamNameSettings({ hostName }: TeamNameSettingsProps) {
+export function TeamNameSettings({ hostName, hostId }: TeamNameSettingsProps) {
   const [currentValue, setCurrentValue] = useState(hostName);
   const hasChanges = currentValue !== hostName;
-  const { data: session } = useSession();
-  const router = useRouter();
 
   const handleChange = (value: string) => {
     setCurrentValue(value);
@@ -26,7 +26,7 @@ export function TeamNameSettings({ hostName }: TeamNameSettingsProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          spotifyId: session?.user?.id,
+          spotifyId: hostId,
           hostName: currentValue,
         }),
       });
@@ -35,7 +35,9 @@ export function TeamNameSettings({ hostName }: TeamNameSettingsProps) {
         throw new Error('Failed to update team name');
       }
 
-      await router.replace(router.asPath);
+      // TODO: add refresh
+      revalidatePath('/host/dashboard/settings');
+
       return response.json();
     };
 
