@@ -8,15 +8,16 @@ import { Suspense } from 'react';
 export default async function Bidding({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
   const { slug } = await params;
 
   if (!slug) notFound();
 
+  // Fetch host data on the server
   const hostPromise = getHost(slug).then(host => {
     if (!host) {
-      console.warn('Host not found', slug);
+      console.error('Host not found', slug);
       notFound();
     }
     return host;

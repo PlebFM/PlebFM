@@ -3,6 +3,9 @@ const nextConfig = {
   reactStrictMode: false,
   // Note: swcMinify removed as it's now default in Next.js 15+
   // experimental:{appDir: true}, // No longer needed as App Router is stable
+  images: {
+    domains: ['i.scdn.co', 'mosaic.scdn.co', 'platform-lookaside.fbsbx.com'],
+  },
   headers: () => [
     {
       source: '/:path*',

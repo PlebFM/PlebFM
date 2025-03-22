@@ -8,7 +8,7 @@ const GET = connectDB(
     { params }: { params: { shortName: string } },
   ) => {
     try {
-      const { shortName } = params;
+      const { shortName } = await params;
 
       const host = await Host.findOne({ shortName });
 
@@ -36,7 +36,7 @@ const POST = connectDB(
     { params }: { params: { shortName: string } },
   ) => {
     try {
-      const { shortName } = params;
+      const { shortName } = await params;
       const body = await request.json();
       const { hostName, refreshToken, spotifyId } = body;
 

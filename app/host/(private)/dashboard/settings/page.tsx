@@ -67,11 +67,10 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 };
 
-export default function SettingsPage({
-  searchParams,
-}: {
+export default async function SettingsPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const searchParams = await props.searchParams;
   const data = fetchDashboardData();
 
   const section = searchParams.then(

@@ -4,9 +4,10 @@ import Host from '@/models/Host';
 import connectDB from '@/middleware/mongodb';
 import { getAccessToken } from '@/lib/spotify';
 
-async function GET(request: NextRequest) {
+// Connect to MongoDB before handling request
+const mongoHandler = connectDB(async (req: NextRequest) => {
   // Get the query parameters from the URL
-  const searchParams = request.nextUrl.searchParams;
+  const searchParams = req.nextUrl.searchParams;
   const query = searchParams.get('query') || '';
   const limit = searchParams.get('limit') || '20';
   const shortName = searchParams.get('shortName');
@@ -57,6 +58,6 @@ async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});
 
-export default connectDB(GET);
+export const GET = mongoHandler;
