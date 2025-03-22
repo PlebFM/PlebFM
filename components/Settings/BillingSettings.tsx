@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import {
   CreditCardIcon,
@@ -71,9 +71,10 @@ export function BillingSettings({ status, currentPlan }: BillingSettingsProps) {
 
         const url = `/api/billing/history?${params.toString()}`;
         const res = await fetch(url);
+
         const data: BillingHistoryResponse = await res.json();
 
-        if (!res.ok) throw new Error(data.error as string);
+        if (!res.ok) throw new Error(res.statusText);
 
         // If loading more, append to existing history; otherwise replace
         if (startingAfter) {
