@@ -9,14 +9,6 @@ const nextConfig = {
   },
   // Configuration for build optimization
   excludeDefaultMomentLocales: true, // For smaller bundle size
-  typescript: {
-    // Dangerously ignore TypeScript errors in build for now (fix properly later)
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    // Dangerously ignore ESLint errors in build for now (fix properly later)
-    ignoreDuringBuilds: true,
-  },
   // Only use App Router files, exclude Pages Router completely for now
   useFileSystemPublicRoutes: true,
   transpilePackages: ['next-auth'],
