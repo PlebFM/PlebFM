@@ -1,7 +1,6 @@
 import React from 'react';
 import NavBar from '../Utils/NavBar';
 import plebFMLogo from '../../public/plebfm-logo.svg';
-import bokeh2 from '../../public/pfm-bokeh-2.jpg';
 import Image from 'next/image';
 import { Spinner } from '../Utils/LoadingSpinner';
 import Tag from '../Utils/Tag';
@@ -19,9 +18,10 @@ export default function Search({ selectSong }: Props) {
     <>
       <div className="fixed w-full h-full bg-black top-0 left-0 bg-pfm-purple-100">
         <Image
-          src={bokeh2}
-          alt="xl"
-          width="100"
+          src={'/pfm-bokeh-2.jpg'}
+          alt="background"
+          fill
+          sizes="100vw"
           className="object-cover w-full h-full blur-2xl opacity-50"
         />
       </div>
@@ -32,6 +32,7 @@ export default function Search({ selectSong }: Props) {
             src={plebFMLogo}
             alt="PlebFM"
             className="w-auto mx-auto lg:w-full"
+            priority
           />
 
           <div className="text-left space-y-2">

@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export function useFullscreenControls(hideDelay = 3000) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  let timeout: NodeJS.Timeout;
+  let timeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const handleMouseMove = () => {
       setShowControls(true);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => setShowControls(false), hideDelay);
+      clearTimeout(timeout.current);
+      timeout.current = setTimeout(() => setShowControls(false), hideDelay);
     };
 
     const handleFullscreenChange = () => {
@@ -22,7 +22,7 @@ export function useFullscreenControls(hideDelay = 3000) {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      clearTimeout(timeout);
+      clearTimeout(timeout.current);
     };
   }, [hideDelay]);
 

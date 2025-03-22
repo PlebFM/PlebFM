@@ -4,23 +4,29 @@ import { TeamNameSettings } from './TeamNameSettings';
 import { JukeboxUrlSettings } from './JukeboxUrlSettings';
 import { DangerZone } from './DangerZone';
 
-interface GeneralSettingsProps {
+type GeneralSettingsProps = {
   hostName: string;
   shortName: string;
+  hostId: string;
   baseUrl: string;
-}
+};
 
 export function GeneralSettings({
   hostName,
   shortName,
+  hostId,
   baseUrl,
 }: GeneralSettingsProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   return (
     <div className="space-y-6">
-      <TeamNameSettings hostName={hostName} />
-      <JukeboxUrlSettings shortName={shortName} baseUrl={baseUrl} />
+      <TeamNameSettings hostName={hostName} hostId={hostId} />
+      <JukeboxUrlSettings
+        shortName={shortName}
+        baseUrl={baseUrl}
+        hostId={hostId}
+      />
       <div>
         <button
           onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}

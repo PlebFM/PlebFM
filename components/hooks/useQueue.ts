@@ -1,3 +1,4 @@
+'use client';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { getUserProfileFromLocal } from '../../utils/profile';

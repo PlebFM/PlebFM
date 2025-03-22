@@ -1,26 +1,22 @@
-import { useState } from 'react';
+'use client';
+
+import { use, useState, useCallback, memo } from 'react';
 import {
   MusicalNoteIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 
-import {
-  DashboardLayout,
-  getServerSidePropsForDashboard,
-  type DashboardPageProps,
-} from '../../components/Dashboard/HostDashboardLayout';
+import { DashboardLayout } from '../../components/Dashboard/HostDashboardLayout';
 import { StatsCard } from '../../components/Dashboard/StatsCard';
 import { QuickActions } from '../../components/Dashboard/QuickActions';
 import { RecentActivity } from '../../components/Dashboard/RecentActivity';
 import type { Activity } from '../../components/Dashboard/RecentActivity';
 import type { SongObject } from '../../utils/songs';
+import { DashboardData } from '../lib/dashboard';
+import { DashboardContentWrapper } from './DashboardContentWrapper';
 
-export default function HostDashboard({ host, queueData }: DashboardPageProps) {
-  const [earnings, setEarnings] = useState(0);
-
-  if (!host) return null;
-
-  const recentActivities: Activity[] = [
+function prepareActivities(queueData: SongObject[]): Activity[] {
+  return [
     ...queueData
       .map((song: SongObject, index) => ({
         id: `queue-${index}`,
@@ -37,10 +33,38 @@ export default function HostDashboard({ host, queueData }: DashboardPageProps) {
     (activity): activity is Activity =>
       activity !== null && activity !== undefined,
   );
+}
+
+const HostDashboard = memo(function HostDashboard({
+  data,
+  pathname,
+}: {
+  data: Promise<DashboardData | null>;
+  pathname: string;
+}) {
+  const params = use(data);
+  const [earnings, setEarnings] = useState(0);
+
+  // Move hooks before any conditionals
+  const handleSkip = useCallback(() => {
+    if (params?.host?.shortName) {
+      fetch(`/api/skip?shortName=${params.host.shortName}`, {
+        method: 'POST',
+      });
+    }
+  }, [params?.host?.shortName]);
+
+  const handleManageQueue = useCallback(() => {
+    window.open('/host/queue', '_blank');
+  }, []);
+
+  if (!params) return null;
+  const { host, queueData } = params;
+
+  const recentActivities = prepareActivities(queueData);
 
   return (
-    <DashboardLayout
-      host={host}
+    <DashboardContentWrapper
       title="Welcome back"
       subtitle="Here's what's happening with your jukebox today."
       margin="large"
@@ -63,20 +87,11 @@ export default function HostDashboard({ host, queueData }: DashboardPageProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <QuickActions
-          onSkip={() => {
-            if (host.shortName) {
-              fetch(`/api/skip?shortName=${host.shortName}`, {
-                method: 'POST',
-              });
-            }
-          }}
-          onManageQueue={() => window.open('/host/queue', '_blank')}
-        />
+        <QuickActions onSkip={handleSkip} onManageQueue={handleManageQueue} />
         <RecentActivity activities={recentActivities} />
       </div>
-    </DashboardLayout>
+    </DashboardContentWrapper>
   );
-}
+});
 
-export const getServerSideProps = getServerSidePropsForDashboard;
+export default HostDashboard;

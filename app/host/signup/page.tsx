@@ -1,13 +1,14 @@
+'use client';
+
 import { signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import HostLoginLayout from '../../components/Signup/HostLoginLayout';
-import { useHostLogin } from '../../components/hooks/useHostLogin';
-import SpotifyStep from '../../components/Signup/SpotifyStep';
-import DetailsStep from '../../components/Signup/DetailsStep';
-import CompleteStep from '../../components/Signup/CompleteStep';
+import { useHostLogin } from '../../../components/hooks/useHostLogin';
+import SpotifyStep from '../../../components/Signup/SpotifyStep';
+import DetailsStep from '../../../components/Signup/DetailsStep';
+import CompleteStep from '../../../components/Signup/CompleteStep';
 
 type OnboardingStep = 'spotify' | 'details' | 'complete';
 
@@ -98,7 +99,7 @@ export default function HostSignup() {
   };
 
   return (
-    <HostLoginLayout title="Create Your Jukebox">
+    <div className="max-w-xl mx-auto pt-16 px-4">
       {/* Step Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -163,6 +164,6 @@ export default function HostSignup() {
           {currentStep === 'complete' && <CompleteStep />}
         </motion.div>
       </AnimatePresence>
-    </HostLoginLayout>
+    </div>
   );
 }

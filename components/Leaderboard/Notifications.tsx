@@ -5,11 +5,11 @@ import { usePusher } from '../hooks/usePusher';
 
 type Props = {
   refreshQueue: () => void;
-  host: string;
+  shortName: string;
 };
 
-export const Notifications = ({ refreshQueue, host }: Props) => {
-  const { notifications } = usePusher(refreshQueue, host);
+export const Notifications = ({ refreshQueue, shortName }: Props) => {
+  const { notifications } = usePusher(refreshQueue, shortName);
   return (
     <div className="absolute top-0 left-0">
       <div className="flex flex-row justify-between p-8 pt-0 pr-0">

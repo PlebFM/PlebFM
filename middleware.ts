@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAuth } from 'next-auth/middleware';
 
 // Public routes that don't require auth
-const PUBLIC_ROUTES = ['/host/login', '/host/signup'];
+const PUBLIC_ROUTES = ['/host/login', '/host/signup', '/host/plans'];
 
 export default withAuth(
   function middleware(req) {

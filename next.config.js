@@ -1,16 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  swcMinify: true,
-  // experimental:{appDir: true},
-  headers: () => [
-    {
-      source: '/:path*',
-      headers: [{ key: 'Cache-Control', value: 'no-store' }],
-    },
-  ],
+  // Note: swcMinify removed as it's now default in Next.js 15+
+  // experimental:{appDir: true}, // No longer needed as App Router is stable
+  images: {
+    domains: ['i.scdn.co', 'mosaic.scdn.co', 'platform-lookaside.fbsbx.com'],
+    minimumCacheTTL: 604800, // 1 week caching for images (in seconds)
+  },
+  // Configuration for build optimization
+  excludeDefaultMomentLocales: true, // For smaller bundle size
+  // Only use App Router files, exclude Pages Router completely for now
+  useFileSystemPublicRoutes: true,
+  transpilePackages: ['next-auth'],
   async headers() {
     return [
+      // Special routes
       {
         source: '/.well-known/nostr.json',
         headers: [
@@ -18,16 +22,11 @@ const nextConfig = {
           { key: 'Access-Control-Allow-Origin', value: '*' },
         ],
       },
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'no-store' },
-          { key: 'Accept', value: '*/*' },
-        ],
-      },
+      // API routes with CORS
       {
         source: '/api/:path*',
         headers: [
+          { key: 'Cache-Control', value: 'no-store' },
           { key: 'origins', value: '*' },
           { key: 'Bypass-Tunnel-Reminder', value: '*' },
           { key: 'Access-Control-Allow-Origin', value: '*' },
@@ -39,6 +38,38 @@ const nextConfig = {
             key: 'Access-Control-Allow-Headers',
             value: 'Authorization, Content-Type',
           },
+        ],
+      },
+      // Avatar image caching - with ETag support and longer cache times
+      {
+        source: '/Avatar/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value:
+              'public, max-age=604800, immutable, stale-while-revalidate=86400',
+          },
+          { key: 'Vary', value: 'Accept' },
+        ],
+      },
+      // Other static assets caching
+      {
+        source: '/:path*.(jpg|jpeg|gif|png|svg|ico|webp)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value:
+              'public, max-age=604800, immutable, stale-while-revalidate=86400',
+          },
+          { key: 'Vary', value: 'Accept' },
+        ],
+      },
+      // Dynamic routes (must be last to not override more specific rules)
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store' },
+          { key: 'Accept', value: '*/*' },
         ],
       },
     ];
