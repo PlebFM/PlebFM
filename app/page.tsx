@@ -1,6 +1,8 @@
 import { Metadata } from 'next/types';
 import { LandingPage } from '../components/Landing/LandingPage';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Index() {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts`);
   const data = await response.json();

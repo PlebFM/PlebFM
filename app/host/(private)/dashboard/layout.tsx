@@ -1,10 +1,10 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { SectionHeader } from '../../../ui/SectionHeader';
 
 export default async function DashboardLayout({
   children,
 }: {
-  children: React.ReactElement;
+  children: ReactNode;
 }) {
   return (
     <>

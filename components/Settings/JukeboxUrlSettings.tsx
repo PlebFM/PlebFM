@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { SettingsSection } from './SettingsSection';
-import { revalidatePath } from 'next/cache';
 
 type JukeboxUrlSettingsProps = {
   shortName: string;
@@ -14,6 +14,7 @@ export function JukeboxUrlSettings({
   baseUrl,
   hostId,
 }: JukeboxUrlSettingsProps) {
+  const router = useRouter();
   const [currentValue, setCurrentValue] = useState(shortName);
   const hasChanges = currentValue !== shortName;
 
@@ -38,7 +39,7 @@ export function JukeboxUrlSettings({
         throw new Error('Failed to update jukebox URL');
       }
 
-      revalidatePath('/host/dashboard/settings');
+      router.refresh();
       return response.json();
     };
 

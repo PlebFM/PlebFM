@@ -1,10 +1,9 @@
-import React from 'react';
-import { SettingsSidebar } from '../../../../../components/Dashboard/SettingsSidebar';
+import type { ReactNode } from 'react';
 
 export default async function SettingsLayout({
   children,
 }: {
-  children: React.ReactElement;
+  children: ReactNode;
 }) {
   return (
     <div className="flex gap-8">

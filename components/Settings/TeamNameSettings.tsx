@@ -1,7 +1,7 @@
 'use client';
 
-import { revalidatePath } from 'next/cache';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { SettingsSection } from './SettingsSection';
 
@@ -11,6 +11,7 @@ type TeamNameSettingsProps = {
 };
 
 export function TeamNameSettings({ hostName, hostId }: TeamNameSettingsProps) {
+  const router = useRouter();
   const [currentValue, setCurrentValue] = useState(hostName);
   const hasChanges = currentValue !== hostName;
 
@@ -35,8 +36,7 @@ export function TeamNameSettings({ hostName, hostId }: TeamNameSettingsProps) {
         throw new Error('Failed to update team name');
       }
 
-      // TODO: add refresh
-      revalidatePath('/host/dashboard/settings');
+      router.refresh();
 
       return response.json();
     };
