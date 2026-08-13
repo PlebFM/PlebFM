@@ -1,31 +1,33 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { checkLnbitsInvoice, getLnbitsInvoice } from '../../lib/lnbits';
+import { getPaymentProvider } from '../../lib/payments';
 import { submitBid } from '../../lib/submit';
 import connectDB from '../../middleware/mongodb';
 import withJukebox from '../../middleware/withJukebox';
 
-const checkInvoice = async (hash: string) => {
-  const data = (await checkLnbitsInvoice(hash)) as { paid: boolean };
-  if (data.paid) {
-    console.log('PAID');
-  }
-  return { settled: data.paid };
-};
-
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
+    const provider = getPaymentProvider();
+
     if (req.method === 'POST') {
       const { memo, value } = req.body;
-      const data = await getLnbitsInvoice(memo, parseInt(value));
-      return res.status(200).json(data);
+      const invoice = await provider.createInvoice(memo, parseInt(value));
+      return res.status(200).json({
+        payment_request: invoice.paymentRequest,
+        payment_hash: invoice.paymentHash,
+        status_ref: invoice.statusRef,
+      });
     } else if (req.method === 'GET') {
-      const { userId, hostId, hash, songId, bidAmount } = req.query;
+      const { userId, hostId, hash, ref, songId, bidAmount } = req.query;
       if (!hostId || !songId || !bidAmount || !hash || !userId)
         throw new Error('Missing required params');
       const rHash = decodeURIComponent(hash as string);
-      const data = await checkInvoice(rHash);
+      // Providers that do not key status off the payment hash (Money Dev Kit
+      // uses a checkout id) send it back as `ref`. Older clients omit it.
+      const statusRef = ref ? decodeURIComponent(ref as string) : rHash;
+      const { settled } = await provider.checkInvoice(statusRef);
       const accessToken: string = req.headers.accessToken as string;
-      if (data.settled) {
+      if (settled) {
+        console.log('PAID');
         // @ts-ignore
         const submitResult = await submitBid(
           hostId as string,
@@ -37,10 +39,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         );
         return res.status(201).json({ settled: true, submit: submitResult });
       }
-      return res.status(200).json(data);
-      // } else if (req.method === 'PATCH'){
-      //   const data = await getLnbitsInvoice();
-      //   res.status(200).json(data);
+      return res.status(200).json({ settled });
     } else {
       return res.status(405).json({ error: 'Method not supported' });
     }

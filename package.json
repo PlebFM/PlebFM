@@ -22,6 +22,8 @@
     "@bitcoin-design/bitcoin-icons-react": "^0.1.11",
     "@headlessui/react": "^2.2.10",
     "@heroicons/react": "^2.0.13",
+    "@moneydevkit/core": "0.22.0",
+    "@moneydevkit/nextjs": "0.22.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "framer-motion": "^11.15.0",
     "mongodb": "^4.12.1",

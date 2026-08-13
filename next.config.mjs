@@ -1,3 +1,5 @@
+import withMdkCheckout from '@moneydevkit/nextjs/next-plugin';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
@@ -47,4 +49,7 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+// Adds `serverExternalPackages` and `outputFileTracingIncludes` for the
+// @moneydevkit/lightning-js native addon so it survives bundling and is traced
+// into the deployed functions.
+export default withMdkCheckout(nextConfig);
