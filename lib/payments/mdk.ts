@@ -1,0 +1,102 @@
+import { createCheckout, getCheckout } from '@moneydevkit/core';
+import { withDeadline } from './deadline';
+import { CreatedInvoice, InvoiceStatus, PaymentProvider } from './types';
+
+/**
+ * Checkout statuses that mean "the sats arrived".
+ *
+ * The typed contract (`CheckoutStatusSchema`) exposes UNCONFIRMED, CONFIRMED,
+ * PENDING_PAYMENT, PAYMENT_RECEIVED and EXPIRED. The documented
+ * `checkout.completed` webhook payload instead reports `status: "COMPLETED"`,
+ * which is absent from that enum, so COMPLETED is matched here defensively
+ * against the widened string rather than the union.
+ */
+const SETTLED_STATUSES: ReadonlySet<string> = new Set([
+  'PAYMENT_RECEIVED',
+  'COMPLETED',
+]);
+
+/**
+ * Checkout status that means "this invoice will never be paid".
+ *
+ * Terminal, so the poller stops instead of asking about a dead checkout every
+ * two seconds for as long as the tab stays open.
+ */
+const EXPIRED_STATUS = 'EXPIRED';
+
+/**
+ * Money Dev Kit provider.
+ *
+ * Deliberately avoids the hosted checkout page (`createCheckoutUrl` /
+ * `<Checkout />`): PlebFM renders its own QR inside a custom bid flow, so this
+ * only needs the raw BOLT11 out of the checkout object.
+ *
+ * Note: status is read via `getCheckout`, which is server-authoritative through
+ * mdk.com. Do NOT substitute `paymentHasBeenReceived()` — that reads an
+ * in-process Set hung off `globalThis`, which is empty or stale across
+ * serverless invocations.
+ */
+export const mdkProvider: PaymentProvider = {
+  name: 'mdk',
+
+  async createInvoice(
+    memo: string,
+    amountSats: number,
+  ): Promise<CreatedInvoice> {
+    const result = await withDeadline('createCheckout', () =>
+      createCheckout({
+        type: 'AMOUNT',
+        currency: 'SAT',
+        amount: amountSats,
+        // `title` labels the order in the MDK dashboard; `description` is what
+        // flows through to the BOLT11 description tag, which is where LNbits'
+        // `memo` used to land and is what the payer sees in their wallet.
+        title: memo,
+        description: memo,
+      }),
+    );
+
+    if (result.error) {
+      throw new Error(
+        `Money Dev Kit checkout failed (${result.error.code}): ${result.error.message}`,
+      );
+    }
+
+    const { checkout } = result.data;
+    const invoice = checkout.invoice;
+
+    if (!invoice?.invoice || !invoice.paymentHash) {
+      throw new Error(
+        `Money Dev Kit checkout ${checkout.id} has no invoice (status ${checkout.status})`,
+      );
+    }
+
+    return {
+      paymentRequest: invoice.invoice,
+      paymentHash: invoice.paymentHash,
+      statusRef: checkout.id,
+    };
+  },
+
+  async checkInvoice(statusRef: string): Promise<InvoiceStatus> {
+    const checkout = await withDeadline('getCheckout', () =>
+      getCheckout(statusRef),
+    );
+    const settled = SETTLED_STATUSES.has(checkout.status as string);
+    const paymentHash = checkout.invoice?.paymentHash;
+
+    // A settled checkout with no payment hash would leave the bid with no
+    // identity to dedupe on, so refuse rather than record an ambiguous bid.
+    if (settled && !paymentHash) {
+      throw new Error(
+        `Money Dev Kit checkout ${statusRef} settled without a payment hash`,
+      );
+    }
+
+    return {
+      settled,
+      paymentHash: paymentHash ?? '',
+      expired: !settled && (checkout.status as string) === EXPIRED_STATUS,
+    };
+  },
+};
