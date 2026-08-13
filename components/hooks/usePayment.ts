@@ -170,7 +170,7 @@ export const usePayment = (
 
       // Count this answer before judging it, so the budget is spent on the
       // fifth consecutive failure rather than the sixth.
-      consecutiveFailures = isTransientFailure(httpStatus)
+      consecutiveFailures = isTransientFailure(httpStatus, body)
         ? consecutiveFailures + 1
         : 0;
 

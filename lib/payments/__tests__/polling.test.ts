@@ -3,6 +3,7 @@ import {
   MAX_CONSECUTIVE_FAILURES,
   NETWORK_FAILURE,
   decidePollOutcome,
+  isTransientFailure,
 } from '../polling';
 
 describe('decidePollOutcome', () => {
@@ -27,17 +28,59 @@ describe('decidePollOutcome', () => {
       ).toEqual({ action: 'stop', reason: 'invalid' });
     });
 
-    it('stops on any 4xx, even one with no body to read', () => {
-      expect(decidePollOutcome(404, null, 0)).toEqual({
-        action: 'stop',
-        reason: 'invalid',
-      });
-    });
-
     it('defaults the reason when a terminal answer omits it', () => {
       expect(
         decidePollOutcome(200, { settled: false, terminal: true }, 0),
       ).toEqual({ action: 'stop', reason: 'invalid' });
+    });
+  });
+
+  // This block replaces an earlier assertion that any 4xx meant `invalid`.
+  // `/api/invoice` sits behind `withJukebox`, which returns a plain-text 400
+  // when a Spotify token refresh fails — nothing to do with the invoice, which
+  // may already be paid. `invalid` recovery mints a replacement, so inferring it
+  // from a status code alone could ask a payer to pay twice.
+  describe('an operational 4xx is not a dead invoice', () => {
+    it('treats a bodyless 4xx as transient, not invalid', () => {
+      expect(decidePollOutcome(400, null, 0)).toEqual({ action: 'retry' });
+      expect(decidePollOutcome(404, null, MAX_CONSECUTIVE_FAILURES)).toEqual({
+        action: 'stop',
+        reason: 'unavailable',
+      });
+    });
+
+    it('still retires an invoice on an explicitly terminal 4xx', () => {
+      expect(
+        decidePollOutcome(
+          400,
+          { settled: false, terminal: true, reason: 'invalid' },
+          0,
+        ),
+      ).toEqual({ action: 'stop', reason: 'invalid' });
+    });
+
+    it('counts an operational 4xx against the budget', () => {
+      expect(isTransientFailure(400, null)).toBe(true);
+      expect(isTransientFailure(400, { settled: false, terminal: true })).toBe(
+        false,
+      );
+    });
+  });
+
+  describe('malformed answers are bounded', () => {
+    it('counts a 2xx with no settlement verdict', () => {
+      expect(isTransientFailure(200, null)).toBe(true);
+      expect(isTransientFailure(200, { unexpected: 'shape' } as never)).toBe(
+        true,
+      );
+      expect(decidePollOutcome(200, null, MAX_CONSECUTIVE_FAILURES)).toEqual({
+        action: 'stop',
+        reason: 'unavailable',
+      });
+    });
+
+    it('does not count a well-formed unpaid answer', () => {
+      expect(isTransientFailure(200, { settled: false })).toBe(false);
     });
   });
 

@@ -53,9 +53,27 @@ export type PaymentFailureReason = InvoiceStatusReason | 'unavailable' | 'mint';
  *
  * One definition, used both to decide the outcome and to advance the counter, so
  * the two cannot drift apart on what "a failure" means.
+ *
+ * Only `terminal` may declare an invoice dead. A status code alone must never
+ * do it: `/api/invoice` is wrapped in `withJukebox`, which answers 400 in plain
+ * text when it cannot refresh a Spotify token — an upstream blip that says
+ * nothing about the invoice. Reading that as "invalid" and minting a replacement
+ * is how a paid invoice gets abandoned and a second payment requested.
  */
-export const isTransientFailure = (httpStatus: number): boolean =>
-  httpStatus === NETWORK_FAILURE || httpStatus >= 500;
+export const isTransientFailure = (
+  httpStatus: number,
+  body?: InvoiceStatusBody | null,
+): boolean => {
+  if (httpStatus === NETWORK_FAILURE || httpStatus >= 500) return true;
+
+  // A 4xx that does not explicitly declare the invoice dead did not come from
+  // the invoice contract — middleware, a proxy, an auth wrapper. Operational.
+  if (httpStatus >= 400) return body?.terminal !== true;
+
+  // A 2xx carrying no settlement verdict is malformed. Counting it stops the
+  // poller looping on it forever waiting for a `settled` that never arrives.
+  return typeof body?.settled !== 'boolean';
+};
 
 export type RecoveryAction =
   /** Keep the invoice and start polling it again. */
@@ -94,19 +112,17 @@ export const decidePollOutcome = (
   // anything else in the body.
   if (body?.settled === true) return { action: 'paid' };
 
+  // Only an explicit terminal answer retires an invoice. Everything else is
+  // treated as "we could not find out yet", which is resumable and never mints
+  // a replacement for an invoice that might already be paid.
   if (body?.terminal === true) {
     return { action: 'stop', reason: body.reason ?? 'invalid' };
   }
 
-  // A rejected reference is the client's own problem and will be rejected
-  // identically every time. Retrying it is pure noise.
-  if (httpStatus >= 400 && httpStatus < 500) {
-    return { action: 'stop', reason: 'invalid' };
-  }
-
-  // Server fault or no response at all: transient until it has happened enough
-  // times in a row to stop being credible.
-  if (isTransientFailure(httpStatus)) {
+  // Server fault, operational 4xx, no response at all, or a malformed answer:
+  // transient until it has happened enough times in a row to stop being
+  // credible, at which point the payer is offered a resume rather than a remint.
+  if (isTransientFailure(httpStatus, body)) {
     return consecutiveFailures >= MAX_CONSECUTIVE_FAILURES
       ? { action: 'stop', reason: 'unavailable' }
       : { action: 'retry' };

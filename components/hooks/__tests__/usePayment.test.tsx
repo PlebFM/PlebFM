@@ -197,6 +197,92 @@ describe('usePayment', () => {
     });
   });
 
+  describe('operational 4xx from route middleware (round 4, finding 1)', () => {
+    // `withJukebox` answers 400 in plain text when it cannot refresh a Spotify
+    // token. That says nothing about the invoice, which may already be paid.
+    const wrapper400 = () =>
+      ({
+        ok: false,
+        status: 400,
+        json: async () => {
+          throw new Error('withJukebox - could not fetch accessToken');
+        },
+      } as any);
+
+    it('does not treat a bare 400 as an invalid invoice', async () => {
+      installFetch([wrapper400]);
+      const { api } = renderPayment();
+      await waitFor(() =>
+        expect(api.current?.bolt11.statusRef).toBe('signed_ref_first'),
+      );
+      await advancePolls(MAX_CONSECUTIVE_FAILURES + 2);
+
+      await waitFor(() => expect(api.current?.paymentFailure).not.toBeNull());
+      // 'invalid' would remint; 'unavailable' resumes.
+      expect(api.current?.paymentFailure?.reason).toBe('unavailable');
+    });
+
+    it('recovers without a second POST and keeps the original reference', async () => {
+      installFetch([wrapper400]);
+      const { api, onPaid } = renderPayment();
+      await waitFor(() =>
+        expect(api.current?.bolt11.statusRef).toBe('signed_ref_first'),
+      );
+      await advancePolls(MAX_CONSECUTIVE_FAILURES + 2);
+      await waitFor(() =>
+        expect(api.current?.paymentFailure?.reason).toBe('unavailable'),
+      );
+      expect(posts).toBe(1);
+
+      // Spotify recovers; the invoice the payer already paid settles.
+      fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+        if (init?.method === 'POST') {
+          posts += 1;
+          return json(200, REMINTED);
+        }
+        gets.push(url);
+        return json(201, { settled: true });
+      });
+
+      await act(async () => {
+        api.current?.retry();
+      });
+      await waitFor(() => expect(onPaid).toHaveBeenCalled());
+
+      expect(posts).toBe(1);
+      expect(gets.every(url => url.includes('signed_ref_first'))).toBe(true);
+      expect(gets.some(url => url.includes('signed_ref_second'))).toBe(false);
+    });
+
+    it('still retires the invoice on an explicit terminal 400', async () => {
+      // Our own contract marks a rejected reference terminal, unlike middleware.
+      installFetch([
+        () => json(400, { settled: false, terminal: true, reason: 'invalid' }),
+      ]);
+      const { api } = renderPayment();
+      await waitFor(() =>
+        expect(api.current?.paymentFailure?.reason).toBe('invalid'),
+      );
+      const before = gets.length;
+      await advancePolls(3);
+      expect(gets.length).toBe(before); // stopped immediately, no budget burn
+    });
+  });
+
+  it('bounds a malformed 200 instead of polling forever (PE-1)', async () => {
+    // 200 with no `settled` verdict: previously reset the budget every time.
+    installFetch([() => json(200, { unexpected: 'shape' })]);
+    const { api } = renderPayment();
+    await waitFor(() =>
+      expect(api.current?.bolt11.statusRef).toBe('signed_ref_first'),
+    );
+    await advancePolls(MAX_CONSECUTIVE_FAILURES + 3);
+    await waitFor(() =>
+      expect(api.current?.paymentFailure?.reason).toBe('unavailable'),
+    );
+    expect(gets.length).toBe(MAX_CONSECUTIVE_FAILURES);
+  });
+
   describe('recovery from a terminal invoice', () => {
     it('mints a replacement when the invoice expired', async () => {
       installFetch(
