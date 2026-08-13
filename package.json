@@ -16,7 +16,8 @@
     "build:css": "npx tailwindcss -i ./src/tailwind.css -o ./public/tailwind.css",
     "build:storybook": "storybook build",
     "watch:css": "npx tailwindcss -i ./styles/globals.css -o ./public/globals.css --watch",
-    "watch:storybook": "storybook dev -p 6007"
+    "watch:storybook": "storybook dev -p 6007",
+    "test": "vitest run"
   },
   "dependencies": {
     "@bitcoin-design/bitcoin-icons-react": "^0.1.11",
@@ -70,6 +71,7 @@
     "storybook": "7.6.24",
     "tailwindcss": "^3.4.19",
     "typescript": "4.9.5",
+    "vitest": "2.1.9",
     "webpack": "^5.109.2"
   },
   "husky": {

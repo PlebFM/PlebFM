@@ -1,9 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
-  decodeInvoiceRef,
   encodeInvoiceRef,
   getPaymentProvider,
   getProviderByName,
+  InvalidInvoiceRefError,
+  resolveInvoiceRef,
+  settleInvoice,
 } from '../../lib/payments';
 import { submitBid } from '../../lib/submit';
 import connectDB from '../../middleware/mongodb';
@@ -32,30 +34,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (!hostId || !songId || !bidAmount || !hash || !userId)
         throw new Error('Missing required params');
 
-      // Everything the settlement depends on comes out of the signed reference,
-      // never off the query string: a client that could name the settled
-      // invoice and the bid's dedupe key separately could mint bids from one
-      // payment. `hash` is accepted as a carrier because older clients send the
-      // reference there, but its raw value is not trusted.
-      const hashValue = decodeURIComponent(hash as string);
-      const refValue = ref ? decodeURIComponent(ref as string) : null;
-      const decoded =
-        (refValue ? decodeInvoiceRef(refValue) : null) ??
-        decodeInvoiceRef(hashValue);
+      // Everything settlement depends on comes out of the signed reference,
+      // never off the query string: a client able to name the settled invoice
+      // and the bid's dedupe key separately could mint bids from one payment.
+      const invoiceRef = resolveInvoiceRef(
+        decodeURIComponent(hash as string),
+        ref ? decodeURIComponent(ref as string) : null,
+      );
 
-      // Pre-token LNbits invoices are bare payment hashes. LNbits looks up by
-      // payment hash, so settlement and identity stay bound for those.
-      const invoiceRef = decoded ?? {
-        provider: 'lnbits' as const,
-        statusRef: hashValue,
-        paymentHash: hashValue,
-      };
-
-      // Settle through the provider that minted it, not the one configured now,
-      // so a cutover or rollback cannot strand an in-flight invoice.
-      const provider = getProviderByName(invoiceRef.provider);
-      const { settled, paymentHash } = await provider.checkInvoice(
-        invoiceRef.statusRef,
+      const { settled, paymentHash } = await settleInvoice(
+        invoiceRef,
+        getProviderByName,
       );
       const accessToken: string = req.headers.accessToken as string;
 
@@ -77,6 +66,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(405).json({ error: 'Method not supported' });
     }
   } catch (e) {
+    // A reference that does not verify is the client's problem, not a server
+    // fault, and must not be retried against a different backend.
+    if (e instanceof InvalidInvoiceRefError) {
+      console.error(e.message);
+      return res.status(400).json({ error: e.message });
+    }
     console.error(e);
     return res.status(500).json(e);
   }
