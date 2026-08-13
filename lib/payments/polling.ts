@@ -45,11 +45,45 @@ export type PollOutcome =
   | { action: 'retry' }
   | { action: 'stop'; reason: InvoiceStatusReason | 'unavailable' };
 
+/** Why the payment flow stopped, as shown to the payer. */
+export type PaymentFailureReason = InvoiceStatusReason | 'unavailable' | 'mint';
+
+/**
+ * Whether an answer counts against the consecutive-failure budget.
+ *
+ * One definition, used both to decide the outcome and to advance the counter, so
+ * the two cannot drift apart on what "a failure" means.
+ */
+export const isTransientFailure = (httpStatus: number): boolean =>
+  httpStatus === NETWORK_FAILURE || httpStatus >= 500;
+
+export type RecoveryAction =
+  /** Keep the invoice and start polling it again. */
+  | 'resume'
+  /** The invoice is dead or was never created; mint a replacement. */
+  | 'remint';
+
+/**
+ * What the payer's retry action should actually do.
+ *
+ * This distinction is a payment-safety property, not a nicety. `unavailable`
+ * means the *server* was unreachable — the invoice is still live and may already
+ * have been paid, so minting a replacement can take a second payment for a bid
+ * that was already funded, and abandons the first one. Only mint again when the
+ * invoice is known dead (`expired`), known rejected (`invalid`), or was never
+ * successfully created (`mint`).
+ */
+export const decideRecovery = (reason: PaymentFailureReason): RecoveryAction =>
+  reason === 'unavailable' ? 'resume' : 'remint';
+
 /**
  * Decide what the poller does with one `/api/invoice` answer.
  *
  * Split out of the hook so the decision is testable without a DOM: the bug
  * being fixed here is entirely in this logic, not in the React around it.
+ *
+ * `consecutiveFailures` must *include* the answer being judged — pass the count
+ * after this response, not before it, or the budget is spent one request late.
  */
 export const decidePollOutcome = (
   httpStatus: number,
@@ -72,7 +106,7 @@ export const decidePollOutcome = (
 
   // Server fault or no response at all: transient until it has happened enough
   // times in a row to stop being credible.
-  if (httpStatus === NETWORK_FAILURE || httpStatus >= 500) {
+  if (isTransientFailure(httpStatus)) {
     return consecutiveFailures >= MAX_CONSECUTIVE_FAILURES
       ? { action: 'stop', reason: 'unavailable' }
       : { action: 'retry' };

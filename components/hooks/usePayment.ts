@@ -2,18 +2,17 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   decidePollOutcome,
+  decideRecovery,
   InvoiceStatusBody,
+  isTransientFailure,
   NETWORK_FAILURE,
+  PaymentFailureReason,
   POLL_INTERVAL_MS,
 } from '../../lib/payments/polling';
 import { Song } from '../../models/Song';
 import { getUserProfileFromLocal } from '../../utils/profile';
 
-export type PaymentFailureReason =
-  | 'expired'
-  | 'invalid'
-  | 'unavailable'
-  | 'mint';
+export type { PaymentFailureReason };
 
 export type PaymentFailure = {
   reason: PaymentFailureReason;
@@ -52,6 +51,7 @@ export const usePayment = (
     null,
   );
   const [attempt, setAttempt] = useState(0);
+  const [pollEpoch, setPollEpoch] = useState(0);
   const pathname = usePathname();
 
   // Held in a ref so a parent that passes a fresh closure each render does not
@@ -59,8 +59,24 @@ export const usePayment = (
   const onPaidRef = useRef(onPaid);
   onPaidRef.current = onPaid;
 
-  /** Mint a fresh invoice and start over. */
-  const retry = useCallback(() => setAttempt(current => current + 1), []);
+  /**
+   * Recover from a failure the payer was shown.
+   *
+   * Only mints a replacement invoice when the current one cannot settle. If the
+   * *server* was what failed, the invoice is still live and may already have
+   * been paid, so this resumes polling it rather than issuing a second invoice
+   * for the same bid — otherwise a transient outage can cost the payer a
+   * duplicate payment and lose the first one.
+   */
+  const retry = useCallback(() => {
+    const reason = paymentFailure?.reason;
+    if (reason && decideRecovery(reason) === 'resume') {
+      setPaymentFailure(null);
+      setPollEpoch(current => current + 1);
+      return;
+    }
+    setAttempt(current => current + 1);
+  }, [paymentFailure?.reason]);
 
   useEffect(() => {
     let cancelled = false;
@@ -152,6 +168,12 @@ export const usePayment = (
 
       if (cancelled) return;
 
+      // Count this answer before judging it, so the budget is spent on the
+      // fifth consecutive failure rather than the sixth.
+      consecutiveFailures = isTransientFailure(httpStatus)
+        ? consecutiveFailures + 1
+        : 0;
+
       const outcome = decidePollOutcome(httpStatus, body, consecutiveFailures);
       if (outcome.action === 'paid') {
         console.log('PAID');
@@ -165,10 +187,6 @@ export const usePayment = (
         return;
       }
 
-      consecutiveFailures =
-        httpStatus === NETWORK_FAILURE || httpStatus >= 500
-          ? consecutiveFailures + 1
-          : 0;
       timeoutId = setTimeout(checkStatus, POLL_INTERVAL_MS);
     };
 
@@ -178,7 +196,8 @@ export const usePayment = (
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [bolt11.hash, bolt11.statusRef, pathname, song.id, totalBid]);
+    // `pollEpoch` restarts polling the *same* invoice after a resume.
+  }, [bolt11.hash, bolt11.statusRef, pathname, pollEpoch, song.id, totalBid]);
 
   return {
     loading,
