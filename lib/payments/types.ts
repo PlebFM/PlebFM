@@ -34,6 +34,16 @@ export type InvoiceStatus = {
    * bid's dedupe key can mint bids from a single payment.
    */
   paymentHash: string;
+  /**
+   * The provider says this invoice can no longer be paid.
+   *
+   * Terminal: the browser must stop polling on it rather than asking every two
+   * seconds forever. Money Dev Kit reports this as checkout status `EXPIRED`.
+   * LNbits' payment lookup has no equivalent field, so it never sets this — the
+   * signed reference's own TTL is what bounds polling there, and it is set to
+   * the same hour LNbits gives the invoice.
+   */
+  expired?: boolean;
 };
 
 export interface PaymentProvider {

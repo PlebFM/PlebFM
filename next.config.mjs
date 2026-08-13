@@ -52,4 +52,32 @@ const nextConfig = {
 // Adds `serverExternalPackages` and `outputFileTracingIncludes` for the
 // @moneydevkit/lightning-js native addon so it survives bundling and is traced
 // into the deployed functions.
-export default withMdkCheckout(nextConfig);
+const mdkConfig = withMdkCheckout(nextConfig);
+
+/**
+ * Routes that actually load the Money Dev Kit SDK, and therefore need the
+ * native Lightning addon traced into their function bundle.
+ *
+ * `/api/invoice` reaches it through `lib/payments`; `/api/mdk` is MDK's own
+ * unified endpoint. Anything else importing `@moneydevkit/core` has to be
+ * added here or it will fail at runtime with a missing native module.
+ */
+const MDK_ROUTES = ['/api/invoice', '/api/mdk'];
+
+// The plugin registers those globs under `'*'`, which traces ~27 MB of native
+// addon into every function — `/api/user` and `/api/hosts` included, neither of
+// which touches payments. Vercel's 250 MB limit absorbs that; Netlify's 50 MB
+// zipped is tighter. Scope it to the two routes that need it.
+const { '*': lightningGlobs = [], ...otherIncludes } =
+  mdkConfig.outputFileTracingIncludes ?? {};
+
+export default {
+  ...mdkConfig,
+  outputFileTracingIncludes: MDK_ROUTES.reduce(
+    (includes, route) => ({
+      ...includes,
+      [route]: [...(includes[route] ?? []), ...lightningGlobs],
+    }),
+    otherIncludes,
+  ),
+};

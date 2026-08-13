@@ -9,3 +9,10 @@ export {
   PaymentHashMismatchError,
 } from './resolve';
 export type { SettlementResult } from './resolve';
+export { ProviderTimeoutError, withDeadline } from './deadline';
+export {
+  createInvoiceErrorResponse,
+  invoiceErrorResponse,
+  unsettledResponse,
+} from './responses';
+export type { InvoiceStatusResponse } from './responses';

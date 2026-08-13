@@ -1,4 +1,5 @@
 import { createCheckout, getCheckout } from '@moneydevkit/core';
+import { withDeadline } from './deadline';
 import { CreatedInvoice, InvoiceStatus, PaymentProvider } from './types';
 
 /**
@@ -14,6 +15,14 @@ const SETTLED_STATUSES: ReadonlySet<string> = new Set([
   'PAYMENT_RECEIVED',
   'COMPLETED',
 ]);
+
+/**
+ * Checkout status that means "this invoice will never be paid".
+ *
+ * Terminal, so the poller stops instead of asking about a dead checkout every
+ * two seconds for as long as the tab stays open.
+ */
+const EXPIRED_STATUS = 'EXPIRED';
 
 /**
  * Money Dev Kit provider.
@@ -34,16 +43,18 @@ export const mdkProvider: PaymentProvider = {
     memo: string,
     amountSats: number,
   ): Promise<CreatedInvoice> {
-    const result = await createCheckout({
-      type: 'AMOUNT',
-      currency: 'SAT',
-      amount: amountSats,
-      // `title` labels the order in the MDK dashboard; `description` is what
-      // flows through to the BOLT11 description tag, which is where LNbits'
-      // `memo` used to land and is what the payer sees in their wallet.
-      title: memo,
-      description: memo,
-    });
+    const result = await withDeadline('createCheckout', () =>
+      createCheckout({
+        type: 'AMOUNT',
+        currency: 'SAT',
+        amount: amountSats,
+        // `title` labels the order in the MDK dashboard; `description` is what
+        // flows through to the BOLT11 description tag, which is where LNbits'
+        // `memo` used to land and is what the payer sees in their wallet.
+        title: memo,
+        description: memo,
+      }),
+    );
 
     if (result.error) {
       throw new Error(
@@ -68,7 +79,9 @@ export const mdkProvider: PaymentProvider = {
   },
 
   async checkInvoice(statusRef: string): Promise<InvoiceStatus> {
-    const checkout = await getCheckout(statusRef);
+    const checkout = await withDeadline('getCheckout', () =>
+      getCheckout(statusRef),
+    );
     const settled = SETTLED_STATUSES.has(checkout.status as string);
     const paymentHash = checkout.invoice?.paymentHash;
 
@@ -80,6 +93,10 @@ export const mdkProvider: PaymentProvider = {
       );
     }
 
-    return { settled, paymentHash: paymentHash ?? '' };
+    return {
+      settled,
+      paymentHash: paymentHash ?? '',
+      expired: !settled && (checkout.status as string) === EXPIRED_STATUS,
+    };
   },
 };

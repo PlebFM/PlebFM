@@ -14,7 +14,10 @@ const HASH_B = 'b'.repeat(64);
 /** Stub backends, so nothing here talks to LNbits or mdk.com. */
 const stubProvider = (
   name: 'lnbits' | 'mdk',
-  checkouts: Record<string, { settled: boolean; paymentHash: string }>,
+  checkouts: Record<
+    string,
+    { settled: boolean; paymentHash: string; expired?: boolean }
+  >,
 ): PaymentProvider => ({
   name,
   async createInvoice() {
@@ -32,6 +35,7 @@ const providers: Record<string, PaymentProvider> = {
     checkout_123: { settled: true, paymentHash: HASH_A },
     checkout_unpaid: { settled: false, paymentHash: HASH_B },
     checkout_swapped: { settled: true, paymentHash: HASH_B },
+    checkout_expired: { settled: false, paymentHash: '', expired: true },
   }),
   lnbits: stubProvider('lnbits', {
     [HASH_A]: { settled: true, paymentHash: HASH_A },
@@ -148,6 +152,32 @@ describe('invoice reference resolution', () => {
 
     it('reports unpaid invoices as unsettled', async () => {
       expect((await settle(HASH_B, null)).settled).toBe(false);
+    });
+  });
+
+  describe('terminal invoices (PR #111 round 2, finding 1)', () => {
+    it('surfaces the provider expiry so the poller can stop', async () => {
+      const token = encodeInvoiceRef({
+        provider: 'mdk',
+        statusRef: 'checkout_expired',
+        paymentHash: HASH_A,
+      });
+      const result = await settle(HASH_A, token);
+      expect(result.settled).toBe(false);
+      expect(result.expired).toBe(true);
+    });
+
+    it('reports a live unpaid invoice as not expired', async () => {
+      const token = encodeInvoiceRef({
+        provider: 'mdk',
+        statusRef: 'checkout_unpaid',
+        paymentHash: HASH_A,
+      });
+      expect((await settle(HASH_A, token)).expired).toBe(false);
+    });
+
+    it('never reports a settled invoice as expired', async () => {
+      expect((await settle(HASH_A, mdkToken())).expired).toBe(false);
     });
   });
 

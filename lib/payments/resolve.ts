@@ -66,6 +66,8 @@ export type SettlementResult = {
   settled: boolean;
   /** Payment hash to record as `Bid.rHash`. Provider-observed, never client-supplied. */
   paymentHash: string;
+  /** Provider says the invoice is dead. Terminal — the client must stop polling. */
+  expired: boolean;
 };
 
 /**
@@ -87,11 +89,13 @@ export const settleInvoice = async (
   resolveProvider: (name: string) => PaymentProvider,
 ): Promise<SettlementResult> => {
   const provider = resolveProvider(ref.provider);
-  const { settled, paymentHash } = await provider.checkInvoice(ref.statusRef);
+  const { settled, paymentHash, expired } = await provider.checkInvoice(
+    ref.statusRef,
+  );
 
   if (settled && paymentHash !== ref.paymentHash) {
     throw new PaymentHashMismatchError(ref.paymentHash, paymentHash);
   }
 
-  return { settled, paymentHash };
+  return { settled, paymentHash, expired: expired === true };
 };
