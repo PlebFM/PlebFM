@@ -69,6 +69,17 @@ export const mdkProvider: PaymentProvider = {
 
   async checkInvoice(statusRef: string): Promise<InvoiceStatus> {
     const checkout = await getCheckout(statusRef);
-    return { settled: SETTLED_STATUSES.has(checkout.status as string) };
+    const settled = SETTLED_STATUSES.has(checkout.status as string);
+    const paymentHash = checkout.invoice?.paymentHash;
+
+    // A settled checkout with no payment hash would leave the bid with no
+    // identity to dedupe on, so refuse rather than record an ambiguous bid.
+    if (settled && !paymentHash) {
+      throw new Error(
+        `Money Dev Kit checkout ${statusRef} settled without a payment hash`,
+      );
+    }
+
+    return { settled, paymentHash: paymentHash ?? '' };
   },
 };

@@ -49,15 +49,22 @@ export const usePayment = (
         shortName: hostId,
       }),
     });
-    const res = await response.json();
+    const res = await response.json().catch(() => null);
+    setLoading(false);
+
+    // A failed mint used to still start the poller, which then hammered
+    // /api/invoice every 2s against an invoice that does not exist.
+    if (!response.ok || !res?.payment_request || !res?.payment_hash) {
+      console.error('Failed to create invoice', res);
+      return;
+    }
+
     setBolt11({
       hash: res.payment_hash,
       paymentRequest: res.payment_request,
-      // LNbits keys status off the payment hash, so `status_ref` and
-      // `payment_hash` match there; Money Dev Kit returns a checkout id.
+      // Both carry the server's signed invoice reference.
       statusRef: res.status_ref ?? res.payment_hash,
     });
-    setLoading(false);
     setIsPolling(true);
   }, [pathname, song.name, totalBid]);
 

@@ -33,6 +33,8 @@ export const lnbitsProvider: PaymentProvider = {
 
   async checkInvoice(statusRef: string): Promise<InvoiceStatus> {
     const data = (await checkLnbitsInvoice(statusRef)) as { paid?: boolean };
-    return { settled: data?.paid === true };
+    // LNbits is queried *by* payment hash, so the hash it settles is the one we
+    // asked about by construction. Echo the lookup key rather than the caller's.
+    return { settled: data?.paid === true, paymentHash: statusRef };
   },
 };

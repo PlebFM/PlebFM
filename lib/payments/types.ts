@@ -26,6 +26,14 @@ export type CreatedInvoice = {
 
 export type InvoiceStatus = {
   settled: boolean;
+  /**
+   * Payment hash as the *provider* reports it for this `statusRef`.
+   *
+   * This is what the bid is recorded under. It must never be taken from the
+   * request: a client that can name the settled invoice and separately name the
+   * bid's dedupe key can mint bids from a single payment.
+   */
+  paymentHash: string;
 };
 
 export interface PaymentProvider {
