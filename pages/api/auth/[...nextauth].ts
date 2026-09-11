@@ -1,5 +1,5 @@
 import NextAuth, { NextAuthOptions, Session } from 'next-auth';
-import { JWT } from 'next-auth/jwt/types';
+import { JWT } from 'next-auth/jwt';
 
 import SpotifyProvider from 'next-auth/providers/spotify';
 import connectDB from '../../../middleware/mongodb';
@@ -30,10 +30,20 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: body as BodyInit,
+      signal: AbortSignal.timeout(8000),
     });
+    if (!res.ok) throw new Error('Spotify refresh failed');
     const data = await res.json();
+    if (!data.access_token) throw new Error('Spotify access token missing');
+    if (data.refresh_token)
+      await Hosts.updateOne(
+        { hostId: (token.user as any)?.id },
+        { $set: { spotifyRefreshToken: data.refresh_token } },
+      );
     return {
       ...token,
+      error: undefined,
+      refreshToken: data.refresh_token ?? token.refreshToken,
       accessToken: data.access_token,
       accessTokenExpires: Date.now() + data.expires_in * 1000,
     };
@@ -48,7 +58,14 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
 const createHost = async (spotifyId: string, refreshToken: string) => {
   const host = await Hosts.findOneAndUpdate(
     { hostId: spotifyId },
-    { spotifyRefreshToken: refreshToken, spotifyId, hostId: spotifyId },
+    {
+      $set: {
+        spotifyRefreshToken: refreshToken,
+        spotifyId,
+        hostId: spotifyId,
+        deletedAt: null,
+      },
+    },
     { new: true, upsert: true },
   );
   return host;
@@ -69,10 +86,17 @@ export const authOptions: NextAuthOptions = {
       if (account && user) {
         await createHost(user.id, account.refresh_token);
         return {
+          authVersion: 2,
           accessToken: account.access_token,
           refreshToken: account.refresh_token,
           accessTokenExpires: account.expires_at * 1000,
           user,
+        };
+      } else if (token.authVersion !== 2) {
+        return {
+          ...token,
+          accessToken: undefined,
+          error: 'RefreshAccessTokenError',
         };
       } else if (
         token.accessTokenExpires &&

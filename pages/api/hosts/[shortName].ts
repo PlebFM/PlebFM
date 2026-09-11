@@ -1,41 +1,20 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import connectDB from '../../../middleware/mongodb';
-import Hosts, { Host } from '../../../models/Host';
-
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  try {
-    const { shortName } = req.query;
-    // Gets list of hosts
-    if (req.method === 'GET') {
-      const host = await Hosts.findOne({ shortName: shortName });
-      if (!host)
-        return res
-          .status(400)
-          .json({ success: false, error: 'Host not found.' });
-
-      return res.status(200).json({ success: true, host: host });
-
-      // Adds new host
-    } else if (req.method === 'POST') {
-      const { hostName, shortName, refreshToken, spotifyId } = req.body;
-      if (!hostName)
-        res.status(400).json({ error: `hostName must be present` });
-      const host: Host = {
-        hostName,
-        shortName,
-        spotifyRefreshToken: refreshToken,
-        spotifyId,
-        hostId: spotifyId,
-      };
-      const result = await Hosts.create(host);
-      res.status(200).json({ success: true, host: result });
-    }
-  } catch (e) {
-    console.error(e);
-    return res
-      .status(500)
-      .json({ success: false, error: 'host lookup failed' });
-  }
-};
-
-export default connectDB(handler);
+import Hosts from '../../../models/Host';
+import { publicHost, PUBLIC_HOST_FIELDS } from '../../../lib/public-host';
+import { methodNotAllowed } from '../../../lib/http';
+export default connectDB(async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method !== 'GET') return methodNotAllowed(res, ['GET']);
+  if (typeof req.query.shortName !== 'string')
+    return res.status(400).json({ error: 'Invalid jukebox URL' });
+  const host = await Hosts.findOne({
+    shortName: req.query.shortName,
+    deletedAt: null,
+  })
+    .select(PUBLIC_HOST_FIELDS)
+    .lean();
+  if (!host)
+    return res.status(404).json({ success: false, error: 'Jukebox not found' });
+  res.setHeader('Cache-Control', 'no-store');
+  return res.json({ success: true, host: publicHost(host) });
+});

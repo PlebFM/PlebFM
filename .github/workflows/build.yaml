@@ -1,25 +1,47 @@
-name: Builds
-
-# on:
-# pull_request:
-#   branches: [main]
-
+name: Checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  build:
+  check:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        node-version: [20]
+    timeout-minutes: 20
+    env:
+      NEXTAUTH_SECRET: ci-placeholder-never-use-in-production
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_PUSHER_APP_KEY: ci-placeholder
+      NEXT_PUBLIC_PUSHER_APP_CLUSTER: us2
+      MONGOMS_VERSION: 7.0.14
     steps:
       - uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install
-      - name: Build
-        run: pnpm run build
+          node-version: 22
+          cache: pnpm
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-${{ runner.os }}-7.0.14
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm audit --prod --audit-level=moderate
+      - run: pnpm build
+      - name: Production HTTP smoke tests
+        run: |
+          node scripts/local-smoke.cjs > /tmp/plebfm-smoke.log 2>&1 &
+          FIXTURE_PID=$!
+          trap 'kill "$FIXTURE_PID"' EXIT
+          pnpm smoke:http
+      - name: Netlify production adapter and scheduled function bundle
+        run: npx --yes netlify-cli@27.5.2 build --offline --context deploy-preview

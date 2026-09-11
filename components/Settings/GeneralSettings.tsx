@@ -3,6 +3,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { TeamNameSettings } from './TeamNameSettings';
 import { JukeboxUrlSettings } from './JukeboxUrlSettings';
 import { DangerZone } from './DangerZone';
+import { DomainSettings } from './DomainSettings';
 
 interface GeneralSettingsProps {
   hostName: string;
@@ -21,6 +22,7 @@ export function GeneralSettings({
     <div className="space-y-6">
       <TeamNameSettings hostName={hostName} />
       <JukeboxUrlSettings shortName={shortName} baseUrl={baseUrl} />
+      <DomainSettings />
       <div>
         <button
           onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
@@ -37,7 +39,7 @@ export function GeneralSettings({
         {isAdvancedOpen && (
           <div className="mt-4">
             <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-              <DangerZone onDelete={() => console.log('Delete jukebox')} />
+              <DangerZone shortName={shortName} />
             </div>
           </div>
         )}

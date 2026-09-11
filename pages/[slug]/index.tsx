@@ -11,7 +11,11 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Layout from '../../components/Utils/Layout';
 import { getUserProfileFromLocal } from '../../utils/profile';
 
-export default function Bidding() {
+export default function Bidding({
+  venue,
+}: {
+  venue: { hostName: string; accentColor: string; welcomeMessage: string };
+}) {
   const pathName = usePathname()?.replaceAll('/', '');
   const [newUser, setNewUser] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -38,13 +42,22 @@ export default function Bidding() {
   };
 
   useEffect(() => {
-    const profile = getUserProfileFromLocal();
-    if (profile) {
-      setUserProfile(profile);
-      setUser();
-    } else {
-      setNewUser(true);
-    }
+    let cancelled = false;
+    fetch('/api/user', { method: 'POST' })
+      .then(async response => {
+        if (!response.ok) throw new Error('Could not create your profile');
+        const { user } = await response.json();
+        if (cancelled) return;
+        localStorage.setItem('userProfile', JSON.stringify(user));
+        setUserProfile(user);
+        setNewUser(false);
+      })
+      .catch(() => {
+        if (!cancelled) setNewUser(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!newUser && !userProfile.firstNym) {
@@ -84,6 +97,13 @@ export default function Bidding() {
     else {
       return (
         <Layout title="Song Search">
+          <div
+            className="px-6 pt-6 text-center"
+            style={{ color: venue.accentColor }}
+          >
+            <h1 className="text-2xl">{venue.hostName}</h1>
+            {venue.welcomeMessage && <p>{venue.welcomeMessage}</p>}
+          </div>
           <Search selectSong={setSongChoice} />
         </Layout>
       );
@@ -102,14 +122,24 @@ export const getServerSideProps: GetServerSideProps = async (
     };
 
   //@ts-ignore
-  const host = await getHost(params?.slug, req.headers.host ?? null);
+  const { ensureDB } = await import('../../lib/db');
+  const { default: Hosts } = await import('../../models/Host');
+  const { publicHost } = await import('../../lib/public-host');
+  await ensureDB();
+  const host = await Hosts.findOne({ shortName: params.slug, deletedAt: null });
 
   if (!host)
     return {
       notFound: true,
       props: { message: 'Jukebox not found!' },
     };
+  const { planForHost } = await import('../../lib/subscriptions');
+  const venue = publicHost(host);
+  if ((await planForHost(host.hostId)).id !== 'pro') {
+    venue.accentColor = undefined;
+    venue.welcomeMessage = undefined;
+  }
   return {
-    props: {},
+    props: { venue: JSON.parse(JSON.stringify(venue)) },
   };
 };

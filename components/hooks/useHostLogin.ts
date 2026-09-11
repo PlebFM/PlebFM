@@ -15,13 +15,13 @@ const findHost = async (spotifyId: string) => {
 };
 
 export function useHostLogin() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasVerified, setHasVerified] = useState(false);
 
   useEffect(() => {
-    if (isLoading || hasVerified) return;
+    if (status === 'loading' || isLoading || hasVerified) return;
 
     const verifySpotifyUser = async () => {
       setIsLoading(true);
@@ -44,7 +44,7 @@ export function useHostLogin() {
     };
 
     verifySpotifyUser();
-  }, [isLoading, session, hasVerified]);
+  }, [isLoading, session, status, hasVerified]);
 
   return {
     session,

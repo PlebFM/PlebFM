@@ -11,6 +11,9 @@ import mongoose, { Schema } from 'mongoose';
  * @field spotifyRefreshToken: string - token generated upon signup to get spotify auth
  */
 export type Host = {
+  deletedAt?: Date | null;
+  accentColor?: string;
+  welcomeMessage?: string;
   hostName?: string;
   shortName?: string;
   spotifyRefreshToken: string;
@@ -19,6 +22,9 @@ export type Host = {
 };
 
 const HostSchema = new Schema<Host>({
+  deletedAt: { type: Date, default: null },
+  accentColor: { type: String, default: '#a855f7' },
+  welcomeMessage: { type: String, default: '' },
   hostName: {
     type: String,
     unique: true,
@@ -31,8 +37,7 @@ const HostSchema = new Schema<Host>({
   },
   spotifyRefreshToken: {
     type: String,
-    unique: true,
-    required: true,
+    select: false,
   },
   spotifyId: {
     type: String,

@@ -57,16 +57,39 @@ export default function Index({ hosts, error }: IndexProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps<IndexProps> = async () => {
+export const getServerSideProps: GetServerSideProps<
+  IndexProps
+> = async context => {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts`,
+    const { ensureDB } = await import('../lib/db');
+    const { default: Hosts } = await import('../models/Host');
+    const { PUBLIC_HOST_FIELDS, publicHost } = await import(
+      '../lib/public-host'
     );
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to fetch hosts');
+    await ensureDB();
+    const { default: Domains } = await import('../models/CustomDomain');
+    const { planForHost } = await import('../lib/subscriptions');
+    const domain = await Domains.findOne({
+      domain: context.req.headers.host?.split(':')[0],
+      verified: true,
+    });
+    if (domain && (await planForHost(domain.hostId)).id !== 'free') {
+      const venue = await Hosts.findOne({
+        hostId: domain.hostId,
+        deletedAt: null,
+      });
+      if (venue?.shortName)
+        return {
+          redirect: { destination: `/${venue.shortName}`, permanent: false },
+        };
     }
+    const hosts = await Hosts.find({
+      deletedAt: null,
+      shortName: { $exists: true },
+    })
+      .select(PUBLIC_HOST_FIELDS)
+      .lean();
+    const data = { hosts: hosts.map(publicHost) };
 
     return {
       props: {
