@@ -1,3 +1,6 @@
+import { recoverCheckout } from '../../../lib/recover-checkout';
+import Subscriptions from '../../../models/HostSubscription';
+import { syncMdkSubscriptions } from '../../../lib/mdk-subscriptions';
 import { withDeadline } from '../../../lib/payments/deadline';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { timingSafeEqual } from 'crypto';
@@ -25,6 +28,10 @@ export default async function handler(
   )
     return res.status(401).json({ error: 'Unauthorized' });
   return connectDB(async () => {
+    if (req.method === 'POST' && req.body?.checkoutId) {
+      await recoverCheckout(req.body);
+      return res.json({ recovered: true });
+    }
     const orders = await Orders.find({
       statusRef: { $type: 'string' },
       $or: [
@@ -48,8 +55,21 @@ export default async function handler(
     })
       .sort({ updatedAt: 1 })
       .limit(2);
+    const subscriptions = await Subscriptions.find({ provider: 'mdk' })
+      .sort({ checkedAt: 1 })
+      .limit(2);
     let failures = 0;
     const jobs = [
+      ...subscriptions.map(item => async () => {
+        try {
+          await syncMdkSubscriptions(item.hostId);
+        } finally {
+          await Subscriptions.updateOne(
+            { _id: item._id },
+            { $set: { checkedAt: new Date() } },
+          );
+        }
+      }),
       ...orders.map(order => async () => {
         try {
           await reconcileOrder(order.orderId);
@@ -105,7 +125,8 @@ export default async function handler(
         createdAt: { $lt: new Date(Date.now() - 120000) },
       }));
     return res.status(failures || unresolved ? 503 : 200).json({
-      checked: orders.length + billing.length + payouts.length,
+      checked:
+        orders.length + billing.length + payouts.length + subscriptions.length,
       failures,
       unresolved,
     });

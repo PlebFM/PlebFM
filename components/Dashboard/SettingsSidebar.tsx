@@ -6,11 +6,6 @@ import {
   CreditCardIcon,
 } from '@heroicons/react/24/outline';
 
-interface SettingsSidebarProps {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}
-
 const navigationItems = [
   {
     name: 'General',
@@ -29,18 +24,17 @@ const navigationItems = [
   },
 ];
 
-export function SettingsSidebar({ isOpen, setIsOpen }: SettingsSidebarProps) {
+export function SettingsSidebar() {
   const router = useRouter();
   const currentSection = (router.query.section as string) || 'general';
 
   return (
-    <div
-      className={`${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      } fixed inset-y-0 left-0 z-30 w-64 bg-black/50 backdrop-blur-xl border-r border-white/10 transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0`}
-    >
-      <div className="h-full px-4 py-6">
-        <nav className="space-y-1">
+    <div className="w-full md:w-64 md:shrink-0 md:border-r border-white/10">
+      <div className="md:h-full md:px-4 md:py-6">
+        <nav
+          aria-label="Settings sections"
+          className="flex gap-1 overflow-x-auto md:block md:space-y-1"
+        >
           {navigationItems.map(item => {
             const isActive = currentSection === item.href.split('section=')[1];
             return (
@@ -52,7 +46,6 @@ export function SettingsSidebar({ isOpen, setIsOpen }: SettingsSidebarProps) {
                     ? 'bg-white/10 text-white'
                     : 'text-white/60 hover:bg-white/5 hover:text-white'
                 } group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors`}
-                onClick={() => setIsOpen(false)}
               >
                 <item.icon
                   className={`${

@@ -1,5 +1,4 @@
 import { getServerSidePropsForDashboard } from '../../lib/dashboard-props';
-import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Toaster } from 'react-hot-toast';
 import {
@@ -14,7 +13,6 @@ import { PayoutSettings } from '../../components/Settings/PayoutSettings';
 
 export default function HostSettings({ host, queueData }: DashboardPageProps) {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const currentSection = (router.query.section as string) || 'general';
 
   if (!host) return null;
@@ -82,8 +80,8 @@ export default function HostSettings({ host, queueData }: DashboardPageProps) {
           },
         }}
       />
-      <div className="flex gap-8">
-        <SettingsSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <div className="flex flex-col md:flex-row gap-8">
+        <SettingsSidebar />
 
         <div className="flex-1 min-w-0">
           <div key={currentSection}>{renderContent()}</div>

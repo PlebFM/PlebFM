@@ -24,7 +24,7 @@ export const useSpotifyPlayback = ({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!trackPosition) return;
+      if (trackPosition === undefined) return;
       if (isPaused || !trackDuration || trackPosition >= trackDuration) return;
       setPosition(trackPosition + 1000);
     }, 1000);
@@ -67,8 +67,10 @@ export const useSpotifyPlayback = ({
       document.body.appendChild(script);
     }
 
+    let alive = true;
     let mountedPlayer: Spotify.Player | undefined;
     const setup = () => {
+      if (!alive) return;
       const player = new window.Spotify.Player({
         name: 'PlebFM',
         getOAuthToken: cb => {
@@ -129,6 +131,7 @@ export const useSpotifyPlayback = ({
     window.onSpotifyWebPlaybackSDKReady = setup;
     if (window.Spotify) setup();
     return () => {
+      alive = false;
       mountedPlayer?.disconnect();
       window.onSpotifyWebPlaybackSDKReady = () => {};
     };
