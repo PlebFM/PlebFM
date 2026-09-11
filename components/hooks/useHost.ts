@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 
 export interface Host {
+  accentColor?: string;
+  welcomeMessage?: string;
   hostName: string;
   shortName: string;
   spotifyId: string;

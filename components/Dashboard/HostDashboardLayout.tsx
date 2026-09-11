@@ -1,12 +1,9 @@
 import { useState, ReactNode } from 'react';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
-import { GetServerSideProps } from 'next';
-import { getSession } from 'next-auth/react';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import type { Host } from '../hooks/useHost';
-import { cleanSong } from '../../utils/songs';
 import type { Plan, Subscription } from '../../models/Subscription';
 
 type MarginSize = 'small' | 'medium' | 'large';
@@ -32,6 +29,17 @@ export interface DashboardPageProps {
   queueData: any[];
   subscription: Subscription | null;
   currentPlan: Plan | null;
+  stats: {
+    receivedSats: number;
+    earnedSats: number;
+    balanceSats: number;
+    daily: Array<{
+      _id: string;
+      bids: number;
+      sats: number;
+      earnedSats: number;
+    }>;
+  };
 }
 
 export function DashboardLayout({
@@ -77,63 +85,3 @@ export function DashboardLayout({
     </div>
   );
 }
-
-export const getServerSidePropsForDashboard: GetServerSideProps<
-  DashboardPageProps
-> = async context => {
-  const session = await getSession(context);
-
-  if (!session?.user?.id) {
-    return {
-      redirect: {
-        destination: '/host/login',
-        permanent: false,
-      },
-    };
-  }
-
-  try {
-    const hostRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/hosts?spotifyId=${session.user.id}`,
-    );
-    const hostData = await hostRes.json();
-
-    if (hostData.hosts.length === 0) {
-      return {
-        redirect: {
-          destination: '/host/signup',
-          permanent: false,
-        },
-      };
-    }
-
-    const host = hostData.hosts[0];
-
-    // Fetch queue data
-    const queueUrl = `${
-      process.env.NEXT_PUBLIC_BASE_URL
-    }/api/leaderboard/queue?playing=${true}&shortName=${host.shortName}`;
-    const queueRes = await fetch(queueUrl);
-    const queue = await queueRes.json();
-
-    // Fetch subscription data
-    const subscriptionRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/subscriptions/current`,
-    );
-    const subscriptionData = await subscriptionRes.json();
-
-    return {
-      props: {
-        host,
-        queueData: queue.data.map(cleanSong) || [],
-        subscription: subscriptionData.subscription || null,
-        currentPlan: subscriptionData.plan || null,
-      },
-    };
-  } catch (err) {
-    console.error(err);
-    throw err instanceof Error
-      ? err
-      : new Error('Failed to fetch data for dashboard');
-  }
-};

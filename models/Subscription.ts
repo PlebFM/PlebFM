@@ -29,7 +29,7 @@ export const PLANS: Plan[] = [
     name: 'Free',
     tier: 'free',
     price: 0,
-    features: ['20 Songs/month', 'Community Support'],
+    features: ['20 paid song checkouts/month', 'Community Support'],
     maxSongs: 20,
   },
   {

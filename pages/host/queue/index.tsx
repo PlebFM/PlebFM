@@ -2,7 +2,8 @@ import React from 'react';
 import Image from 'next/image';
 import plebFMLogo from '../../../public/plebfm-logo.svg';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../api/auth/[...nextauth]';
 import WebPlayback from '../../../components/Leaderboard/SpotifyPlayback';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
@@ -94,11 +95,11 @@ export default function Queue() {
   );
 }
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
-  if (!session) {
+  const session = await getServerSession(context.req, context.res, authOptions);
+  if (!session || session.error) {
     return {
       redirect: {
-        destination: '/host',
+        destination: '/host/login',
         permanent: false,
       },
     };

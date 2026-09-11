@@ -1,18 +1,47 @@
-/**
- * Money Dev Kit's unified endpoint.
- *
- * This is infrastructure, not application code — mdk.com calls it to spin up the
- * serverless Lightning node so it can claim incoming payments. There are no
- * events to parse and no handlers to write.
- *
- * It is an App Router route handler living alongside PlebFM's Pages Router.
- * Next.js supports both routers in one project, and `app/` here contains only
- * this file.
- *
- * Deliberately .js, not .ts: this package subpath is published via an `exports`
- * map, which the legacy `"moduleResolution": "node"` in tsconfig.json cannot
- * resolve. Resolving it would mean moving to "bundler" (TypeScript >= 5, which
- * this repo does not yet use). Money Dev Kit's own docs show this file as
- * `route.js`, so nothing is lost. See the PR description for the follow-up.
- */
-export { POST, GET } from '@moneydevkit/nextjs/server/route';
+import {
+  POST as sdkPost,
+  GET as sdkGet,
+} from '@moneydevkit/nextjs/server/route';
+// Keep MDK's authenticated node callbacks and signed renewal links. Checkout
+// creation belongs to PlebFM's authenticated/order-backed APIs. Never expose
+// customer lookup or the SDK's preview payment simulation to the public.
+export async function POST(request) {
+  let body;
+  try {
+    body = await request.clone().json();
+  } catch {
+    return Response.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+  const route = [body.handler, body.route, body.target]
+    .find(v => typeof v === 'string')
+    ?.toLowerCase();
+  if (
+    ![
+      'webhook',
+      'webhooks',
+      'balance',
+      'ping',
+      'list_channels',
+      'sync_rgs',
+      'get_checkout',
+      'confirm_checkout',
+    ].includes(route)
+  )
+    return Response.json({ error: 'Operation unavailable' }, { status: 403 });
+  if (
+    route === 'confirm_checkout' &&
+    (body.confirm?.products || body.confirm?.customer)
+  )
+    return Response.json(
+      { error: 'Checkout details are fixed' },
+      { status: 403 },
+    );
+  return sdkPost(request);
+}
+export async function GET(request) {
+  // Only signed subscription renewal/cancellation and the SDK's own CSRF
+  // bootstrap may use GET. Signed generic checkout links aren't used here.
+  if (new URL(request.url).searchParams.get('action') === 'createCheckout')
+    return Response.json({ error: 'Use PlebFM checkout' }, { status: 403 });
+  return sdkGet(request);
+}

@@ -1,4 +1,5 @@
-import { createCheckout, getCheckout } from '@moneydevkit/core';
+import { createDurableCheckout } from '../mdk-checkout';
+import { getCheckout, createMoneyDevKitClient } from '@moneydevkit/core';
 import { withDeadline } from './deadline';
 import { CreatedInvoice, InvoiceStatus, PaymentProvider } from './types';
 
@@ -42,27 +43,19 @@ export const mdkProvider: PaymentProvider = {
   async createInvoice(
     memo: string,
     amountSats: number,
+    metadata?: Record<string, string>,
+    saveReference?: (id: string) => Promise<void>,
   ): Promise<CreatedInvoice> {
-    const result = await withDeadline('createCheckout', () =>
-      createCheckout({
-        type: 'AMOUNT',
+    const checkout = await createDurableCheckout(
+      {
         currency: 'SAT',
         amount: amountSats,
-        // `title` labels the order in the MDK dashboard; `description` is what
-        // flows through to the BOLT11 description tag, which is where LNbits'
-        // `memo` used to land and is what the payer sees in their wallet.
-        title: memo,
-        description: memo,
-      }),
+        metadata: { title: memo, description: memo, ...metadata },
+      },
+      saveReference ?? (async () => {}),
     );
-
-    if (result.error) {
-      throw new Error(
-        `Money Dev Kit checkout failed (${result.error.code}): ${result.error.message}`,
-      );
-    }
-
-    const { checkout } = result.data;
+    if (checkout.sandbox)
+      throw new Error('Sandbox invoices cannot fund jukebox bids');
     const invoice = checkout.invoice;
 
     if (!invoice?.invoice || !invoice.paymentHash) {
@@ -82,6 +75,8 @@ export const mdkProvider: PaymentProvider = {
     const checkout = await withDeadline('getCheckout', () =>
       getCheckout(statusRef),
     );
+    if (checkout.sandbox)
+      throw new Error('Sandbox invoices cannot fund jukebox bids');
     const settled = SETTLED_STATUSES.has(checkout.status as string);
     const paymentHash = checkout.invoice?.paymentHash;
 
@@ -95,8 +90,41 @@ export const mdkProvider: PaymentProvider = {
 
     return {
       settled,
+      currency: checkout.currency,
+      amountSats:
+        checkout.invoice?.amountSatsReceived ??
+        checkout.invoice?.amountSats ??
+        undefined,
+      netAmountSats: checkout.netAmount ?? undefined,
       paymentHash: paymentHash ?? '',
       expired: !settled && (checkout.status as string) === EXPIRED_STATUS,
     };
   },
 };
+
+export async function recoverMdkInvoice(
+  id: string,
+  orderId: string,
+  amountSats: number,
+) {
+  const client = createMoneyDevKitClient();
+  let checkout = await withDeadline('recover checkout', () => getCheckout(id));
+  if (
+    checkout.sandbox ||
+    checkout.userMetadata?.bidOrderId !== orderId ||
+    checkout.currency !== 'SAT' ||
+    checkout.totalAmount !== amountSats
+  )
+    throw new Error('Checkout does not match order');
+  if (checkout.status === 'CONFIRMED')
+    checkout = await withDeadline('resume invoice', () =>
+      client.checkouts.mintInvoice({ checkoutId: id }),
+    );
+  if (!checkout.invoice?.paymentHash || !checkout.invoice.invoice) return null;
+  return {
+    statusRef: id,
+    paymentHash: checkout.invoice.paymentHash,
+    paymentRequest: checkout.invoice.invoice,
+    mintState: 'ready',
+  };
+}

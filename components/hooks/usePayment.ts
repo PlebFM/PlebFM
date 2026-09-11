@@ -10,7 +10,6 @@ import {
   POLL_INTERVAL_MS,
 } from '../../lib/payments/polling';
 import { Song } from '../../models/Song';
-import { getUserProfileFromLocal } from '../../utils/profile';
 
 export type { PaymentFailureReason };
 
@@ -53,6 +52,8 @@ export const usePayment = (
   const [attempt, setAttempt] = useState(0);
   const [pollEpoch, setPollEpoch] = useState(0);
   const pathname = usePathname();
+  const requestId = useRef<string>('');
+  const storageKey = `plebfm-checkout:${pathname}:${song.id}:${totalBid}`;
 
   // Held in a ref so a parent that passes a fresh closure each render does not
   // tear down and restart the poll loop underneath a payer.
@@ -75,13 +76,20 @@ export const usePayment = (
       setPollEpoch(current => current + 1);
       return;
     }
+    if (reason === 'expired') {
+      sessionStorage.removeItem(storageKey);
+      requestId.current = '';
+    }
     setAttempt(current => current + 1);
-  }, [paymentFailure?.reason]);
+  }, [paymentFailure?.reason, storageKey]);
 
   useEffect(() => {
     let cancelled = false;
 
     const mint = async () => {
+      requestId.current =
+        sessionStorage.getItem(storageKey) || crypto.randomUUID();
+      sessionStorage.setItem(storageKey, requestId.current);
       setLoading(true);
       setPaymentFailure(null);
       const hostId = pathname?.substring(1) ?? 'atl'; // /atl -> atl
@@ -103,6 +111,8 @@ export const usePayment = (
           },
           body: JSON.stringify({
             value: totalBid,
+            songId: song.id,
+            requestId: requestId.current,
             memo: `PlebFM - ${song.name ?? 'Bid'}`,
             shortName: hostId,
           }),
@@ -136,7 +146,7 @@ export const usePayment = (
     return () => {
       cancelled = true;
     };
-  }, [attempt, pathname, song.name, totalBid]);
+  }, [attempt, pathname, song.name, song.id, totalBid, storageKey]);
 
   useEffect(() => {
     if (!bolt11.statusRef) return;
@@ -146,13 +156,7 @@ export const usePayment = (
     let consecutiveFailures = 0;
 
     const checkStatus = async () => {
-      const hostId = pathname?.substring(1); // /atl -> atl
-      const user = getUserProfileFromLocal();
-      const url = `/api/invoice?hash=${encodeURIComponent(
-        bolt11.hash,
-      )}&ref=${encodeURIComponent(bolt11.statusRef)}&hostId=${hostId}&songId=${
-        song.id
-      }&bidAmount=${totalBid}&userId=${user.userId}&shortName=${hostId}`;
+      const url = `/api/invoice?hash=${encodeURIComponent(bolt11.hash)}`;
 
       // A request that never lands is reported as a failure to poll on, not as
       // an exception that silently kills the loop with no UI to show for it.
@@ -176,7 +180,7 @@ export const usePayment = (
 
       const outcome = decidePollOutcome(httpStatus, body, consecutiveFailures);
       if (outcome.action === 'paid') {
-        console.log('PAID');
+        sessionStorage.removeItem(storageKey);
         onPaidRef.current();
         return;
       }
@@ -197,7 +201,15 @@ export const usePayment = (
       clearTimeout(timeoutId);
     };
     // `pollEpoch` restarts polling the *same* invoice after a resume.
-  }, [bolt11.hash, bolt11.statusRef, pathname, pollEpoch, song.id, totalBid]);
+  }, [
+    bolt11.hash,
+    bolt11.statusRef,
+    pathname,
+    pollEpoch,
+    song.id,
+    totalBid,
+    storageKey,
+  ]);
 
   return {
     loading,

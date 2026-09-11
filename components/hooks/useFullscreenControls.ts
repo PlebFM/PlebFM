@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 export function useFullscreenControls(hideDelay = 3000) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const timeout = useRef<NodeJS.Timeout>();
+  const timeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     const handleMouseMove = () => {

@@ -1,43 +1,37 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
-import { PLANS } from '../../../models/Subscription';
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+import { syncMdkSubscriptions } from '../../../lib/mdk-subscriptions';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import connectDB from '../../../middleware/mongodb';
+import { requireHostSession } from '../../../lib/auth';
+import { planForHost, subscriptionForHost } from '../../../lib/subscriptions';
+import { cancelHostSubscription, reconcileBilling } from '../../../lib/billing';
+import BillingCheckouts from '../../../models/BillingCheckout';
+import Receipts from '../../../models/BillingReceipt';
+import { methodNotAllowed } from '../../../lib/http';
+export default connectDB(async (req: NextApiRequest, res: NextApiResponse) => {
+  if (!['GET', 'POST', 'DELETE'].includes(req.method ?? ''))
+    return methodNotAllowed(res, ['GET', 'POST', 'DELETE']);
+  const session = await requireHostSession(req, res);
+  if (!session) return;
+  const hostId = session.user!.id!;
+  if (req.method === 'DELETE') await cancelHostSubscription(hostId);
+  if (req.method === 'POST') {
+    const pending = await BillingCheckouts.find({
+      hostId,
+      state: 'pending',
+    }).limit(10);
+    for (const record of pending) await reconcileBilling(record.checkoutId);
+    if (
+      process.env.MDK_ACCESS_TOKEN &&
+      (await BillingCheckouts.exists({ hostId, state: 'paid' }))
+    )
+      await syncMdkSubscriptions(hostId);
   }
-
-  try {
-    const session = await getServerSession(req, res, authOptions);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    // TODO: Replace with actual database query
-    // For now, return a mock subscription
-    const mockSubscription = {
-      id: 'mock-sub-1',
-      hostId: session.user.id,
-      planId: 'pro',
-      status: 'active',
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      cancelAtPeriodEnd: false,
-      paymentMethod: 'stripe',
-    };
-
-    const plan = PLANS.find(p => p.id === mockSubscription.planId);
-
-    return res.status(200).json({
-      subscription: mockSubscription,
-      plan,
-    });
-  } catch (error) {
-    console.error('Error fetching subscription:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
+  return res.json({
+    subscription: await subscriptionForHost(hostId),
+    plan: await planForHost(hostId),
+    history: await Receipts.find({ hostId })
+      .sort({ paidAt: -1 })
+      .limit(100)
+      .lean(),
+  });
+});

@@ -25,6 +25,9 @@ export type CreatedInvoice = {
 };
 
 export type InvoiceStatus = {
+  amountSats?: number;
+  netAmountSats?: number;
+  currency?: string;
   settled: boolean;
   /**
    * Payment hash as the *provider* reports it for this `statusRef`.
@@ -49,7 +52,12 @@ export type InvoiceStatus = {
 export interface PaymentProvider {
   readonly name: 'lnbits' | 'mdk';
   /** Mint an invoice for `amountSats`. Throws if the provider returns no invoice. */
-  createInvoice(memo: string, amountSats: number): Promise<CreatedInvoice>;
+  createInvoice(
+    memo: string,
+    amountSats: number,
+    metadata?: Record<string, string>,
+    saveReference?: (id: string) => Promise<void>,
+  ): Promise<CreatedInvoice>;
   /** Look up settlement state for a `statusRef` returned by `createInvoice`. */
   checkInvoice(statusRef: string): Promise<InvoiceStatus>;
 }

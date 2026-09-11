@@ -33,21 +33,25 @@ export const useSpotifyPlayback = ({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      getPlaybackState(token).then(x => {
-        console.log('spotify playback state', x);
-        if (x?.item) setTrack(x.item);
-        if (x?.progress_ms) setPosition(x.progress_ms);
-        if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
-        if (x?.device?.id) setDeviceId(x.device.id);
-        if (x?.device?.is_active) setActive(x.device.is_active);
-        if (x) setPaused(!x.is_playing);
-      });
-      syncJukebox(token, shortName, deviceId).then(res => {
-        if (!res?.data) {
-          console.error('failed to sync jukebox', res);
-        }
-        refreshQueue();
-      });
+      getPlaybackState(token)
+        .then(x => {
+          console.log('spotify playback state', x);
+          if (x?.item) setTrack(x.item);
+          if (x?.progress_ms !== undefined) setPosition(x.progress_ms);
+          if (x?.item?.duration_ms) setDuration(x.item.duration_ms);
+          if (x?.device?.id) setDeviceId(x.device.id);
+          if (x?.device) setActive(x.device.is_active);
+          if (x) setPaused(!x.is_playing);
+        })
+        .catch(() => setActive(false));
+      syncJukebox(token, shortName, deviceId)
+        .then(res => {
+          if (!res?.data) {
+            console.error('failed to sync jukebox', res);
+          }
+          refreshQueue();
+        })
+        .catch(error => console.error('Queue sync failed', error));
     }, 5000);
     return () => clearInterval(interval);
   }, [deviceId, shortName, token, refreshQueue]);
@@ -63,7 +67,8 @@ export const useSpotifyPlayback = ({
       document.body.appendChild(script);
     }
 
-    window.onSpotifyWebPlaybackSDKReady = () => {
+    let mountedPlayer: Spotify.Player | undefined;
+    const setup = () => {
       const player = new window.Spotify.Player({
         name: 'PlebFM',
         getOAuthToken: cb => {
@@ -72,6 +77,7 @@ export const useSpotifyPlayback = ({
         volume: 0.5,
       });
 
+      mountedPlayer = player;
       setPlayer(player);
 
       player.addListener('ready', ({ device_id }) => {
@@ -120,7 +126,13 @@ export const useSpotifyPlayback = ({
 
       player.connect();
     };
-  }, [isActive, token]);
+    window.onSpotifyWebPlaybackSDKReady = setup;
+    if (window.Spotify) setup();
+    return () => {
+      mountedPlayer?.disconnect();
+      window.onSpotifyWebPlaybackSDKReady = () => {};
+    };
+  }, [token]);
 
   return {
     isPaused,

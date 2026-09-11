@@ -19,18 +19,8 @@ export const getProviderByName = (name: string): PaymentProvider => {
   return provider;
 };
 
-/**
- * Selects the Lightning backend for *new* invoices from `PAYMENT_PROVIDER`.
- *
- * Defaults to `lnbits` so an existing deployment that has not set the variable
- * keeps its current behaviour untouched. Set `PAYMENT_PROVIDER=mdk` to route
- * bids through Money Dev Kit.
- *
- * Only mint with this. Settlement goes through `settleInvoice`, which routes by
- * the provider recorded in the invoice's signed reference — otherwise flipping
- * this variable strands invoices that are already in flight.
- */
+/** New bids default to MDK. Settlement always uses the provider saved on the order. */
 export const getPaymentProvider = (): PaymentProvider =>
   getProviderByName(
-    (process.env.PAYMENT_PROVIDER ?? 'lnbits').trim().toLowerCase(),
+    (process.env.PAYMENT_PROVIDER ?? 'mdk').trim().toLowerCase(),
   );
