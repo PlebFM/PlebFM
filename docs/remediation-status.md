@@ -1,6 +1,6 @@
 # Remediation status — 2026-09-11
 
-Application changes are implemented on `alex/app-remediation`, including the earlier MDK PR #111. Production cutover is pending the external setup and live acceptance below.
+Application changes are implemented on `alex/app-remediation`, including the earlier MDK PR #111 and the later security fixes. Production cutover is pending the account access and live acceptance below. **The live `pleb.fm` site is on Netlify; Vercel is a separate deployment target. A green Vercel check alone does not verify the production deployment.**
 
 | Audit area                          | Implementation                                                                                                                                      | Verification                                                                                  |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -12,16 +12,24 @@ Application changes are implemented on `alex/app-remediation`, including the ear
 | Host features                       | Ledger earnings, analytics, withdrawal reservations/retry/refunds, branding, domain ownership/DNS validation, guarded deletion                      | Transaction and domain tests; browser settings persistence and analytics/billing verification |
 | Dependencies and CI                 | Patched Next/Sharp/transitive packages; restored PR/main workflow; Ubuntu build and production HTTP smoke workflow                                  | Local lint/typecheck/build pass; production audit reports no known vulnerabilities            |
 
-Local verification: **92 tests in 13 files passed**. **18 production HTTP smoke checks passed** against an isolated fixture. Browser checks confirmed the home/guest pages, dashboard earnings, analytics, setting persistence, appearance saving and billing history. Browser testing found and fixed both the client database-import crash and the Pages Router SDK import failure. These checks used synthetic identities/data and did not move money.
+Local verification: **109 tests in 16 files passed**. **19 production HTTP smoke checks passed** against an isolated fixture. The offline Netlify adapter build passed, including Node 22 server packaging, the every-minute scheduled function and the background worker. CI now includes this Netlify build. Earlier browser checks confirmed the home/guest pages, dashboard earnings, analytics, setting persistence, appearance saving and billing history. These checks used synthetic identities/data and did not move money.
 
-Read-only preflight against the locally configured services found **17 hosts**, the obsolete `spotifyRefreshToken_1` index, no new-ledger unresolved records, and **zero Stripe subscriptions under the configured key**. This is not a claim about any other Stripe account/environment. The linked Vercel team reports Pro.
+## Deployment preparation completed
+
+- Removed application credentials from Vercel Preview and Development, retained and verified their original values in Production, and retired eight running previews whose immutable deployments still held the old credentials. New previews have independent auth/cron secrets and withdrawals disabled. Hosted staging still needs its own database user and provider apps; unconfigured previews cannot access production data.
+- Saved the original local configuration privately and removed app production credentials from `.env.local`. Use `pnpm smoke:local` for disposable local testing; operations now require an explicit production env file.
+- Snapshotted all **1,106 documents in six collections** from the database configured in Vercel Production (which matched the original local connection), restored exact BSON data and indexes to a disposable replica set, rehearsed the migration there, then applied the required indexes to that configured database. The database-only preflight passes with **17 hosts**, no obsolete refresh-token index and no unresolved new-ledger records. This is an application-data snapshot, not an Atlas cluster backup. Netlify account access is still required to confirm that its runtime uses this same database.
+- Configured Vercel Production's cron secret, withdrawal-disable flag and project/team identifiers. These values still need to be configured in **Netlify**, where the live site runs. Sensitive Vercel secrets cannot be read back through `env pull`; an empty pulled value does not prove absence.
+- Fixed pending-order reconciliation using the stored `statusRef` instead of a nonexistent `checkoutId` field. Corrected the newer MDK proxy change to preserve the SDK's `handler` discriminator while removing secondary selectors. Added regression coverage for these paths, unknown payout status, sandbox subscription minting, snapshot restoration and Netlify scheduling.
+- Verified the configured Stripe key is a test key with zero subscriptions. Production Stripe credentials/inventory must be checked in Netlify before making claims about legacy live subscriptions.
 
 ## Pending before production cutover
 
-- Configure MDK app credentials, backed-up mnemonic, Basic/Pro products, business webhook secret and cron secret; verify both callback endpoints.
+- Sign in to Netlify, Atlas and MDK. Netlify CLI/browser and Atlas/MDK browser access were unavailable during this preparation. Configure a staging-only database user and independent service credentials; scope Netlify production secrets and retire any legacy Netlify previews that retain them.
+- Configure MDK app credentials, backed-up mnemonic, Basic/Pro products, business webhook secret and cron secret on Netlify; verify both callback endpoints and scheduled/background execution.
 - Configure Vercel domain automation credentials and complete a real test-domain setup.
-- Apply the reviewed schema/index migration, inventory outstanding legacy invoices, and revoke/re-authorize the exposed Spotify grants. No production migration, grant revocation, merge or deployment was performed during implementation.
+- Confirm Netlify's database matches the migrated database, rerun the database-only preflight immediately before cutover, inventory outstanding legacy invoices, and revoke/re-authorize exposed Spotify grants after deploying the security fix. No grant revocation, merge or production code deployment was performed.
 - Perform small real bid, closed-browser fulfillment, subscription renewal/cancellation, withdrawal and Spotify playback acceptance tests in an isolated staging environment.
-- Separate production credentials from preview environments and confirm wallet reserves cover host liabilities before enabling withdrawals.
+- Confirm wallet reserves cover host liabilities before enabling withdrawals. Netlify credential isolation is still pending account access; Vercel and local isolation are complete.
 
 The full sequence, migration commands, recovery rules and rollback constraints are in [payments-cutover.md](payments-cutover.md). Missing credentials are a deployment gate, not a waived test.

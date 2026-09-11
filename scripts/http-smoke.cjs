@@ -89,8 +89,16 @@ const base = 'http://localhost:3100';
     });
     assert.equal(r.status, 403);
   }
+  // No real MDK key is configured in this fixture. Reaching SDK authentication
+  // proves that the proxy preserved its handler discriminator after filtering.
+  r = await request('/api/mdk', {
+    method: 'POST',
+    body: JSON.stringify({ handler: 'ping', route: 'pay_invoice' }),
+  });
+  assert.equal(r.status, 500);
+  assert.equal((await r.json()).error, 'Webhook secret is not configured.');
   console.log(
-    '18 production HTTP smoke checks passed against the disposable fixture.',
+    '19 production HTTP smoke checks passed against the disposable fixture.',
   );
 })().catch(e => {
   console.error(e.message);

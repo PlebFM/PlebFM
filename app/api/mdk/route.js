@@ -12,6 +12,8 @@ export async function POST(request) {
   } catch {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
+  if (!body || typeof body !== 'object' || Array.isArray(body))
+    return Response.json({ error: 'Invalid JSON object' }, { status: 400 });
   const route = [body.handler, body.route, body.target]
     .find(v => typeof v === 'string')
     ?.toLowerCase();
@@ -39,10 +41,15 @@ export async function POST(request) {
   // Strip all routing fields and reconstruct the body with only the validated
   // route name, so the SDK cannot be directed by a smuggled secondary field.
   const { handler: _h, route: _r, target: _t, ...rest } = body;
-  const safeBody = { [route]: body[route] ?? true, ...rest };
+  // The SDK resolves handler/route/target; a property named after the operation
+  // is not a routing discriminator. Pass exactly one canonical discriminator.
+  const safeBody = { ...rest, handler: route };
+  const headers = new Headers(request.headers);
+  headers.set('content-type', 'application/json');
+  headers.delete('content-length');
   const safeRequest = new Request(request.url, {
     method: request.method,
-    headers: request.headers,
+    headers,
     body: JSON.stringify(safeBody),
   });
   return sdkPost(safeRequest);

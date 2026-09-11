@@ -53,3 +53,5 @@ Tests start a disposable MongoDB replica set and use synthetic provider response
 After `pnpm build`, run `pnpm smoke:local` for a disposable local database and synthetic host account. Open `http://localhost:3100`; `http://localhost:3101/signin` signs in the fixture host. This helper is not part of the deployed app. Stop it with Ctrl-C to remove the fixture database.
 
 See [the MDK cutover checklist](docs/payments-cutover.md) before merging or deploying payment changes. New subscriptions use customer-initiated Lightning renewals. Existing Stripe subscriptions remain supported during migration. All payment accounting requires MongoDB transactions and the indexes installed by the preflight schema step.
+
+The live `pleb.fm` site is hosted by Netlify; Vercel is a separate deployment target. `netlify.toml` and `netlify/functions/` configure the production build and scheduled reconciliation. CI packages both hosting paths. See [remediation status](docs/remediation-status.md) for completed setup and remaining account-access requirements.

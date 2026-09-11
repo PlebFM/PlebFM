@@ -21,6 +21,7 @@
     "typecheck": "tsc --noEmit --incremental false",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "preflight": "tsx scripts/preflight.ts",
+    "db:snapshot": "node scripts/database-snapshot.cjs",
     "smoke:local": "node scripts/local-smoke.cjs",
     "smoke:http": "node scripts/http-smoke.cjs"
   },

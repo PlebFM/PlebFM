@@ -300,6 +300,27 @@ it('keeps an uncertain withdrawal reserved for safe retry', async () => {
   expect((await Accounts.findById('venue')).balanceSats).toBe(20);
   expect((await Payouts.findOne()).requestKey).toBe('venue:request-1111111111');
 });
+it('keeps an unknown provider payout status pending without a refund or second payment', async () => {
+  await Accounts.updateOne({ _id: 'venue' }, { $set: { balanceSats: 100 } });
+  const payout = await reservePayout(
+    'venue',
+    'request-1111111111',
+    80,
+    'one@example.com',
+  );
+  vi.mocked(programmaticPayout)
+    .mockClear()
+    .mockResolvedValue({ data: { paymentId: 'payment' } } as any);
+  vi.mocked(waitForPayoutResult).mockResolvedValue({
+    data: { status: 'UNKNOWN' },
+  } as any);
+  const pending = await processPayout(payout);
+  await processPayout(pending);
+  expect(programmaticPayout).toHaveBeenCalledOnce();
+  expect((await Accounts.findById('venue')).balanceSats).toBe(20);
+  expect((await Payouts.findOne()).state).toBe('pending');
+  expect((await Payouts.findOne()).completedAt).toBeUndefined();
+});
 
 vi.mock('../../lib/mdk-checkout', () => ({ createDurableCheckout: vi.fn() }));
 vi.mock('@moneydevkit/core', () => ({
@@ -311,7 +332,11 @@ vi.mock('../../lib/mdk-subscriptions', () => ({
   syncMdkSubscriptions: vi.fn(),
 }));
 import { createDurableCheckout } from '../../lib/mdk-checkout';
-import { listProducts, getCheckout } from '@moneydevkit/core';
+import {
+  listProducts,
+  getCheckout,
+  createMoneyDevKitClient,
+} from '@moneydevkit/core';
 import {
   createSubscriptionCheckout,
   reconcileBilling,
@@ -409,6 +434,26 @@ it('rejects a plan payment with the wrong recorded price', async () => {
   await expect(reconcileBilling('billing-checkout')).rejects.toMatchObject({
     status: 409,
   });
+  expect((await Billing.findOne()).state).toBe('pending');
+});
+it('rejects a confirmed sandbox subscription before minting an invoice', async () => {
+  await Billing.deleteMany({});
+  await Billing.create({
+    requestKey: 'billing-key',
+    checkoutId: 'billing-checkout',
+    hostId: 'venue',
+    planId: 'pro',
+    state: 'pending',
+  });
+  vi.mocked(getCheckout).mockResolvedValue({
+    sandbox: true,
+    status: 'CONFIRMED',
+  } as any);
+  vi.mocked(createMoneyDevKitClient).mockClear();
+  await expect(reconcileBilling('billing-checkout')).rejects.toMatchObject({
+    status: 409,
+  });
+  expect(createMoneyDevKitClient).not.toHaveBeenCalled();
   expect((await Billing.findOne()).state).toBe('pending');
 });
 

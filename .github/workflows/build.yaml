@@ -43,3 +43,5 @@ jobs:
           FIXTURE_PID=$!
           trap 'kill "$FIXTURE_PID"' EXIT
           pnpm smoke:http
+      - name: Netlify production adapter and scheduled function bundle
+        run: npx --yes netlify-cli@27.5.2 build --offline --context deploy-preview

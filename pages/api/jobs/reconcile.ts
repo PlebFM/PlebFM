@@ -37,7 +37,6 @@ export default async function handler(
       $or: [
         {
           state: { $in: ['pending', 'uncertain'] },
-          checkoutId: { $type: 'string' },
         },
         { state: 'fulfilled', notifiedAt: { $exists: false } },
       ],

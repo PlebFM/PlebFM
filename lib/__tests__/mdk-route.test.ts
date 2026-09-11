@@ -1,5 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-const post = vi.hoisted(() => vi.fn(async () => new Response('ok')));
+const post = vi.hoisted(() =>
+  vi.fn(async (_request: Request) => new Response('ok')),
+);
 vi.mock('@moneydevkit/nextjs/server/route', () => ({ POST: post, GET: post }));
 import { POST } from '../../app/api/mdk/route';
 beforeEach(() => vi.clearAllMocks());
@@ -31,3 +33,26 @@ it('delegates node callback authentication to the SDK', async () => {
   await POST(req({ handler: 'webhook' }));
   expect(post).toHaveBeenCalledOnce();
 });
+it('preserves the SDK routing contract while discarding secondary selectors', async () => {
+  await POST(
+    req({
+      handler: 'PING',
+      route: 'pay_invoice',
+      target: 'create_checkout',
+      payload: 'fixture',
+    }),
+  );
+  const forwarded = post.mock.calls[0][0] as Request;
+  expect(await forwarded.json()).toEqual({
+    handler: 'ping',
+    payload: 'fixture',
+  });
+  expect(forwarded.headers.get('content-type')).toBe('application/json');
+});
+it.each([null, [], 'ping', 7])(
+  'rejects non-object JSON without throwing',
+  async value => {
+    expect((await POST(req(value))).status).toBe(400);
+    expect(post).not.toHaveBeenCalled();
+  },
+);

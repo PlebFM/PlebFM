@@ -3,29 +3,38 @@ import fs from 'node:fs';
 import mongoose from 'mongoose';
 import Stripe from 'stripe';
 async function main() {
-  if (fs.existsSync('.env.local')) process.loadEnvFile('.env.local');
+  const envFile = process.argv
+    .find(arg => arg.startsWith('--env-file='))
+    ?.slice(11);
+  if (envFile) process.loadEnvFile(envFile);
+  else if (fs.existsSync('.env.local')) process.loadEnvFile('.env.local');
   const apply = process.argv.includes('--apply-schema');
   const importStripe = process.argv.includes('--import-stripe');
-  const required = [
-    'MONGODB_URI',
-    'NEXTAUTH_SECRET',
-    'NEXTAUTH_URL',
-    'MDK_ACCESS_TOKEN',
-    'MDK_MNEMONIC',
-    'MDK_WEBHOOK_SECRET',
-    'CRON_SECRET',
-    'MDK_BASIC_PRODUCT_ID',
-    'MDK_PRO_PRODUCT_ID',
-    'SPOTIFY_CLIENT_ID',
-    'SPOTIFY_CLIENT_SECRET',
-    'PUSHER_APP_ID',
-    'PUSHER_APP_SECRET',
-    'NEXT_PUBLIC_PUSHER_APP_KEY',
-    'NEXT_PUBLIC_PUSHER_APP_CLUSTER',
-    'NEXT_PUBLIC_PUSHER_CHANNEL',
-    'VERCEL_DOMAIN_TOKEN',
-    'VERCEL_PROJECT_ID',
-  ];
+  const databaseOnly = process.argv.includes('--database-only');
+  if (databaseOnly && importStripe)
+    throw Error('Incompatible preflight options');
+  const required = databaseOnly
+    ? ['MONGODB_URI']
+    : [
+        'MONGODB_URI',
+        'NEXTAUTH_SECRET',
+        'NEXTAUTH_URL',
+        'MDK_ACCESS_TOKEN',
+        'MDK_MNEMONIC',
+        'MDK_WEBHOOK_SECRET',
+        'CRON_SECRET',
+        'MDK_BASIC_PRODUCT_ID',
+        'MDK_PRO_PRODUCT_ID',
+        'SPOTIFY_CLIENT_ID',
+        'SPOTIFY_CLIENT_SECRET',
+        'PUSHER_APP_ID',
+        'PUSHER_APP_SECRET',
+        'NEXT_PUBLIC_PUSHER_APP_KEY',
+        'NEXT_PUBLIC_PUSHER_APP_CLUSTER',
+        'NEXT_PUBLIC_PUSHER_CHANNEL',
+        'VERCEL_DOMAIN_TOKEN',
+        'VERCEL_PROJECT_ID',
+      ];
   const missing = required.filter(k => !process.env[k]);
   console.log(
     'Missing configuration:',
@@ -39,6 +48,13 @@ async function main() {
   await mongoose.connect(process.env.MONGODB_URI, {
     serverSelectionTimeoutMS: 8000,
   });
+  const hello = await mongoose.connection.db.command({ hello: 1 });
+  if (
+    (!hello.setName && hello.msg !== 'isdbgrid') ||
+    !hello.logicalSessionTimeoutMinutes
+  )
+    throw Error('Database must support transactions');
+  console.log('Database topology supports transactions.');
   const { default: Hosts } = await import('../models/Host');
   const models = await Promise.all(
     [
@@ -62,11 +78,23 @@ async function main() {
     await Hosts.countDocuments({ deletedAt: null }),
   );
   if (apply) {
-    for (const index of obsolete) await Hosts.collection.dropIndex(index.name!);
     for (const model of [Hosts, ...models]) await model.createIndexes();
+    // Keep the old index intact if installation of a required index fails.
+    for (const index of obsolete) await Hosts.collection.dropIndex(index.name!);
     console.log(
       'Required indexes installed; obsolete refresh-token indexes removed.',
     );
+  }
+  let missingIndexes = false;
+  for (const model of [Hosts, ...models]) {
+    const difference = await model.diffIndexes();
+    if (difference.toCreate.length) {
+      missingIndexes = true;
+      console.log(
+        `BLOCKER: ${model.modelName} missing required index definitions:`,
+        difference.toCreate,
+      );
+    }
   }
   for (const name of ['PaymentOrder', 'BillingCheckout', 'Payout']) {
     const model = models.find(m => m.modelName === name);
@@ -81,7 +109,7 @@ async function main() {
       ),
     );
   }
-  if (process.env.STRIPE_SECRET_KEY) {
+  if (!databaseOnly && process.env.STRIPE_SECRET_KEY) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     let total = 0,
       unmapped = 0,
@@ -119,6 +147,7 @@ async function main() {
   }
   if (
     missing.length ||
+    missingIndexes ||
     (!apply && obsolete.length) ||
     process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0'
   )
