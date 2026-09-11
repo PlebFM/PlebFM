@@ -116,6 +116,8 @@ export async function reconcileBilling(checkoutId: string) {
   const record = await BillingCheckouts.findOne({ checkoutId });
   if (!record) return;
   let checkout = await getCheckout(checkoutId);
+  if (checkout.sandbox)
+    throw new HttpError(409, 'Sandbox payments cannot activate a paid plan');
   if (checkout.status === 'CONFIRMED')
     checkout = await createMoneyDevKitClient().checkouts.mintInvoice({
       checkoutId,
@@ -126,8 +128,6 @@ export async function reconcileBilling(checkoutId: string) {
     checkout.totalAmount !== PLANS.find(p => p.id === record.planId)?.price
   )
     throw new HttpError(409, 'Checkout does not match the saved plan');
-  if (checkout.sandbox)
-    throw new HttpError(409, 'Sandbox payments cannot activate a paid plan');
   if (['PAYMENT_RECEIVED', 'COMPLETED'].includes(checkout.status)) {
     await syncMdkSubscriptions(record.hostId);
     if (!(await subscriptionForHost(record.hostId)))

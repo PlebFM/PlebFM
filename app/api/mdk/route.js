@@ -36,7 +36,16 @@ export async function POST(request) {
       { error: 'Checkout details are fixed' },
       { status: 403 },
     );
-  return sdkPost(request);
+  // Strip all routing fields and reconstruct the body with only the validated
+  // route name, so the SDK cannot be directed by a smuggled secondary field.
+  const { handler: _h, route: _r, target: _t, ...rest } = body;
+  const safeBody = { [route]: body[route] ?? true, ...rest };
+  const safeRequest = new Request(request.url, {
+    method: request.method,
+    headers: request.headers,
+    body: JSON.stringify(safeBody),
+  });
+  return sdkPost(safeRequest);
 }
 export async function GET(request) {
   // Only signed subscription renewal/cancellation and the SDK's own CSRF

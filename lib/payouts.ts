@@ -87,13 +87,20 @@ export async function processPayout(payout: any) {
     await session.withTransaction(async () => {
       const current = await Payouts.findById(payout._id).session(session);
       if (['paid', 'failed'].includes(current.state)) return;
-      if (result.data.status === 'FAILED')
+      if (result.data.status === 'SUCCESS') {
+        current.state = 'paid';
+      } else if (result.data.status === 'FAILED') {
         await Accounts.updateOne(
           { _id: current.hostId },
           { $inc: { balanceSats: current.amountSats, revision: 1 } },
           { session },
         );
-      current.state = result.data.status === 'SUCCESS' ? 'paid' : 'failed';
+        current.state = 'failed';
+      } else {
+        // Unknown terminal status — leave funds reserved and bail out so an
+        // operator can investigate rather than silently losing the balance.
+        return;
+      }
       current.completedAt = new Date();
       await current.save({ session });
     });
