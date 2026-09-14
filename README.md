@@ -1,6 +1,4 @@
-<!-- ![Builds](https://github.com/PlebFM/PlebFM/actions/workflows/build.yaml/badge.svg)  -->
-
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c8e78b64-9e0b-482a-96ee-2155db9c4bef/deploy-status)](https://app.netlify.com/sites/pleb-fm/deploys)
+[![Checks](https://github.com/PlebFM/PlebFM/actions/workflows/build.yaml/badge.svg)](https://github.com/PlebFM/PlebFM/actions/workflows/build.yaml)
 
 # Pleb.FM
 
@@ -54,4 +52,4 @@ After `pnpm build`, run `pnpm smoke:local` for a disposable local database and s
 
 See [the MDK cutover checklist](docs/payments-cutover.md) before merging or deploying payment changes. New subscriptions use customer-initiated Lightning renewals. Existing Stripe subscriptions remain supported during migration. All payment accounting requires MongoDB transactions and the indexes installed by the preflight schema step.
 
-The live `pleb.fm` site is hosted by Netlify; Vercel is a separate deployment target. `netlify.toml` and `netlify/functions/` configure the production build and scheduled reconciliation. CI packages both hosting paths. See [remediation status](docs/remediation-status.md) for completed setup and remaining account-access requirements.
+Vercel is the deployment target. `vercel.json` schedules payment reconciliation every minute. As verified on September 14, 2026, `pleb.fm` still points to the legacy Netlify deployment; completing the migration requires the domain cutover and retirement of old deployments. See [remediation status](docs/remediation-status.md) for completed setup and remaining account-access requirements.

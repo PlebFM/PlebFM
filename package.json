@@ -52,7 +52,6 @@
     "stripe": "^17.5.0"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^5.15.13",
     "@storybook/addon-essentials": "7.6.24",
     "@storybook/addon-interactions": "7.6.24",
     "@storybook/addon-links": "7.6.24",

@@ -127,9 +127,6 @@ importers:
         specifier: ^17.5.0
         version: 17.5.0
     devDependencies:
-      '@netlify/plugin-nextjs':
-        specifier: ^5.15.13
-        version: 5.15.13
       '@storybook/addon-essentials':
         specifier: 7.6.24
         version: 7.6.24(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -3013,13 +3010,6 @@ packages:
       {
         integrity: sha512-9JKTEik4vq+yGosHYhZ1tiH/3WpUS0Nh0kej4Agndhox8pAdWhEx5knFVRcb/ya9knCRCs1rPxNrSXTDdfVqpA==,
       }
-
-  '@netlify/plugin-nextjs@5.15.13':
-    resolution:
-      {
-        integrity: sha512-gBmWtgG13ZW4ytNMCvacfwZemtdtV/Ekc+6RBYvI5fndjmDvKxgFHylsw7oli+PHMGAtNqaJrN8QccGnDReu6A==,
-      }
-    engines: { node: '>=18.0.0' }
 
   '@next/env@15.5.24':
     resolution:
@@ -15397,8 +15387,6 @@ snapshots:
       gunzip-maybe: 1.4.2
       pump: 3.0.2
       tar-fs: 2.1.5
-
-  '@netlify/plugin-nextjs@5.15.13': {}
 
   '@next/env@15.5.24': {}
 
