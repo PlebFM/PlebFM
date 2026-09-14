@@ -1,13 +1,17 @@
+import { appOrigin } from './app-url';
 import { createHmac } from 'crypto';
 import { resolveTxt } from 'dns/promises';
 import Domains from '../models/CustomDomain';
 import { HttpError } from './http';
 export function validateDomain(domain: unknown): string {
+  const appDomain = new URL(appOrigin()).hostname;
   if (
     typeof domain !== 'string' ||
     domain.length > 253 ||
     !/^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}$/.test(domain) ||
     domain.endsWith('.vercel.app') ||
+    domain === appDomain ||
+    domain.endsWith(`.${appDomain}`) ||
     domain === 'pleb.fm' ||
     domain.endsWith('.pleb.fm')
   )

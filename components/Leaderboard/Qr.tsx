@@ -1,10 +1,11 @@
 import { QRCodeSVG } from 'qrcode.react';
+import { venueUrl } from '../../lib/app-url';
 export const QR = ({ shortName }: { shortName: string }) => {
   return (
     <div className="drop-shadow-2xl m-auto rounded-xl overflow-hidden">
       {shortName && (
         <QRCodeSVG
-          value={`https://pleb.fm/${shortName}`}
+          value={venueUrl(shortName)}
           bgColor={'#ffffff00'}
           fgColor={'#ffffff'}
           width={'240px'}

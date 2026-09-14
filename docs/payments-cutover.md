@@ -2,7 +2,7 @@
 
 This release replaces new bid and subscription payments with Money Dev Kit. It includes the work from PR #111 and supersedes that PR as the complete application change. The original [audit](audits/2026-09-11-app-status.md) describes main at `d72c0e9`; its findings are historical, not assertions about this branch.
 
-**Production target: Vercel only.** As verified on September 14, 2026, `https://pleb.fm` still resolves to and serves the legacy Netlify deployment. Prepare the linked Vercel project `pleb-fm`, attach the domain and use its verified DNS instructions for cutover. Disable Netlify auto-publishing before merging so the legacy site cannot deploy this branch. Retire the legacy deployment after cutover; do not provision the new payment integration on Netlify. A green preview check does not verify live provider setup.
+**Production target: Vercel only, at `https://plebfm.lwn.lol`.** The domain is attached to the linked `pleb-fm` project and serves HTTPS from Vercel. It currently aliases the older production deployment; the remediation branch still needs its release gates completed before production rollout. `pleb.fm` now redirects to the new domain. Disable legacy Netlify auto-publishing before merging and retire its old deployment. A green preview check does not verify live provider setup.
 
 ## Before deployment
 
@@ -18,7 +18,9 @@ This release replaces new bid and subscription payments with Money Dev Kit. It i
 
 ## Vercel domain cutover
 
-After hosted acceptance, attach `pleb.fm` and `www.pleb.fm` to the Vercel project and verify the requested DNS records and TLS certificates. Keep `NEXTAUTH_URL` and `NEXT_PUBLIC_BASE_URL` aligned with the canonical production URL and verify the Spotify OAuth callback and both MDK callback URLs. Pause legacy invoice creation and reconcile outstanding payments before directing traffic to Vercel. Verify both domain variants, sign-in, checkout callbacks and the scheduled reconciliation job after DNS propagation. Retire old Netlify and Vercel deployments that still expose vulnerable routes or recreate obsolete indexes, then apply and verify the final index migration. Preserve private configuration snapshots and legacy payment records needed for reconciliation.
+`plebfm.lwn.lol` is already attached to Vercel with working DNS and HTTPS. Set `NEXTAUTH_URL` and `NEXT_PUBLIC_BASE_URL` to `https://plebfm.lwn.lol` and register `https://plebfm.lwn.lol/api/auth/callback/spotify` in the Spotify app's redirect allowlist. Set the MDK app domain to the same origin and use `https://plebfm.lwn.lol/api/webhooks/mdk` for business events; its SDK node callback is `/api/mdk`. A replacement business webhook needs its own signing secret in `MDK_WEBHOOK_SECRET`; a redirect from the old endpoint is not a substitute. Keep legacy Stripe webhook delivery configured until its inventory is reconciled.
+
+After hosted acceptance, deploy the approved remediation revision so the new environment and browser bundle take effect. Verify sign-in, venue QR URLs, signed callbacks and the production cron on the new domain. Pause legacy invoice creation and reconcile outstanding payments. Retire old Netlify and Vercel deployments that still expose vulnerable routes or recreate obsolete indexes, then apply and verify the final index migration. Preserve private configuration snapshots and legacy payment records needed for reconciliation.
 
 ## Required live acceptance
 

@@ -1,3 +1,4 @@
+import { appOrigin } from '../../lib/app-url';
 import { getServerSidePropsForDashboard } from '../../lib/dashboard-props';
 import { useRouter } from 'next/router';
 import { Toaster } from 'react-hot-toast';
@@ -28,7 +29,7 @@ export default function HostSettings({ host, queueData }: DashboardPageProps) {
             <GeneralSettings
               hostName={host.hostName}
               shortName={host.shortName}
-              baseUrl={process.env.NEXT_PUBLIC_BASE_URL || ''}
+              baseUrl={appOrigin()}
             />
           </>
         );

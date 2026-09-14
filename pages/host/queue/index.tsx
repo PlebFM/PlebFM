@@ -1,4 +1,5 @@
 import React from 'react';
+import { venueUrl } from '../../../lib/app-url';
 import Image from 'next/image';
 import plebFMLogo from '../../../public/plebfm-logo.svg';
 import bokeh4 from '../../../public/pfm-bokeh-4.jpg';
@@ -17,6 +18,7 @@ import { FloatingControls } from '../../../components/Leaderboard/FloatingContro
 
 export default function Queue() {
   const { queueData, refresh, session, host } = useLeaderboard();
+  const guestUrl = venueUrl(host ?? '').replace(/^https?:\/\//, '');
   useWakeLock();
   const { isFullscreen, showControls, toggleFullscreen } =
     useFullscreenControls();
@@ -55,12 +57,10 @@ export default function Queue() {
                 />
                 <div className="flex flex-col justify-end items-end">
                   <p className="text-base m-auto w-full text-center my-0">
-                    Scan to Bid on songs! {/* at <u>pleb.fm/{host}</u> */}
+                    Scan to Bid on songs!
                   </p>
-                  <QR shortName={host ?? 'atl'} />
-                  <p className="text-base m-auto font-bold">
-                    pleb.fm/{host ?? ''}
-                  </p>
+                  <QR shortName={host ?? ''} />
+                  <p className="text-base m-auto font-bold">{guestUrl}</p>
                 </div>
               </div>
 
@@ -84,7 +84,7 @@ export default function Queue() {
               ))}
               {queueData.length === 0 && (
                 <p className="m-10">
-                  Queue is Empty! Place a bid on a song at <b>pleb.fm/{host}</b>
+                  Queue is Empty! Place a bid on a song at <b>{guestUrl}</b>
                 </p>
               )}
             </div>
