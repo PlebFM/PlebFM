@@ -1,3 +1,7 @@
+import {
+  programmaticPayout,
+  waitForPayoutResult,
+} from '@moneydevkit/core/server';
 import mongoose from 'mongoose';
 import Accounts from '../models/HostAccount';
 import Payouts from '../models/Payout';
@@ -57,9 +61,6 @@ export async function reservePayout(
 }
 export async function processPayout(payout: any) {
   if (['paid', 'failed'].includes(payout.state)) return payout;
-  const { programmaticPayout, waitForPayoutResult } = await import(
-    '@moneydevkit/core/server'
-  );
   if (!payout.paymentId) {
     const result = await programmaticPayout({
       amountSats: payout.amountSats,

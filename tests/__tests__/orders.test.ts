@@ -281,7 +281,7 @@ it('refunds a confirmed failed withdrawal exactly once', async () => {
   vi.mocked(waitForPayoutResult).mockResolvedValue({
     data: { status: 'FAILED' },
   } as any);
-  await Promise.all([processPayout(payout), processPayout(payout)]);
+  await Promise.all(Array.from({ length: 20 }, () => processPayout(payout)));
   expect((await Accounts.findById('venue')).balanceSats).toBe(100);
   expect((await Payouts.findOne()).state).toBe('failed');
 });
