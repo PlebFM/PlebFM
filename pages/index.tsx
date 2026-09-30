@@ -70,7 +70,9 @@ export const getServerSideProps: GetServerSideProps<IndexProps> = async () => {
 
     return {
       props: {
-        hosts: data.hosts,
+        hosts: data.hosts.filter(
+          (host: Host) => host.hostName === 'Atlanta BitDevs',
+        ),
       },
     };
   } catch (err) {
