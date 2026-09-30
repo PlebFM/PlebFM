@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:security": "node --test tests/host-security.test.cjs",
+    "test": "node --test tests/*.test.cjs",
     "prepare": "npx husky install",
     "format": "npx prettier --write .",
     "pretty-quick": "npx pretty-quick --staged",

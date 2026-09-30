@@ -8,8 +8,6 @@ const appKey = process.env.NEXT_PUBLIC_PUSHER_APP_KEY!;
 const cluster = process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER!;
 const channelId = process.env.NEXT_PUBLIC_PUSHER_CHANNEL!;
 
-const pusher = new Pusher(appKey, { cluster });
-
 export type Notification = {
   message: string;
   user: User;
@@ -20,6 +18,9 @@ export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
+    if (!appKey || !cluster || !channelId) return;
+
+    const pusher = new Pusher(appKey, { cluster });
     const channelName = `${channelId}-${jukeboxName}`;
     const channel = pusher.subscribe(channelName);
 
@@ -44,8 +45,9 @@ export const usePusher = (refreshQueue: () => void, jukeboxName = '') => {
     // });
 
     return () => {
-      pusher.unbind_all();
+      channel.unbind_all();
       pusher.unsubscribe(channelName);
+      pusher.disconnect();
     };
   }, [jukeboxName, refreshQueue]);
 
