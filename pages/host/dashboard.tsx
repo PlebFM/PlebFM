@@ -1,3 +1,4 @@
+import { getServerSidePropsForDashboard } from '../../lib/dashboard-props';
 import { useState } from 'react';
 import {
   MusicalNoteIcon,
@@ -6,7 +7,6 @@ import {
 
 import {
   DashboardLayout,
-  getServerSidePropsForDashboard,
   type DashboardPageProps,
 } from '../../components/Dashboard/HostDashboardLayout';
 import { StatsCard } from '../../components/Dashboard/StatsCard';
@@ -15,8 +15,12 @@ import { RecentActivity } from '../../components/Dashboard/RecentActivity';
 import type { Activity } from '../../components/Dashboard/RecentActivity';
 import type { SongObject } from '../../utils/songs';
 
-export default function HostDashboard({ host, queueData }: DashboardPageProps) {
-  const [earnings, setEarnings] = useState(0);
+export default function HostDashboard({
+  host,
+  queueData,
+  stats,
+}: DashboardPageProps) {
+  const [message, setMessage] = useState('');
 
   if (!host) return null;
 
@@ -55,20 +59,28 @@ export default function HostDashboard({ host, queueData }: DashboardPageProps) {
         />
         <StatsCard
           title="Total Earned"
-          value={`$${(earnings / 100).toFixed(2)}`}
-          trend="+15%"
+          value={`${stats.earnedSats.toLocaleString()} sats`}
+          trend={`${stats.balanceSats.toLocaleString()} sats available`}
           icon={<CurrencyDollarIcon className="h-6 w-6 text-green-400" />}
           iconBg="bg-green-400/10"
         />
       </div>
 
+      {message && (
+        <p role="status" className="text-white mb-4">
+          {message}
+        </p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <QuickActions
-          onSkip={() => {
-            if (host.shortName) {
-              fetch(`/api/skip?shortName=${host.shortName}`, {
-                method: 'POST',
-              });
+          onSkip={async () => {
+            try {
+              const res = await fetch('/api/skip', { method: 'POST' });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error);
+              setMessage('Skipped the current song.');
+            } catch (e) {
+              setMessage((e as Error).message);
             }
           }}
           onManageQueue={() => window.open('/host/queue', '_blank')}

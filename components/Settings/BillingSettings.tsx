@@ -1,139 +1,110 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { toast } from 'react-hot-toast';
-import { CreditCardIcon } from '@heroicons/react/24/outline';
-import Image from 'next/image';
-import BitcoinLogo from '../../public/bitcoin-logo.svg';
-import { PLANS, type Plan } from '../../models/Subscription';
-import { CurrentPlanCard } from '../Billing/CurrentPlanCard';
-import { PaymentMethodCard } from '../Billing/PaymentMethodCard';
-import { BillingHistoryItem } from '../Billing/BillingHistoryItem';
-
-interface BillingHistory {
-  id: string;
-  date: string;
-  amount: number;
-  status: 'paid' | 'pending' | 'failed';
-  description: string;
-}
-
-interface BillingSettingsProps {
-  hostId: string;
-}
-
-export function BillingSettings({ hostId }: BillingSettingsProps) {
+export function BillingSettings({ hostId }: { hostId: string }) {
+  const [data, setData] = useState<any>(null),
+    [error, setError] = useState(''),
+    [busy, setBusy] = useState(false);
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentPlan] = useState<Plan>(PLANS[1]); // Pro plan
-  const [nextBillingDate] = useState('December 1, 2023');
-  const [billingHistory] = useState<BillingHistory[]>([
-    {
-      id: '1',
-      date: 'Nov 1, 2023',
-      amount: 2900,
-      status: 'paid',
-      description: 'Pro Plan - Monthly',
-    },
-    {
-      id: '2',
-      date: 'Oct 1, 2023',
-      amount: 2900,
-      status: 'paid',
-      description: 'Pro Plan - Monthly',
-    },
-  ]);
-
-  useEffect(() => {
-    if (router.query.success) {
-      toast.success('Successfully subscribed!');
-    } else if (router.query.canceled) {
-      toast.error('Subscription canceled.');
-    }
-  }, [router.query]);
-
-  const handleSubscribe = async (
-    planId: string,
-    paymentMethod: 'stripe' | 'bitcoin',
-  ) => {
+  const load = useCallback(async (method = 'GET') => {
+    setBusy(true);
+    setError('');
     try {
-      setIsLoading(true);
-      const res = await fetch('/api/billing/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, paymentMethod }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error);
-
-      if (paymentMethod === 'stripe') {
-        window.location.href = data.url;
-      } else {
-        toast.error('Bitcoin payments coming soon!');
-      }
-    } catch (error) {
-      toast.error('Failed to start subscription process');
-      console.error('Subscription error:', error);
+      const res = await fetch('/api/subscriptions/current', { method });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error);
+      setData(body);
+    } catch (e) {
+      setError((e as Error).message);
     } finally {
-      setIsLoading(false);
+      setBusy(false);
     }
-  };
-
+  }, []);
+  useEffect(() => {
+    void load(router.query.refresh ? 'POST' : 'GET');
+  }, [load, router.query.refresh]);
   return (
-    <div>
-      <div className="space-y-6">
-        <CurrentPlanCard
-          plan={currentPlan}
-          nextBillingDate={nextBillingDate}
-          onUpgrade={() => handleSubscribe('enterprise', 'stripe')}
-          isLoading={isLoading}
-        />
-
-        <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Payment Methods
-          </h3>
-          <div className="space-y-4">
-            <PaymentMethodCard
-              icon={<CreditCardIcon className="h-6 w-6 text-white/60" />}
-              title="Credit Card"
-              subtitle="Powered by Stripe"
-              buttonText="Update"
-              onClick={() => handleSubscribe(currentPlan.id, 'stripe')}
-              disabled={isLoading}
-            />
-            <PaymentMethodCard
-              icon={
-                <Image src={BitcoinLogo} alt="Bitcoin" className="h-6 w-6" />
-              }
-              title="Bitcoin"
-              subtitle="Coming soon"
-              buttonText="Set up"
-              onClick={() => handleSubscribe(currentPlan.id, 'bitcoin')}
-              disabled={isLoading}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Billing History
-          </h3>
-          <div className="space-y-4">
-            {billingHistory.map(item => (
-              <BillingHistoryItem
-                key={item.id}
-                description={item.description}
-                date={item.date}
-                amount={item.amount}
-                status={item.status}
-                onDownload={() => console.log('Download invoice', item.id)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+    <div className="text-white space-y-6">
+      {error && (
+        <p role="alert" className="text-red-300">
+          {error}
+        </p>
+      )}
+      {!data ? (
+        <p>Loading billing…</p>
+      ) : (
+        <>
+          <section className="p-6 bg-white/5 rounded-lg space-y-3">
+            <h3 className="text-xl">{data.plan.name} plan</h3>
+            <p>
+              {data.subscription
+                ? `Access through ${new Date(
+                    data.subscription.currentPeriodEnd,
+                  ).toLocaleDateString()}`
+                : 'No paid subscription'}
+            </p>
+            {data.subscription?.cancelAtPeriodEnd && (
+              <p>
+                Cancellation scheduled. Access continues until the date above.
+              </p>
+            )}
+            <p className="text-white/60">
+              Lightning plans renew when you pay the renewal invoice. Email
+              reminders arrive before the period ends; there are no automatic
+              card charges.
+            </p>
+            <Link className="underline mr-6" href="/host/plans">
+              View plans
+            </Link>
+            <button
+              disabled={busy}
+              onClick={() => load('POST')}
+              className="underline mr-6"
+            >
+              Refresh payment status
+            </button>
+            {data.subscription && !data.subscription.cancelAtPeriodEnd && (
+              <button
+                disabled={busy}
+                onClick={() => load('DELETE')}
+                className="underline"
+              >
+                Cancel renewal
+              </button>
+            )}
+          </section>
+          <section className="p-6 bg-white/5 rounded-lg">
+            <h3 className="text-xl mb-4">Payment history</h3>
+            {data.history.length === 0 ? (
+              <p>No payments recorded yet.</p>
+            ) : (
+              data.history.map((item: any) => (
+                <div
+                  key={item.receiptId}
+                  className="flex gap-4 justify-between border-b border-white/10 py-3"
+                >
+                  <span>
+                    {item.planId} · {new Date(item.paidAt).toLocaleDateString()}
+                  </span>
+                  <span>
+                    {item.currency === 'USD'
+                      ? `$${(item.amount / 100).toFixed(2)}`
+                      : `${item.amount} sats`}
+                  </span>
+                  <a
+                    className="underline"
+                    href={`/api/billing/receipt?id=${encodeURIComponent(
+                      item.receiptId,
+                    )}`}
+                  >
+                    Download receipt
+                  </a>
+                </div>
+              ))
+            )}
+          </section>
+        </>
+      )}
     </div>
   );
 }

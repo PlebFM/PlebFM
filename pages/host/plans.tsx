@@ -1,29 +1,35 @@
+import { getServerSidePropsForDashboard } from '../../lib/dashboard-props';
 import { useState } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import {
   DashboardLayout,
-  getServerSidePropsForDashboard,
   type DashboardPageProps,
 } from '../../components/Dashboard/HostDashboardLayout';
 import { PLANS } from '../../models/Subscription';
 
 export default function HostPlans({ host, currentPlan }: DashboardPageProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSelectPlan = async (planId: string) => {
     try {
       setIsLoading(true);
+      setError('');
+      const key = `plebfm-plan:${planId}`;
+      const requestId = sessionStorage.getItem(key) || crypto.randomUUID();
+      sessionStorage.setItem(key, requestId);
       const res = await fetch('/api/billing/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, paymentMethod: 'stripe' }),
+        body: JSON.stringify({ planId, requestId }),
       });
 
       const data = await res.json();
+      if (data.resetCheckout) sessionStorage.removeItem(key);
       if (!res.ok) throw new Error(data.error);
       window.location.href = data.url;
     } catch (error) {
-      console.error('Error selecting plan:', error);
+      setError((error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -39,6 +45,15 @@ export default function HostPlans({ host, currentPlan }: DashboardPageProps) {
       margin="large"
       hideHeader={true}
     >
+      {error && (
+        <p role="alert" className="text-red-300 mb-4">
+          {error}
+        </p>
+      )}
+      <p className="text-white/60 mb-6">
+        Pay with Lightning. Renewals are paid manually through email reminders.
+        Free includes 20 song checkouts per month.
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {PLANS.map(plan => {
           const isCurrentPlan = currentPlan?.id === plan.id;

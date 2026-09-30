@@ -1,3 +1,4 @@
+import { sendError, HttpError, methodNotAllowed } from '../../lib/http';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Users, {
   Adjectives,
@@ -8,6 +9,8 @@ import Users, {
 } from '../../models/User';
 import { createId } from '@paralleldrive/cuid2';
 import connectDB from '../../middleware/mongodb';
+import { guestId, setGuest } from '../../lib/guest';
+import { assertSameOrigin } from '../../lib/auth';
 
 const getColorFromAdjective = (firstNym: any) => {
   const indexOfFirstNym = Object.keys(Adjectives).indexOf(firstNym);
@@ -34,19 +37,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
       // POST /api/user
+      assertSameOrigin(req);
+      const currentId = guestId(req);
+      const current = currentId
+        ? await Users.findOne({ userId: currentId })
+        : null;
+      if (current)
+        return res.status(200).json({ success: true, user: current });
       const user: User = { ...generateUser() };
       const result = await Users.create(user);
+      setGuest(res, user.userId);
       res.status(200).json({ success: true, user: result });
     } else if (req.method === 'GET') {
       // GET /api/user?userId=...
       const { userId } = req.query;
-      if (!userId) throw new Error('userId is required');
+      if (typeof userId !== 'string')
+        throw new HttpError(400, 'userId is required');
       const result = await Users.find({ userId: userId });
       res.status(200).json({ success: true, user: result });
-    }
+    } else return methodNotAllowed(res, ['GET', 'POST']);
   } catch (error: any) {
-    console.error(error.message);
-    res.status(500).json(error.message);
+    return sendError(res, error);
   }
 };
 

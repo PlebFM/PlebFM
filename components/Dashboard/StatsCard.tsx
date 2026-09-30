@@ -33,9 +33,7 @@ export function StatsCard({
         <div className={`${iconBg} p-3 rounded-xl`}>{icon}</div>
       </div>
       <div className="mt-4 flex items-center text-sm">
-        <ArrowTrendingUpIcon className="h-4 w-4 text-green-400 mr-1" />
         <span className="text-green-400">{trend}</span>
-        <span className="text-white/40 ml-1.5">vs last week</span>
       </div>
     </motion.div>
   );

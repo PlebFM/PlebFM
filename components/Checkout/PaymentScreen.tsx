@@ -2,7 +2,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { CartIcon, CopyIcon } from '@bitcoin-design/bitcoin-icons-react/filled';
 import bokeh2 from '../../public/pfm-bokeh-2.jpg';
-import { MusicalNoteIcon, QueueListIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowPathIcon,
+  ExclamationTriangleIcon,
+  MusicalNoteIcon,
+  QueueListIcon,
+} from '@heroicons/react/24/outline';
 import Button from '../Utils/Button';
 import NavBar from '../Utils/NavBar';
 import { Song } from '../../models/Song';
@@ -28,7 +33,15 @@ function PaymentScreen({
 }: Props) {
   const pathname = usePathname();
 
-  const { loading, bolt11 } = usePayment(song, totalBid, onPaid);
+  const { loading, bolt11, paymentFailure, retry } = usePayment(
+    song,
+    totalBid,
+    onPaid,
+  );
+
+  // A dead invoice used to leave the QR on screen while the poller asked about
+  // it forever. Show what happened and offer a fresh one instead.
+  const showInvoice = readyToCheckout && !invoicePaid && !paymentFailure;
 
   return (
     <>
@@ -55,7 +68,14 @@ function PaymentScreen({
               className="bg-white/10 w-[290px] h-[290px] p-[32px] rounded-full flex flex-col space-y-4 justify-center text-center p-8 touch-none relative"
               id="slider"
             >
-              {readyToCheckout && !invoicePaid ? (
+              {paymentFailure && !invoicePaid ? (
+                <>
+                  <ExclamationTriangleIcon className="w-24 h-24 mx-auto" />
+                  <p className="text-lg text-center">
+                    {paymentFailure.message}
+                  </p>
+                </>
+              ) : showInvoice ? (
                 <>
                   <CartIcon className="w-24 h-24 mx-auto" />
                   <p className="text-lg text-center">
@@ -73,7 +93,16 @@ function PaymentScreen({
               )}
             </div>
 
-            {readyToCheckout && !invoicePaid ? (
+            {paymentFailure && !invoicePaid ? (
+              <Button
+                className="w-full"
+                icon={<ArrowPathIcon />}
+                onClick={retry}
+                size="small"
+              >
+                Try Again
+              </Button>
+            ) : showInvoice ? (
               <div className="flex flex-col m-auto justify-items-center items-center gap-4">
                 {loading ? (
                   <div className="w-full h-full flex justify-center items-center">

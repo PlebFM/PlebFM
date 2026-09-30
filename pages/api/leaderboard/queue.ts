@@ -1,285 +1,129 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { randomUUID } from 'crypto';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import connectDB from '../../../middleware/mongodb';
-import Hosts, { Host } from '../../../models/Host';
-import Plays, { Play } from '../../../models/Play';
-import withJukebox from '../../../middleware/withJukebox';
+import Hosts from '../../../models/Host';
+import Plays from '../../../models/Play';
+import Accounts from '../../../models/HostAccount';
+import { requireHostSession } from '../../../lib/auth';
+import { getQueue } from '../../../lib/queue';
 import {
-  addTrackToSpotifyQueue,
-  clearSpotifyQueue,
   getSpotifyQueue,
   getSpotifyRecentlyPlayed,
+  addTrackToSpotifyQueue,
   startSpotifyQueue,
 } from '../../../lib/spotify';
-
-const getQueue = async (
-  shortName: string,
-  _limit?: string,
-  userId?: string,
-  includeNext: boolean = true,
-  includePlaying: boolean = false,
-): Promise<Play[]> => {
-  // const { shortName, _limit, userId } = req.query;
-  const limit = parseInt((_limit as string) ?? '10');
-  if (!shortName) throw new Error('getQueue - Expected query param shortName!');
-  // Lookup host by shortname
-  const host: Host = await Hosts.findOne({
-    shortName: shortName,
-  }).catch(e => {
-    console.error('hostError', e);
-    throw new Error(e);
-  });
-
-  // If not host exists, return error
-
-  if (!host) throw new Error('getQueue - No host found for shortName!');
-  // Query Plays: Get play objs where hostId = host.hostId & status = queued
-  // sort by highest runningTotal and oldest queueTimestamp if ties occur
-  const statusFilters = ['queued'];
-  if (includeNext) statusFilters.push('next');
-  if (includePlaying) statusFilters.push('playing');
-  const filter = userId
-    ? { hostId: host.hostId, 'bids.user.userId': userId }
-    : { hostId: host.hostId, status: statusFilters };
-  let sortedPlays: Array<Play> = await Plays.find(
-    filter,
-    {},
-    { options: { limit: limit } },
-  )
-    // .sort({ runningTotal: -1, queueTimestamp: 1 })
-    .catch(e => {
-      console.error('find queue error', e);
-      throw new Error(e);
+import { HttpError, methodNotAllowed } from '../../../lib/http';
+export default connectDB(async (req: NextApiRequest, res: NextApiResponse) => {
+  const shortName =
+    req.method === 'GET' ? req.query.shortName : req.body?.shortName;
+  if (typeof shortName !== 'string')
+    throw new HttpError(400, 'Jukebox URL is required');
+  const host = await Hosts.findOne({ shortName, deletedAt: null });
+  if (!host) throw new HttpError(404, 'Jukebox not found');
+  if (req.method === 'GET') {
+    const data = await getQueue(host.hostId, {
+      userId:
+        typeof req.query.userId === 'string' ? req.query.userId : undefined,
+      includePlaying: req.query.playing === 'true',
+      includeNext: req.query.next !== 'false',
+      limit: Math.min(100, Math.max(1, Number(req.query._limit) || 100)),
     });
-
-  // Plays.find returns a list of results. If no results found, list will be empty []
-  if (sortedPlays.length === 0) return [];
-
-  sortedPlays.sort((a, b) => {
-    if (a.status === 'playing') return -1;
-    if (b.status === 'playing') return 1;
-    if (a.status === 'next') return -1;
-    if (b.status === 'next') return 1;
-    return b.runningTotal - a.runningTotal;
-  });
-  return sortedPlays;
-};
-
-const updateQueuedSongs = async (nextPlay: Play) => {
-  const song = await Plays.findOneAndUpdate(
-    { playId: nextPlay.playId },
-    { status: 'next' },
-    { new: true },
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json({ success: true, data });
+  }
+  if (!['POST', 'PUT', 'DELETE'].includes(req.method ?? ''))
+    return methodNotAllowed(res, ['GET', 'POST', 'PUT', 'DELETE']);
+  const session = await requireHostSession(req, res);
+  if (!session) return;
+  if (session.user.id !== host.hostId)
+    throw new HttpError(403, 'This jukebox belongs to another host');
+  const token = session.accessToken!;
+  const deviceId =
+    typeof req.body.deviceId === 'string' ? req.body.deviceId : '';
+  if (req.method === 'DELETE') {
+    await Plays.updateMany(
+      { hostId: host.hostId, status: { $in: ['queued', 'next'] } },
+      { $set: { status: 'removed' } },
+    );
+    return res.json({ success: true });
+  }
+  if (req.method === 'PUT') {
+    const playing = await Plays.findOne({
+      hostId: host.hostId,
+      status: 'playing',
+    });
+    const current = await getSpotifyQueue(token);
+    const uri = playing
+      ? `spotify:track:${playing.songId}`
+      : 'spotify:track:0vFOzaXqZHahrZp6enQwQb';
+    if (!playing || current?.currently_playing?.id !== playing.songId)
+      await startSpotifyQueue(uri, deviceId, token);
+    return res.json({ success: true });
+  }
+  await Accounts.updateOne(
+    { _id: host.hostId },
+    { $setOnInsert: { balanceSats: 0 } },
+    { upsert: true },
   );
-  return song;
-};
-
-// update status of top song to "up next"
-// get spotify queue
-// add top song to spotify queue
-//
-// 1. if last played on spotify is "playing" in jukebox...
-//   change "playing" to "played"
-//
-// 2. if currently playing "next" in jukebox...
-//   change "next" to "playing"
-//
-// 3. if nothing is "next" in jukebox...
-//   change top to "next"
-//
-// 4. if spotify next is not "next"
-//   add "next" to spotify queue (what if queue isn't empty???? maybe check length?)
-const syncJukebox = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { shortName, accessToken, deviceId } = req.body;
-  let updated = false;
-  const host = await Hosts.findOne({ shortName: shortName });
-  const _spotifyQueue = await getSpotifyQueue(accessToken);
-  if (_spotifyQueue.error) {
-    throw new Error(
-      `Get Spotify Queue Failed! error: ${JSON.stringify(_spotifyQueue.error)}`,
-    );
-  }
-  const spotifyQueue = _spotifyQueue?.queue;
-  const spotifyQueueIds = new Set(
-    spotifyQueue?.map((track: { id: string }) => track?.id),
+  const leaseId = randomUUID();
+  const lease = await Accounts.findOneAndUpdate(
+    {
+      _id: host.hostId,
+      $or: [
+        { queueLeaseUntil: { $lt: new Date() } },
+        { queueLeaseUntil: { $exists: false } },
+      ],
+    },
+    {
+      $set: {
+        queueLeaseUntil: new Date(Date.now() + 30000),
+        queueLeaseId: leaseId,
+      },
+    },
   );
-  const spotifyCurrent = _spotifyQueue?.currently_playing;
-  const jukeboxQueue = await getQueue(
-    shortName,
-    undefined,
-    undefined,
-    false,
-    false,
-  );
-  const jukeboxTop = jukeboxQueue?.[0];
-  const jukeboxCurrent = await Plays.findOne({
-    status: 'playing',
-    hostId: host.hostId,
-  }).catch(e => {
-    console.error('find song error', e);
-    throw new Error(e);
-  });
-  let jukeboxNext = await Plays.findOne({
-    status: 'next',
-    hostId: host.hostId,
-  }).catch(e => {
-    console.error('find song error', e);
-    throw new Error(e);
-  });
-  const spotifyRecent = await getSpotifyRecentlyPlayed(accessToken, 1);
-  const spotifyLastPlayed = spotifyRecent?.items?.[0];
-  const jukeboxPlayingStatus = await Plays.find({
-    hostId: host.hostId,
-    status: 'playing',
-  });
-
-  // 1. if last played on spotify is "playing" in jukebox... (if "playing" and not in spotify, change to "played")
-  //   change "playing" to "played"
-  const spotifyLastPlayedInJuke = await Plays.findOne({
-    hostId: host.hostId,
-    songId: spotifyLastPlayed?.id,
-    status: 'playing',
-  });
-  // should we NOT clear if we're currently playing it too?
-  if (spotifyLastPlayedInJuke && spotifyCurrent?.id !== spotifyLastPlayed?.id) {
-    // if (spotifyLastPlayed?.track?.id === jukeboxCurrent.songId) {
-    console.log(`updating ${spotifyLastPlayedInJuke?.songName} to played`);
-    await Plays.findOneAndUpdate(
-      { playId: spotifyLastPlayedInJuke.playId },
-      { status: 'played' },
-      { new: true },
-    );
-    return { success: true, updated: true };
-  }
-
-  // 1.5 (if "playing" and not in spotify, change to "played")
-  else if (jukeboxPlayingStatus.length > 1) {
-    for (const play of jukeboxPlayingStatus) {
-      if (play.songId === spotifyCurrent?.id) continue;
-      console.log(`updating ${play?.songName} to played`);
-      await Plays.findOneAndUpdate(
-        { playId: play.playId },
-        { status: 'played' },
-        { new: true },
-      );
-    }
-    return { success: true, updated: true };
-  }
-
-  // 2. if currently playing "next" in jukebox...
-  //   change "next" to "playing"
-  else if (spotifyCurrent && spotifyCurrent?.id === jukeboxNext?.songId) {
-    console.log(`updating ${jukeboxNext.songName} to playing`);
-    await Plays.findOneAndUpdate(
-      { playId: jukeboxNext.playId },
-      { status: 'playing' },
-    );
-    return { success: true, updated: true };
-  }
-  // 3. if nothing is "next" in jukebox...
-  //   change top to "next"
-  else if (!jukeboxNext && jukeboxTop) {
-    jukeboxNext = await Plays.findOneAndUpdate(
-      { playId: jukeboxTop.playId },
-      { status: 'next' },
-      { new: true },
-    );
-    return { success: true, updated: true };
-  }
-
-  // 4. if spotify next is not "next"
-  //   add "next" to spotify queue (what if queue isn't empty???? maybe check length?)
-  else if (jukeboxNext && !spotifyQueueIds.has(jukeboxNext.songId)) {
-    // if (spotifyQueue?.length >= 20) {
-    //   console.log('queue full.. not adding', jukeboxNext?.songName);
-    //   return { success: true, updated: false };
-    // }
-    const addResult = await addTrackToSpotifyQueue(
-      `spotify:track:${jukeboxNext.songId}`,
-      deviceId,
-      accessToken,
-    );
-    console.log('added song', jukeboxNext?.songName, addResult.statusText);
-    console.log('queue length', spotifyQueue?.length);
-    return { success: true, updated: true };
-  }
-  const playingSongs = await Plays.find({
-    hostId: host.hostId,
-    status: 'playing',
-  });
-
-  return { success: true, updated: false };
-};
-
-const startQueue = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { accessToken, deviceId, shortName } = req.body;
-  // get the "up next" song
-  const host: Host = await Hosts.findOne({ shortName: shortName }).catch(e => {
-    console.error(e);
-    throw new Error(e);
-  });
-  const playingSong = await Plays.findOne(
-    { hostId: host.hostId, status: 'playing' },
-    {},
-    { new: true },
-  );
-  // If nothing's playing, play money
-  const MONEY = 'spotify:track:0vFOzaXqZHahrZp6enQwQb';
-  const playingTrack = playingSong
-    ? `spotify:track:${playingSong?.songId}`
-    : MONEY;
-  // PLAY PLAYING SONG
-  console.log('playingTrack', playingTrack);
-  const spotifyQueue = await getSpotifyQueue(accessToken);
-  const spotifyPlaying = spotifyQueue?.currently_playing;
-  if (spotifyPlaying?.id !== playingSong.songId) {
-    // do nothing if it's the same
-    console.log('starting', playingSong?.songName);
-    const result = await startSpotifyQueue(playingTrack, deviceId, accessToken);
-  } else {
-    console.log('already playing', playingSong?.songName);
-  }
-};
-
-const deleteQueue = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { accessToken, deviceId } = req.body;
-  const result = await clearSpotifyQueue(deviceId, accessToken);
-  return result;
-};
-
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (!lease) return res.json({ success: true, data: { updated: false } });
   try {
-    if (req.method === 'GET') {
-      const {
-        shortName,
-        _limit,
-        userId,
-        next = true,
-        playing = false,
-      } = req.query;
-      const sortedPlays = await getQueue(
-        shortName as string,
-        _limit as string,
-        userId as string,
-        next as boolean,
-        playing as boolean,
-      );
-      return res.status(200).json({ success: true, data: sortedPlays });
-    } else if (req.method === 'POST') {
-      // will poll during playback
-      const result = await syncJukebox(req, res);
-      return res.status(200).json({ success: true, data: result });
-    } else if (req.method === 'PUT') {
-      // hits on page load to start queue
-      const result = await startQueue(req, res);
-      return res.status(200).json({ success: true, data: result });
-    } else if (req.method === 'DELETE') {
-      const result = await deleteQueue(req, res);
-      return res.status(200).json({ success: true, data: result });
+    const spotify = await getSpotifyQueue(token);
+    const recent = await getSpotifyRecentlyPlayed(token, 20);
+    const currentId = spotify?.currently_playing?.id;
+    const recentIds = new Set(
+      recent?.items?.map((item: any) => item.track?.id),
+    );
+    for (const play of await Plays.find({
+      hostId: host.hostId,
+      status: 'playing',
+    })) {
+      if (play.songId !== currentId && recentIds.has(play.songId))
+        await Plays.updateOne(
+          { playId: play.playId },
+          {
+            $set: { status: 'played', playedTimestamp: Date.now().toString() },
+          },
+        );
     }
-  } catch (error: any) {
-    console.error(error.stack);
-    return res.status(500).json({ success: false, message: error.message });
+    if (currentId)
+      await Plays.updateOne(
+        { hostId: host.hostId, songId: currentId, status: 'next' },
+        { $set: { status: 'playing', playedTimestamp: Date.now().toString() } },
+      );
+    let next = await Plays.findOne({ hostId: host.hostId, status: 'next' });
+    if (!next)
+      next = await Plays.findOneAndUpdate(
+        { hostId: host.hostId, status: 'queued' },
+        { $set: { status: 'next' } },
+        { sort: { runningTotal: -1, queueTimestamp: 1 }, new: true },
+      );
+    if (next && !spotify?.queue?.some((track: any) => track.id === next.songId))
+      await addTrackToSpotifyQueue(
+        `spotify:track:${next.songId}`,
+        deviceId,
+        token,
+      );
+    return res.json({ success: true, data: { updated: true } });
+  } finally {
+    await Accounts.updateOne(
+      { _id: host.hostId, queueLeaseId: leaseId },
+      { $unset: { queueLeaseUntil: 1, queueLeaseId: 1 } },
+    );
   }
-};
-
-export default connectDB(withJukebox(handler));
+});

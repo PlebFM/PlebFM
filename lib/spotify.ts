@@ -1,234 +1,128 @@
-import querystring from 'querystring';
-
-export const getAccessToken = async (refreshToken: string) => {
-  const client_id = process.env.SPOTIFY_CLIENT_ID;
-  const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-  const basic = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
-  const TOKEN_ENDPOINT = `https://accounts.spotify.com/api/token`;
-  const response = await fetch(TOKEN_ENDPOINT, {
+import { HttpError } from './http';
+let catalog: { access_token: string; expires: number } | undefined;
+export async function getAccessToken(refreshToken?: string) {
+  if (!refreshToken && catalog && catalog.expires > Date.now()) return catalog;
+  const response = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: {
-      Authorization: `Basic ${basic}`,
+      Authorization: `Basic ${Buffer.from(
+        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
+      ).toString('base64')}`,
       'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: '*/*',
     },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      refresh_token: refreshToken,
-    }),
+    body: new URLSearchParams(
+      refreshToken
+        ? { grant_type: 'refresh_token', refresh_token: refreshToken }
+        : { grant_type: 'client_credentials' },
+    ),
+    signal: AbortSignal.timeout(8000),
   });
-  if (!response.ok) console.error('get access token failed');
-
-  return await response.json();
-};
-
-export const searchTrack = async (
-  queryText: string,
-  accessToken: string,
-  limit?: string,
-) => {
-  const queries = querystring.stringify({
-    q: queryText,
-    type: 'track',
-    limit: limit,
-  });
-  const searchUrl = `https://api.spotify.com/v1/search?${queries}`;
-  // const basic = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
-  const res = await fetch(searchUrl, {
-    method: 'GET',
+  if (!response.ok)
+    throw new HttpError(
+      503,
+      'Spotify connection needs attention. Please reconnect.',
+    );
+  const data = await response.json();
+  if (!data.access_token)
+    throw new HttpError(503, 'Spotify returned no access token');
+  if (!refreshToken)
+    catalog = {
+      access_token: data.access_token,
+      expires: Date.now() + Math.max(0, data.expires_in - 60) * 1000,
+    };
+  return data;
+}
+async function spotify(
+  path: string,
+  token: string,
+  method = 'GET',
+  body?: unknown,
+) {
+  if (!token) throw new HttpError(401, 'Reconnect Spotify to control playback');
+  const response = await fetch(`https://api.spotify.com/v1/${path}`, {
+    method,
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
-      Accept: '*/*',
     },
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    signal: AbortSignal.timeout(8000),
   });
-  const result = await res.json();
-  return result.tracks;
-};
-const getCurrentTrack = async (accessToken: string) => {
-  const url = `https://api.spotify.com/v1/me/player/currently-playing`;
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-  });
-  if (res.status === 204) return null;
-  const result = await res.json();
-  return result;
-};
-
-export const getPlaybackState = async (accessToken: string) => {
-  // try {
-  const url = `https://api.spotify.com/v1/me/player`;
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-  });
-  if (res.status === 204) {
-    const trackRes = await getCurrentTrack(accessToken);
+  if (!response.ok)
+    throw new HttpError(
+      response.status === 401 ? 401 : 502,
+      response.status === 401
+        ? 'Reconnect Spotify to continue'
+        : `Spotify request failed (${response.status})`,
+    );
+  if (response.status === 204 || response.headers.get('content-length') === '0')
     return null;
-  }
-  const result = await res.json();
-  return result;
-  const response = {
-    deviceName: result.device.name,
-    deviceId: result.device.id,
-    repeatState: result.repeat_state,
-    shuffleState: result.shuffle_state,
-    trackUri: result.item.id,
-    progressMs: result.progress_ms,
-    durationMs: result.item.duration_ms,
-  };
-  return response;
-};
-
-export const getTrack = async (trackId: string, accessToken: string) => {
-  const searchUrl = `https://api.spotify.com/v1/tracks/${trackId}`;
-  const res = await fetch(searchUrl, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
+  return response.json();
+}
+export const searchTrack = async (query: string, token: string, limit = '10') =>
+  (
+    await spotify(
+      `search?${new URLSearchParams({
+        q: query,
+        type: 'track',
+        limit: String(Math.min(50, Math.max(1, Number(limit) || 10))),
+      })}`,
+      token,
+    )
+  ).tracks;
+export const getTrack = (id: string, token: string) =>
+  spotify(`tracks/${encodeURIComponent(id)}`, token);
+export const getPlaybackState = (token: string) => spotify('me/player', token);
+export const getSpotifyQueue = (token: string) =>
+  spotify('me/player/queue', token);
+export const getSpotifyRecentlyPlayed = (token: string, limit = 10) =>
+  spotify(
+    `me/player/recently-played?limit=${Math.min(50, Math.max(1, limit))}`,
+    token,
+  );
+export const transferPlayback = async (deviceId: string, token: string) => {
+  await spotify('me/player', token, 'PUT', {
+    device_ids: [deviceId],
+    play: true,
   });
-  const result = await res.json();
-  return result;
+  return { success: true };
 };
-
-export const transferPlayback = async (
-  deviceId: string,
-  accessToken: string,
-) => {
-  const searchUrl = `https://api.spotify.com/v1/me/player`;
-  const body = JSON.stringify({ device_ids: [deviceId], play: true });
-  const res = await fetch(searchUrl, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-    body: body,
-  });
-  if (res.status === 202) return { success: true };
-  else return { success: false };
-};
-
-// Resets spotify queue by playing a song
 export const startSpotifyQueue = async (
   trackUri: string,
   deviceId: string,
-  accessToken: string,
+  token: string,
 ) => {
-  const url = `https://api.spotify.com/v1/me/player/play`;
-  const body = JSON.stringify({ uris: [trackUri], device_id: deviceId });
-  const result = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-    body,
-  });
-  return result;
+  await spotify(
+    `me/player/play?${new URLSearchParams({ device_id: deviceId })}`,
+    token,
+    'PUT',
+    { uris: [trackUri] },
+  );
+  return { success: true };
 };
-
-const skipSong = async (deviceId: string, accessToken: string) => {
-  const url = `https://api.spotify.com/v1/me/player/next`;
-  const body = JSON.stringify({ device_id: deviceId });
-  const result = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-    body: body,
-  });
-  return result;
+export const skipSong = async (token: string, deviceId?: string) => {
+  await spotify(
+    `me/player/next${
+      deviceId ? '?' + new URLSearchParams({ device_id: deviceId }) : ''
+    }`,
+    token,
+    'POST',
+  );
+  return { success: true };
 };
-export const clearSpotifyQueue = async (
-  deviceId: string,
-  accessToken: string,
-  // _spotifyQueue?: { queue: any[]; error: any; currently_playing: any },
-) => {
-  const _spotifyQueue = await getSpotifyQueue(accessToken);
-  const spotifyQueue = _spotifyQueue?.queue;
-  console.log('oldqueue', spotifyQueue);
-  const current = _spotifyQueue?.currently_playing;
-  console.log('current', current.name);
-  if (!spotifyQueue)
-    throw new Error(
-      `No spotify queue found! ${JSON.stringify(_spotifyQueue?.error)}`,
-    );
-  const trackUri = `spotify:track:${_spotifyQueue?.currently_playing?.id}`;
-  // await addTrackToSpotifyQueue(trackUri, deviceId, accessToken);
-  // const newSpotifyQueue = await getSpotifyQueue(accessToken);
-  // console.log('new queue', newSpotifyQueue.queue)
-};
-
 export const addTrackToSpotifyQueue = async (
   trackUri: string,
   deviceId: string,
-  accessToken: string,
+  token: string,
 ) => {
-  const queries = querystring.stringify({
-    uri: trackUri,
-    device_id: deviceId,
-  });
-  const url = `https://api.spotify.com/v1/me/player/queue?${queries}`;
-  const result = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-  });
-  console.log('add track result', result.statusText, result.status);
-  return result;
+  await spotify(
+    `me/player/queue?${new URLSearchParams({
+      uri: trackUri,
+      ...(deviceId ? { device_id: deviceId } : {}),
+    })}`,
+    token,
+    'POST',
+  );
+  return { success: true };
 };
-
-const spotifyQueueEndpoint = 'https://api.spotify.com/v1/me/player/queue';
-export const getSpotifyQueue = async (accessToken: string) => {
-  const res = await fetch(spotifyQueueEndpoint, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-  });
-  if (!res.ok) {
-    console.error('Spotify error', res.statusText);
-  }
-  const result = await res.json();
-  return result;
-};
-
-const spotifyRecentlyPlayedEndpoint =
-  'https://api.spotify.com/v1/me/player/recently-played';
-export const getSpotifyRecentlyPlayed = async (
-  accessToken: string,
-  limit: number = 10,
-) => {
-  const res = await fetch(`${spotifyRecentlyPlayedEndpoint}?limit=${limit}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-    },
-  });
-  const result = await res.json();
-  return result;
-};
+// Spotify has no API to delete its playback queue. Clearing PlebFM's queue is handled separately.
