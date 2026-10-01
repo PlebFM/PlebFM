@@ -22,12 +22,14 @@ User Song Selection
 
 ## Getting Started
 
+Use Node.js 20.19+ or 22.12+ and pnpm 9.15.2.
+
 Clone and install dependencies
 
 ```bash
 git clone git@github.com:PlebFM/PlebFM.git
 cd PlebFM
-npm i
+pnpm install
 ```
 
 Copy `.env.sample` to `.env.local` and fill in real values
@@ -39,9 +41,7 @@ cp .env.sample .env.local
 Run the development server
 
 ```bash
-npm run dev
-# or
-yarn dev
+pnpm dev
 ```
 
 Open [https://localhost:3000](https://localhost:3000) with your browser to see the result.

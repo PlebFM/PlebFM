@@ -1,7 +1,7 @@
 import {
   DEFAULT_THEME,
   withTailwindTheme,
-} from './withTailwindTheme.decorator';
+} from './withTailwindTheme.decorator.jsx';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -13,11 +13,12 @@ export const parameters = {
   },
 };
 
+export const initialGlobals = { theme: DEFAULT_THEME };
+
 export const globalTypes = {
   theme: {
     name: 'Theme',
     description: 'Global theme for components',
-    defaultValue: DEFAULT_THEME,
     toolbar: {
       icon: 'paintbrush',
       // Array of plain string values or MenuItem shape (see below)
