@@ -1,18 +1,5 @@
 import { useEffect, useState } from 'react';
 
-interface WakeLockSentinel extends EventTarget {
-  released: boolean;
-  release(): Promise<void>;
-}
-
-interface WakeLock {
-  request(type: 'screen'): Promise<WakeLockSentinel>;
-}
-
-interface ExtendedNavigator extends Navigator {
-  wakeLock: WakeLock;
-}
-
 export function useWakeLock() {
   const [isActive, setIsActive] = useState(false);
 
@@ -21,9 +8,7 @@ export function useWakeLock() {
 
     const requestWakeLock = async () => {
       try {
-        wakeLock = await (navigator as ExtendedNavigator).wakeLock.request(
-          'screen',
-        );
+        wakeLock = await navigator.wakeLock.request('screen');
         setIsActive(true);
       } catch (err) {
         console.log('Wake Lock error:', err);

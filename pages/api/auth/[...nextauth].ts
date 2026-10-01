@@ -1,5 +1,5 @@
 import NextAuth, { NextAuthOptions, Session } from 'next-auth';
-import { JWT } from 'next-auth/jwt/types';
+import type { JWT } from 'next-auth/jwt';
 
 import SpotifyProvider from 'next-auth/providers/spotify';
 import connectDB from '../../../middleware/mongodb';
