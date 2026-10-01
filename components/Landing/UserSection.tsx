@@ -1,6 +1,6 @@
 import Section from './Section';
 import JukeboxLink from './JukeboxLink';
-import { Host } from '../hooks/useHost';
+import { PublicHost as Host } from '../../lib/publicHost';
 
 interface UserSectionProps {
   hosts: Host[];
@@ -29,7 +29,7 @@ export default function UserSection({ hosts, error }: UserSectionProps) {
         <ul className="space-y-2">
           {hosts.map(host => (
             <JukeboxLink key={host.shortName} href={`/${host.shortName}`}>
-              {host.hostName}
+              {host.hostName ?? ''}
             </JukeboxLink>
           ))}
         </ul>

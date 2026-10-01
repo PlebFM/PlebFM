@@ -6,10 +6,10 @@ import bokeh2 from '../public/pfm-bokeh-2.jpg';
 import Hero from '../components/Landing/Hero';
 import UserSection from '../components/Landing/UserSection';
 import HostSection from '../components/Landing/HostSection';
-import { Host } from '../components/hooks/useHost';
+import { PublicHost, toPublicHost } from '../lib/publicHost';
 
 interface IndexProps {
-  hosts: Host[];
+  hosts: PublicHost[];
   error?: string;
 }
 
@@ -70,9 +70,9 @@ export const getServerSideProps: GetServerSideProps<IndexProps> = async () => {
 
     return {
       props: {
-        hosts: data.hosts.filter(
-          (host: Host) => host.hostName === 'Atlanta BitDevs',
-        ),
+        hosts: data.hosts
+          .map(toPublicHost)
+          .filter((host: PublicHost) => host.hostName === 'Atlanta BitDevs'),
       },
     };
   } catch (err) {
